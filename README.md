@@ -1910,10 +1910,23 @@ RSpec.describe "/users", type: :request do
   describe "PATCH /update" do
     context "with valid parameters and headers" do
 
-      it "updates the requested user attribute" do
+      it "updates user's name" do
         patch user_url(@user1), params: valid_user_update_attributes, headers: valid_headers
         @user1.reload
         expect(@user1.name).to eq("UpdatedName")
+      end
+
+      it "updates user's name in their cars" do
+        patch user_url(@user1), params: valid_user_update_attributes, headers: valid_headers
+        @user1.reload
+        get user_url(@user1), headers: valid_headers
+        user = JSON.parse(response.body)
+        car_ids = user['car_ids']
+        cars = user['cars']
+        fiat = cars.find { |car| car['name'] == "Michael's Fiat 500" }
+        civic = cars.find { |car| car['name'] == "Michael's Honda Civic" }
+        expect(fiat['userName']).to eq "Michael Scott"
+        expect(civic['userName']).to eq "Michael Scott"
       end
 
       it "doesn't change the other user attributes" do
@@ -1932,12 +1945,10 @@ RSpec.describe "/users", type: :request do
         expect(@user1['password_digest']).to be_kind_of(String)
         expect(fiat['name']).to eq "Michael's Fiat 500"
         expect(fiat['description']).to eq "Michael's Fiat 500 (description)"
-        expect(fiat['userName']).to eq "Michael Scott"
         expect(url_for(fiat['image'])).to be_kind_of(String)
         expect(url_for(fiat['image'])).to match(/http.*fiat-500\.jpg/)
         expect(civic['name']).to eq "Michael's Honda Civic"
         expect(civic['description']).to eq "Michael's Honda Civic (description)"
-        expect(civic['userName']).to eq "Michael Scott"
         expect(url_for(civic['image'])).to be_kind_of(String)
         expect(url_for(civic['image'])).to match(/http.*honda-civic\.jpg/)
       end
