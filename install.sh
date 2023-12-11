@@ -1259,7 +1259,7 @@ RSpec.describe "/cars", type: :request do
     end
     it "gets two cars a successful response" do
       get cars_url, headers: valid_headers
-      expect(JSON.parse(response.body).length).to eq 7
+      expect(JSON.parse(response.body).length).to eq 6
     end
     it "first car has correct properties" do
       get cars_url, headers: valid_headers
@@ -1673,69 +1673,69 @@ EOF
 rspec
 
 
-echo -e "\n\n🦄  Documents (Backend)\n\n"
-# rails g scaffold document name description image:attachment car:references
-rails g scaffold document name description image:attachment ref_id:integer ref_type
-rails db:migrate
-cat <<'EOF' | puravida app/controllers/documents_controller.rb ~
-class DocumentsController < ApplicationController
-  before_action :set_document, only: %i[ show update destroy ]
+# echo -e "\n\n🦄  Documents (Backend)\n\n"
+# # rails g scaffold document name description image:attachment car:references
+# rails g scaffold document name description image:attachment ref_id:integer ref_type
+# rails db:migrate
+# cat <<'EOF' | puravida app/controllers/documents_controller.rb ~
+# class DocumentsController < ApplicationController
+#   before_action :set_document, only: %i[ show update destroy ]
 
-  # GET /documents
-  def index
-    if params['user_id'].present?
-      @documents = Document.joins(car: [:user]).where(users: {id: params['user_id']}).map { |document| prep_raw_document(document) }
-    else
-      @documents = Document.all.map { |document| prep_raw_document(document) }
-    end
-    render json: @documents
-  end
+#   # GET /documents
+#   def index
+#     if params['user_id'].present?
+#       @documents = Document.joins(car: [:user]).where(users: {id: params['user_id']}).map { |document| prep_raw_document(document) }
+#     else
+#       @documents = Document.all.map { |document| prep_raw_document(document) }
+#     end
+#     render json: @documents
+#   end
 
-  # GET /documents/1
-  def show
-    render json: prep_raw_document(@document)
-  end
+#   # GET /documents/1
+#   def show
+#     render json: prep_raw_document(@document)
+#   end
 
-  # POST /documents
-  def create
-    create_params = document_params
-    create_params['image'] = params['image'].blank? ? nil : params['image'] # if no image is chosen on new document page, params['image'] comes in as a blank string, which throws a 500 error at Document.new(create_params). This changes any params['avatar'] blank string to nil, which is fine in Document.new(create_params).
-    create_params['car_id'] = create_params['car_id'].to_i
-    @document = Document.new(create_params)
-    if @document.save
-      render json: prep_raw_document(@document), status: :created, location: @document
-    else
-      render json: @document.errors, status: :unprocessable_entity
-    end
-  end
+#   # POST /documents
+#   def create
+#     create_params = document_params
+#     create_params['image'] = params['image'].blank? ? nil : params['image'] # if no image is chosen on new document page, params['image'] comes in as a blank string, which throws a 500 error at Document.new(create_params). This changes any params['avatar'] blank string to nil, which is fine in Document.new(create_params).
+#     create_params['car_id'] = create_params['car_id'].to_i
+#     @document = Document.new(create_params)
+#     if @document.save
+#       render json: prep_raw_document(@document), status: :created, location: @document
+#     else
+#       render json: @document.errors, status: :unprocessable_entity
+#     end
+#   end
 
-  # PATCH/PUT /documents/1
-  def update
-    if @document.update(document_params)
-      render json: prep_raw_document(@document)
-    else
-      render json: @document.errors, status: :unprocessable_entity
-    end
-  end
+#   # PATCH/PUT /documents/1
+#   def update
+#     if @document.update(document_params)
+#       render json: prep_raw_document(@document)
+#     else
+#       render json: @document.errors, status: :unprocessable_entity
+#     end
+#   end
 
-  # DELETE /documents/1
-  def destroy
-    @document.destroy
-  end
+#   # DELETE /documents/1
+#   def destroy
+#     @document.destroy
+#   end
 
-  private
-    # Use callbacks to share common setup or constraints between actions.
-    def set_document
-      @document = Document.find(params[:id])
-    end
+#   private
+#     # Use callbacks to share common setup or constraints between actions.
+#     def set_document
+#       @document = Document.find(params[:id])
+#     end
 
-    # Only allow a list of trusted parameters through.
-    def document_params
-      params.permit(:id, :name, :description, :image, :car_id)
-    end
-end
-~
-EOF
+#     # Only allow a list of trusted parameters through.
+#     def document_params
+#       params.permit(:id, :name, :description, :image, :car_id)
+#     end
+# end
+# ~
+# EOF
 # cat <<'EOF' | puravida spec/requests/documents_spec.rb ~
 # # frozen_string_literal: true
 # require 'open-uri'

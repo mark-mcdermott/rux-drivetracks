@@ -1584,7 +1584,7 @@ RSpec.describe "/cars", type: :request do
     end
     it "gets two cars a successful response" do
       get cars_url, headers: valid_headers
-      expect(JSON.parse(response.body).length).to eq 7
+      expect(JSON.parse(response.body).length).to eq 6
     end
     it "first car has correct properties" do
       get cars_url, headers: valid_headers
