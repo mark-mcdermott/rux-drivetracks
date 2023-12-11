@@ -1166,39 +1166,34 @@ end
 ~
 EOF
 cat <<'EOF' | puravida spec/fixtures/cars.yml ~
-wrenches:
-  name: Wrenches
-  description: Michael's wrench
+fiat:
+  name: Michael's Fiat 500
+  description: Michael's Fiat 500 (description)
   user: michael
 
-bolts:
-  name: Bolts
-  description: Michael's bolt
+civic:
+  name: Michael's Honda Civic
+  description: Michael's Honda Civic (description)
   user: michael
 
-brackets:
-  name: Brackets
-  description: Jim's bracket
+elantra:
+  name: Jim's Hynadai Elantra
+  description: Jim's Hynadai Elantra (description)
   user: jim
 
-nuts:
-  name: Nuts
-  description: Jim's nut
+leaf:
+  name: Jim's Nissan Leaf
+  description: Jim's Nissan Leaf (description)
   user: jim
 
-pipes:
-  name: Pipes
-  description: Jim's pipe
+scion:
+  name: Pam's Scion
+  description: Pam's Scion (description)
   user: jim
 
-screws:
-  name: Screws
-  description: Pam's screw
-  user: pam
-
-washers:
-  name: Washers
-  description: Pam's washer
+camry:
+  name: Pam's Toyota Camry
+  description: Pam's Toyota Camry (description)
   user: pam
 ~
 EOF
