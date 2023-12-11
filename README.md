@@ -1,6 +1,6 @@
 ![Ruxtmin Mech Diagram](https://github.com/mark-mcdermott/ruxtmin/blob/main/assets/images/mechs/ruxtmin-mech-diagram.png)
 
-# Ruxtmin - Rails 7 Nuxt 2 Admin Boilerplate (With Active Storage Avatars)
+# Rux-Drivetracks - Rails 7 Nuxt 2 Admin (With Active Storage Avatars)
 
 Nuxt 2 frontend, Rails 7 backend API and a simple implementation of Rail's Active Storage for uploading and displaying avatars. It uses bcrypt and jwt for backend auth and Nuxt's auth module for frontend auth. Uses rspec for API tests and cypress for end-to-end tests.
 
@@ -24,7 +24,7 @@ This readme uses a small custom bash command called [puravida](#user-content-pur
 - `puravida spec/fixtures/files`
 - copy `assets` folder into `app` folder
 - copy the contents of the `office-avatars` folder into `spec/fixtures/files` folder
-- copy the contents of the `widgets` folder into `spec/fixtures/files` folder
+- copy the contents of the `cars` folder into `spec/fixtures/files` folder
 - `puravida config/initializers/cors.rb ~`
 ```
 Rails.application.config.middleware.insert_before 0, Rack::Cors do
@@ -656,42 +656,42 @@ class ApplicationController < ActionController::API
   # We also change avatar from a weird active_storage object to just the avatar url before it gets to the frontend.
   def prep_raw_user(user)
     avatar = user.avatar.present? ? url_for(user.avatar) : nil
-    # widgets = Widget.where(user_id: user.id).map { |widget| widget.id }
-    # subwidgets = Subwidget.where(widget_id: widgets).map { |subwidget| subwidget.id }
+    # cars = Car.where(user_id: user.id).map { |car| car.id }
+    # documents = Document.where(car_id: cars).map { |document| document.id }
     user = user.admin ? user.slice(:id,:email,:name,:admin) : user.slice(:id,:email,:name)
     user['avatar'] = avatar
-    # user['widget_ids'] = widgets
-    # user['subwidget_ids'] = subwidgets
+    # user['car_ids'] = cars
+    # user['document_ids'] = documents
     user
   end
 
-  def prep_raw_widget(widget)
-    user_id = widget.user_id
-    user_name = User.find(widget.user_id).name
-    # subwidgets = Subwidget.where(widget_id: widget.id)
-    # subwidgets = subwidgets.map { |subwidget| subwidget.slice(:id,:name,:description,:widget_id) }
-    image = widget.image.present? ? url_for(widget.image) : nil
-    widget = widget.slice(:id,:name,:description)
-    widget['userId'] = user_id
-    widget['userName'] = user_name
-    widget['image'] = image
-    # widget['subwidgets'] = subwidgets
-    widget
+  def prep_raw_car(car)
+    user_id = car.user_id
+    user_name = User.find(car.user_id).name
+    # documents = Document.where(car_id: car.id)
+    # documents = documents.map { |document| document.slice(:id,:name,:description,:car_id) }
+    image = car.image.present? ? url_for(car.image) : nil
+    car = car.slice(:id,:name,:description)
+    car['userId'] = user_id
+    car['userName'] = user_name
+    car['image'] = image
+    # car['documents'] = documents
+    car
   end
 
-  def prep_raw_subwidget(subwidget)
-    widget_id = subwidget.widget_id
-    widget = Widget.find(widget_id)
-    user = User.find(widget.user_id)
-    image = subwidget.image.present? ? url_for(subwidget.image) : nil
-    subwidget = subwidget.slice(:id,:name,:description)
-    subwidget['widgetId'] = widget_id
-    subwidget['widgetName'] = widget.name
-    subwidget['widgetDescription'] = widget.description
-    subwidget['userId'] = user.id
-    subwidget['userName'] = user.name
-    subwidget['image'] = image
-    subwidget
+  def prep_raw_document(document)
+    car_id = document.car_id
+    car = Car.find(car_id)
+    user = User.find(car.user_id)
+    image = document.image.present? ? url_for(document.image) : nil
+    document = document.slice(:id,:name,:description)
+    document['carId'] = car_id
+    document['carName'] = car.name
+    document['carDescription'] = car.description
+    document['userId'] = user.id
+    document['userName'] = user.name
+    document['image'] = image
+    document
   end
   
   private 
@@ -1299,13 +1299,13 @@ end
 - `rspec`
 
 
-### Widgets (Backend)
-- `rails g scaffold widget name description image:attachment user:references`
-- change the migration file (`db/migrate/<timestamp>_create_widgets.rb`) to:
+### Cars (Backend)
+- `rails g scaffold car name description image:attachment user:references`
+- change the migration file (`db/migrate/<timestamp>_create_cars.rb`) to:
 ```
-class CreateWidgets < ActiveRecord::Migration[7.0]
+class CreateCars < ActiveRecord::Migration[7.0]
   def change
-    create_table :widgets do |t|
+    create_table :cars do |t|
       t.string :name
       t.string :description
       t.references :user, null: false, foreign_key: {on_delete: :cascade}
@@ -1316,9 +1316,9 @@ end
 ~
 ```
 - `rails db:migrate`
-- `puravida app/models/widget.rb ~`
+- `puravida app/models/car.rb ~`
 ```
-class Widget < ApplicationRecord
+class Car < ApplicationRecord
   belongs_to :user
   has_one_attached :image
   validates :name, presence: true, allow_blank: false, length: { minimum: 4, maximum: 254 }
@@ -1380,44 +1380,44 @@ class ApplicationController < ActionController::API
   # We also change avatar from a weird active_storage object to just the avatar url before it gets to the frontend.
   def prep_raw_user(user)
     avatar = user.avatar.present? ? url_for(user.avatar) : nil
-    widget_ids = Widget.where(user_id: user.id).map { |widget| widget.id }
-    widgets = Widget.where(user_id: user.id).map { |widget| prep_raw_widget(widget) }
-    # subwidgets = Subwidget.where(widget_id: widgets).map { |subwidget| subwidget.id }
+    car_ids = Car.where(user_id: user.id).map { |car| car.id }
+    cars = Car.where(user_id: user.id).map { |car| prep_raw_car(car) }
+    # documents = Document.where(car_id: cars).map { |document| document.id }
     user = user.admin ? user.slice(:id,:email,:name,:admin) : user.slice(:id,:email,:name)
     user['avatar'] = avatar
-    user['widget_ids'] = widget_ids
-    user['widgets'] = widgets
-    # user['subwidget_ids'] = subwidgets
+    user['car_ids'] = car_ids
+    user['cars'] = cars
+    # user['document_ids'] = documents
     user
   end
 
-  def prep_raw_widget(widget)
-    user_id = widget.user_id
-    user_name = User.find(widget.user_id).name
-    # subwidgets = Subwidget.where(widget_id: widget.id)
-    # subwidgets = subwidgets.map { |subwidget| subwidget.slice(:id,:name,:description,:widget_id) }
-    image = widget.image.present? ? url_for(widget.image) : nil
-    widget = widget.slice(:id,:name,:description)
-    widget['userId'] = user_id
-    widget['userName'] = user_name
-    widget['image'] = image
-    # widget['subwidgets'] = subwidgets
-    widget
+  def prep_raw_car(car)
+    user_id = car.user_id
+    user_name = User.find(car.user_id).name
+    # documents = Document.where(car_id: car.id)
+    # documents = documents.map { |document| document.slice(:id,:name,:description,:car_id) }
+    image = car.image.present? ? url_for(car.image) : nil
+    car = car.slice(:id,:name,:description)
+    car['userId'] = user_id
+    car['userName'] = user_name
+    car['image'] = image
+    # car['documents'] = documents
+    car
   end
 
-  def prep_raw_subwidget(subwidget)
-    widget_id = subwidget.widget_id
-    widget = Widget.find(widget_id)
-    user = User.find(widget.user_id)
-    image = subwidget.image.present? ? url_for(subwidget.image) : nil
-    subwidget = subwidget.slice(:id,:name,:description)
-    subwidget['widgetId'] = widget_id
-    subwidget['widgetName'] = widget.name
-    subwidget['widgetDescription'] = widget.description
-    subwidget['userId'] = user.id
-    subwidget['userName'] = user.name
-    subwidget['image'] = image
-    subwidget
+  def prep_raw_document(document)
+    car_id = document.car_id
+    car = Car.find(car_id)
+    user = User.find(car.user_id)
+    image = document.image.present? ? url_for(document.image) : nil
+    document = document.slice(:id,:name,:description)
+    document['carId'] = car_id
+    document['carName'] = car.name
+    document['carDescription'] = car.description
+    document['userId'] = user.id
+    document['userName'] = user.name
+    document['image'] = image
+    document
   end
   
   private 
@@ -1429,66 +1429,66 @@ class ApplicationController < ActionController::API
 end
 ~
 ```
-- `puravida app/controllers/widgets_controller.rb ~`
+- `puravida app/controllers/cars_controller.rb ~`
 ```
-class WidgetsController < ApplicationController
-  before_action :set_widget, only: %i[ show update destroy ]
+class CarsController < ApplicationController
+  before_action :set_car, only: %i[ show update destroy ]
 
-  # GET /widgets
+  # GET /cars
   def index
     if params['user_id'].present?
-      @widgets = Widget.where(user_id: params['user_id']).map { |widget| prep_raw_widget(widget) }
+      @cars = Car.where(user_id: params['user_id']).map { |car| prep_raw_car(car) }
     else
-      @widgets = Widget.all.map { |widget| prep_raw_widget(widget) }
+      @cars = Car.all.map { |car| prep_raw_car(car) }
     end
-    render json: @widgets
+    render json: @cars
   end
 
-  # GET /widgets/1
+  # GET /cars/1
   def show
-    render json: prep_raw_widget(@widget)
+    render json: prep_raw_car(@car)
   end
 
-  # POST /widgets
+  # POST /cars
   def create
-    create_params = widget_params
-    create_params['image'] = params['image'].blank? ? nil : params['image'] # if no image is chosen on new widget page, params['image'] comes in as a blank string, which throws a 500 error at User.new(user_params). This changes any params['avatar'] blank string to nil, which is fine in User.new(user_params).
-    @widget = Widget.new(create_params)
-    if @widget.save
-      render json: prep_raw_widget(@widget), status: :created, location: @widget
+    create_params = car_params
+    create_params['image'] = params['image'].blank? ? nil : params['image'] # if no image is chosen on new car page, params['image'] comes in as a blank string, which throws a 500 error at User.new(user_params). This changes any params['avatar'] blank string to nil, which is fine in User.new(user_params).
+    @car = Car.new(create_params)
+    if @car.save
+      render json: prep_raw_car(@car), status: :created, location: @car
     else
-      render json: @widget.errors, status: :unprocessable_entity
+      render json: @car.errors, status: :unprocessable_entity
     end
   end
 
-  # PATCH/PUT /widgets/1
+  # PATCH/PUT /cars/1
   def update
-    if @widget.update(widget_params)
-      render json: prep_raw_widget(@widget)
+    if @car.update(car_params)
+      render json: prep_raw_car(@car)
     else
-      render json: @widget.errors, status: :unprocessable_entity
+      render json: @car.errors, status: :unprocessable_entity
     end
   end
 
-  # DELETE /widgets/1
+  # DELETE /cars/1
   def destroy
-    @widget.destroy
+    @car.destroy
   end
 
   private
     # Use callbacks to share common setup or constraints between actions.
-    def set_widget
-      @widget = Widget.find(params[:id])
+    def set_car
+      @car = Car.find(params[:id])
     end
 
     # Only allow a list of trusted parameters through.
-    def widget_params
+    def car_params
       params.permit(:id, :name, :description, :image, :user_id)
     end
 end
 ~
 ```
-- `puravida spec/fixtures/widgets.yml ~`
+- `puravida spec/fixtures/cars.yml ~`
 ```
 wrenches:
   name: Wrenches
@@ -1526,13 +1526,13 @@ washers:
   user: pam
 ~
 ```
-- `puravida spec/models/widget_spec.rb ~`
+- `puravida spec/models/car_spec.rb ~`
 ```
 require 'rails_helper'
 
-RSpec.describe "/widgets", type: :request do
+RSpec.describe "/cars", type: :request do
   fixtures :users
-  fixtures :widgets
+  fixtures :cars
   let(:valid_attributes) {{ name: "test1", description: "test1", user_id: User.find_by(email: "michaelscott@dundermifflin.com").id }}
   let(:invalid_attributes) {{ name: "", description: "invalid_attributes" }}
   let(:valid_headers) {{ Authorization: "Bearer " + @michael_token }}
@@ -1542,22 +1542,22 @@ RSpec.describe "/widgets", type: :request do
   end
 
   it "is valid with valid attributes" do
-    expect(Widget.new(valid_attributes)).to be_valid
+    expect(Car.new(valid_attributes)).to be_valid
   end
   it "is not valid width poorly formed email" do
-    expect(Widget.new(invalid_attributes)).to_not be_valid
+    expect(Car.new(invalid_attributes)).to_not be_valid
   end
 
 end
 ~
 ```
-- `puravida spec/requests/widgets_spec.rb ~`
+- `puravida spec/requests/cars_spec.rb ~`
 ```
 require 'rails_helper'
 
-RSpec.describe "/widgets", type: :request do
+RSpec.describe "/cars", type: :request do
   fixtures :users
-  fixtures :widgets
+  fixtures :cars
   let(:valid_attributes) {{ name: "test1", description: "test1", user_id: User.find_by(email: "michaelscott@dundermifflin.com").id }}
   let(:invalid_attributes) {{ name: "", description: "invalid_attributes" }}
   let(:valid_headers) {{ Authorization: "Bearer " + @michael_token }}
@@ -1568,45 +1568,45 @@ RSpec.describe "/widgets", type: :request do
   end
 
   before :each do
-    @wrenches = widgets(:wrenches)
+    @wrenches = cars(:wrenches)
     @wrenches.image.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'allen-wrenches.jpg'),'image/png'))
-    @bolts = widgets(:bolts)
+    @bolts = cars(:bolts)
     @bolts.image.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'bolts.jpg'),'image/png'))
-    @brackets = widgets(:brackets)
+    @brackets = cars(:brackets)
     @brackets.image.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'brackets.png'),'image/png'))
-    @nuts = widgets(:nuts)
+    @nuts = cars(:nuts)
     @nuts.image.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'nuts.jpg'),'image/png'))
-    @pipes = widgets(:pipes)
+    @pipes = cars(:pipes)
     @pipes.image.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'pipes.jpg'),'image/png'))
-    @screws = widgets(:screws)
+    @screws = cars(:screws)
     @screws.image.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'screws.jpg'),'image/png'))
-    @washers = widgets(:washers)
+    @washers = cars(:washers)
     @washers.image.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'washers.jpg'),'image/png'))
   end
 
   describe "GET /index" do
     it "renders a successful response" do
-      get widgets_url, headers: valid_headers
+      get cars_url, headers: valid_headers
       expect(response).to be_successful
     end
-    it "gets two widgets a successful response" do
-      get widgets_url, headers: valid_headers
+    it "gets two cars a successful response" do
+      get cars_url, headers: valid_headers
       expect(JSON.parse(response.body).length).to eq 7
     end
-    it "first widget has correct properties" do
-      get widgets_url, headers: valid_headers
-      widgets = JSON.parse(response.body)
-      wrenches = widgets.find { |widget| widget['name'] == "Wrenches" }
+    it "first car has correct properties" do
+      get cars_url, headers: valid_headers
+      cars = JSON.parse(response.body)
+      wrenches = cars.find { |car| car['name'] == "Wrenches" }
       expect(wrenches['name']).to eq "Wrenches"
       expect(wrenches['description']).to eq "Michael's wrench"
       expect(wrenches['userName']).to eq "Michael Scott"
       expect(wrenches['image']).to be_kind_of(String)
       expect(wrenches['image']).to match(/http.*allen-wrenches\.jpg/)
     end
-    it "second widget has correct properties" do
-      get widgets_url, headers: valid_headers
-      widgets = JSON.parse(response.body)
-      brackets = widgets.find { |widget| widget['name'] == "Brackets" }
+    it "second car has correct properties" do
+      get cars_url, headers: valid_headers
+      cars = JSON.parse(response.body)
+      brackets = cars.find { |car| car['name'] == "Brackets" }
       expect(brackets['name']).to eq "Brackets"
       expect(brackets['description']).to eq "Jim's bracket"
       expect(brackets['userName']).to eq "Jim Halpert"
@@ -1618,13 +1618,13 @@ RSpec.describe "/widgets", type: :request do
 
   describe "GET /show" do
     it "renders a successful response" do
-      widget = widgets(:wrenches)
-      get widget_url(widget), headers: valid_headers
+      car = cars(:wrenches)
+      get car_url(car), headers: valid_headers
       expect(response).to be_successful
     end
-    it "gets correct widget properties" do
-      widget = widgets(:wrenches)
-      get widget_url(widget), headers: valid_headers
+    it "gets correct car properties" do
+      car = cars(:wrenches)
+      get car_url(car), headers: valid_headers
       wrenches = JSON.parse(response.body)
       expect(wrenches['name']).to eq "Wrenches"
       expect(wrenches['description']).to eq "Michael's wrench"
@@ -1634,27 +1634,27 @@ RSpec.describe "/widgets", type: :request do
 
   describe "POST /create" do
     context "with valid parameters" do
-      it "creates a new Widget" do
-        expect { post widgets_url, params: valid_attributes, headers: valid_headers, as: :json
-        }.to change(Widget, :count).by(1)
+      it "creates a new Car" do
+        expect { post cars_url, params: valid_attributes, headers: valid_headers, as: :json
+        }.to change(Car, :count).by(1)
       end
 
-      it "renders a JSON response with the new widget" do
-        post widgets_url, params: valid_attributes, headers: valid_headers, as: :json
+      it "renders a JSON response with the new car" do
+        post cars_url, params: valid_attributes, headers: valid_headers, as: :json
         expect(response).to have_http_status(:created)
         expect(response.content_type).to match(a_string_including("application/json"))
       end
     end
 
     context "with invalid parameters" do
-      it "does not create a new Widget" do
+      it "does not create a new Car" do
         expect {
-          post widgets_url, params: invalid_attributes, headers: valid_headers, as: :json
-        }.to change(Widget, :count).by(0)
+          post cars_url, params: invalid_attributes, headers: valid_headers, as: :json
+        }.to change(Car, :count).by(0)
       end
 
-      it "renders a JSON response with errors for the new widget" do
-        post widgets_url, params: invalid_attributes, headers: valid_headers, as: :json
+      it "renders a JSON response with errors for the new car" do
+        post cars_url, params: invalid_attributes, headers: valid_headers, as: :json
         expect(response).to have_http_status(:unprocessable_entity)
         expect(response.content_type).to match(a_string_including("application/json"))
       end
@@ -1665,23 +1665,23 @@ RSpec.describe "/widgets", type: :request do
     context "with valid parameters" do
       let(:new_attributes) {{ name: "UpdatedName"}}
 
-      it "updates the requested widget" do
-        widget = widgets(:wrenches)
-        patch widget_url(widget), params: new_attributes, headers: valid_headers, as: :json
-        widget.reload
-        expect(widget.name).to eq("UpdatedName")
+      it "updates the requested car" do
+        car = cars(:wrenches)
+        patch car_url(car), params: new_attributes, headers: valid_headers, as: :json
+        car.reload
+        expect(car.name).to eq("UpdatedName")
       end
 
-      it "renders a JSON response with the widget" do
-        widget = widgets(:wrenches)
-        patch widget_url(widget), params: new_attributes, headers: valid_headers, as: :json
+      it "renders a JSON response with the car" do
+        car = cars(:wrenches)
+        patch car_url(car), params: new_attributes, headers: valid_headers, as: :json
         expect(response).to have_http_status(:ok)
         expect(response.content_type).to match(a_string_including("application/json"))
       end
 
-      it "widget's other properties are still correct" do
-        widget = widgets(:wrenches)
-        patch widget_url(widget), params: new_attributes, headers: valid_headers, as: :json
+      it "car's other properties are still correct" do
+        car = cars(:wrenches)
+        patch car_url(car), params: new_attributes, headers: valid_headers, as: :json
         wrench = JSON.parse(response.body)
         expect(wrench['description']).to eq "Michael's wrench"
         expect(wrench['userName']).to eq "Michael Scott"
@@ -1692,9 +1692,9 @@ RSpec.describe "/widgets", type: :request do
     end
 
     context "with invalid parameters" do
-      it "renders a JSON response with errors for the widget" do
-        widget = widgets(:wrenches)
-        patch widget_url(widget), params: invalid_attributes, headers: valid_headers, as: :json
+      it "renders a JSON response with errors for the car" do
+        car = cars(:wrenches)
+        patch car_url(car), params: invalid_attributes, headers: valid_headers, as: :json
         expect(response).to have_http_status(:unprocessable_entity)
         expect(response.content_type).to match(a_string_including("application/json"))
       end
@@ -1702,21 +1702,21 @@ RSpec.describe "/widgets", type: :request do
   end
 
   describe "DELETE /destroy" do
-    it "destroys the requested widget" do
-      widget = Widget.create! valid_attributes
-      expect { delete widget_url(widget), headers: valid_headers, as: :json
-      }.to change(Widget, :count).by(-1)
+    it "destroys the requested car" do
+      car = Car.create! valid_attributes
+      expect { delete car_url(car), headers: valid_headers, as: :json
+      }.to change(Car, :count).by(-1)
     end
   end
 end
 ~
 ```
-- `puravida spec/requests/widgets_spec_bak.rb ~`
+- `puravida spec/requests/cars_spec_bak.rb ~`
 ```
 # frozen_string_literal: true
 require 'open-uri'
 require 'rails_helper'
-RSpec.describe "/widgets", type: :request do
+RSpec.describe "/cars", type: :request do
   let(:valid_create_user_1_params) { { name: "Michael Scott", email: "michaelscott@dundermifflin.com", admin: "true", password: "password" } }
   let(:user_1_attachment) { "/spec/fixtures/files/images/office-avatars/michael-scott.png" }
   let(:user_1_image) { "michael-scott.png" }
@@ -1739,30 +1739,30 @@ RSpec.describe "/widgets", type: :request do
         user1.save!
         user2 = User.create! valid_create_user_2_params
         header = header_from_user(user2,valid_user_2_login_params)
-        widget1 = Widget.create(name: "Wrenches", description: "Michael's wrenches", user_id: user1.id)
+        car1 = Car.create(name: "Wrenches", description: "Michael's wrenches", user_id: user1.id)
         image_filename = "allen-wrenches.jpg"
-        image_path = "#{Rails.root}/app/assets/images/widgets/allen-wrenches.jpg"
+        image_path = "#{Rails.root}/app/assets/images/cars/allen-wrenches.jpg"
         open_image = URI.open(image_path)
-        widget1.image.attach(io: open_image, filename: image_filename)
-        widget1.save!
-        widget2 = Widget.create(name: "Bolts", description: "Michael's bolts", user_id: user1.id)
-        widget2.save!
-        get widgets_url, headers: header, as: :json
+        car1.image.attach(io: open_image, filename: image_filename)
+        car1.save!
+        car2 = Car.create(name: "Bolts", description: "Michael's bolts", user_id: user1.id)
+        car2.save!
+        get cars_url, headers: header, as: :json
         expect(response).to be_successful
       end
       
-      it "gets two widgets (one with image, one without)" do
+      it "gets two cars (one with image, one without)" do
         user1 = User.create! valid_create_user_1_params
         user1.avatar.attach(io: URI.open("#{Rails.root}" + user_1_attachment), filename: user_1_image)
         user1.save!
         user2 = User.create! valid_create_user_2_params
-        widget1 = Widget.create(name: "Wrenches", description: "Michael's wrenches", user_id: user1.id)
-        widget1.image.attach(io: URI.open("#{Rails.root}/app/assets/images/widgets/allen-wrenches.jpg"), filename: "allen-wrenches.jpg")
-        widget1.save!
-        widget2 = Widget.create(name: "Bolts", description: "Michael's bolts", user_id: user1.id)
-        widget2.save!
+        car1 = Car.create(name: "Wrenches", description: "Michael's wrenches", user_id: user1.id)
+        car1.image.attach(io: URI.open("#{Rails.root}/app/assets/images/cars/allen-wrenches.jpg"), filename: "allen-wrenches.jpg")
+        car1.save!
+        car2 = Car.create(name: "Bolts", description: "Michael's bolts", user_id: user1.id)
+        car2.save!
         header = header_from_user(user2,valid_user_2_login_params)
-        get widgets_url, headers: header, as: :json
+        get cars_url, headers: header, as: :json
         expect(response).to be_successful
         expect(JSON.parse(response.body).length).to eq 2
         expect(JSON.parse(response.body)[0]).to include("id","name","description","image","userId")
@@ -1777,19 +1777,19 @@ RSpec.describe "/widgets", type: :request do
         expect(JSON.parse(response.body)[1]['userId']).to eq(user1.id)
       end
 
-      it "gets user one's widgets" do
+      it "gets user one's cars" do
         user1 = User.create! valid_create_user_1_params
         user1.avatar.attach(io: URI.open("#{Rails.root}" + user_1_attachment), filename: user_1_image)
         user1.save!
         user2 = User.create! valid_create_user_2_params
-        widget1 = Widget.create(name: "Wrenches", description: "Michael's wrenches", user_id: user1.id)
-        widget1.image.attach(io: URI.open("#{Rails.root}/app/assets/images/widgets/allen-wrenches.jpg"), filename: "allen-wrenches.jpg")
-        widget1.save!
-        widget2 = Widget.create(name: "Bolts", description: "Michael's bolts", user_id: user1.id)
-        widget3 = Widget.create(name: "test3", description: "test3", user_id: user2.id)
-        widget3 = Widget.create(name: "test4", description: "test4", user_id: user2.id)
+        car1 = Car.create(name: "Wrenches", description: "Michael's wrenches", user_id: user1.id)
+        car1.image.attach(io: URI.open("#{Rails.root}/app/assets/images/cars/allen-wrenches.jpg"), filename: "allen-wrenches.jpg")
+        car1.save!
+        car2 = Car.create(name: "Bolts", description: "Michael's bolts", user_id: user1.id)
+        car3 = Car.create(name: "test3", description: "test3", user_id: user2.id)
+        car3 = Car.create(name: "test4", description: "test4", user_id: user2.id)
         header = header_from_user(user2,valid_user_2_login_params)
-        get widgets_url, params: { user_id: user1.id }, headers: header
+        get cars_url, params: { user_id: user1.id }, headers: header
         expect(response).to be_successful
         expect(JSON.parse(response.body).length).to eq 2
         expect(JSON.parse(response.body)[0]).to include("id","name","description","image","userId")
@@ -1804,19 +1804,19 @@ RSpec.describe "/widgets", type: :request do
         expect(JSON.parse(response.body)[1]['userId']).to eq(user1.id)
       end
 
-      it "gets user two's widgets" do
+      it "gets user two's cars" do
         user1 = User.create! valid_create_user_1_params
         user1.avatar.attach(io: URI.open("#{Rails.root}" + user_1_attachment), filename: user_1_image)
         user1.save!
         user2 = User.create! valid_create_user_2_params
-        widget1 = Widget.create(name: "Wrenches", description: "Michael's wrenches", user_id: user1.id)
-        widget1.image.attach(io: URI.open("#{Rails.root}/app/assets/images/widgets/allen-wrenches.jpg"), filename: "allen-wrenches.jpg")
-        widget1.save!
-        widget2 = Widget.create(name: "Bolts", description: "Michael's bolts", user_id: user1.id)
-        widget3 = Widget.create(name: "test3", description: "test3", user_id: user2.id)
-        widget3 = Widget.create(name: "test4", description: "test4", user_id: user2.id)
+        car1 = Car.create(name: "Wrenches", description: "Michael's wrenches", user_id: user1.id)
+        car1.image.attach(io: URI.open("#{Rails.root}/app/assets/images/cars/allen-wrenches.jpg"), filename: "allen-wrenches.jpg")
+        car1.save!
+        car2 = Car.create(name: "Bolts", description: "Michael's bolts", user_id: user1.id)
+        car3 = Car.create(name: "test3", description: "test3", user_id: user2.id)
+        car3 = Car.create(name: "test4", description: "test4", user_id: user2.id)
         header = header_from_user(user2,valid_user_2_login_params)
-        get widgets_url, params: { user_id: user2.id }, headers: header
+        get cars_url, params: { user_id: user2.id }, headers: header
         expect(response).to be_successful
         expect(JSON.parse(response.body).length).to eq 2
         expect(JSON.parse(response.body)[0]).to include("id","name","description","image","userId")
@@ -1836,12 +1836,12 @@ RSpec.describe "/widgets", type: :request do
     context "with invalid auth header" do
       it "renders a 401 response" do
         User.create! valid_create_user_1_params
-        get widgets_url, headers: invalid_auth_header, as: :json
+        get cars_url, headers: invalid_auth_header, as: :json
         expect(response).to have_http_status(401)
       end
       it "renders a 401 response" do
         User.create! valid_create_user_1_params
-        get widgets_url, headers: poorly_formed_header(valid_create_user_2_params), as: :json
+        get cars_url, headers: poorly_formed_header(valid_create_user_2_params), as: :json
         expect(response).to have_http_status(401)
       end
     end
@@ -1855,37 +1855,37 @@ RSpec.describe "/widgets", type: :request do
         user1.save!
         user2 = User.create! valid_create_user_2_params
         header = header_from_user(user2,valid_user_2_login_params)
-        widget1 = Widget.create(name: "Wrenches", description: "Michael's wrenches", user_id: user1.id)
-        widget1.image.attach(io: URI.open("#{Rails.root}/app/assets/images/widgets/allen-wrenches.jpg"), filename: "allen-wrenches.jpg")
-        widget1.save!
-        get widget_url(widget1), headers: header, as: :json
+        car1 = Car.create(name: "Wrenches", description: "Michael's wrenches", user_id: user1.id)
+        car1.image.attach(io: URI.open("#{Rails.root}/app/assets/images/cars/allen-wrenches.jpg"), filename: "allen-wrenches.jpg")
+        car1.save!
+        get car_url(car1), headers: header, as: :json
         expect(response).to be_successful
       end
-      it "gets one widget (with image)" do
+      it "gets one car (with image)" do
         user1 = User.create! valid_create_user_1_params
         user1.avatar.attach(io: URI.open("#{Rails.root}" + user_1_attachment), filename: user_1_image)
         user1.save!
         user2 = User.create! valid_create_user_2_params
         header = header_from_user(user2,valid_user_2_login_params)
-        widget1 = Widget.create(name: "Wrenches", description: "Michael's wrenches", user_id: user1.id)
-        widget1.image.attach(io: URI.open("#{Rails.root}/app/assets/images/widgets/allen-wrenches.jpg"), filename: "allen-wrenches.jpg")
-        widget1.save!
-        get widget_url(widget1), headers: header, as: :json
+        car1 = Car.create(name: "Wrenches", description: "Michael's wrenches", user_id: user1.id)
+        car1.image.attach(io: URI.open("#{Rails.root}/app/assets/images/cars/allen-wrenches.jpg"), filename: "allen-wrenches.jpg")
+        car1.save!
+        get car_url(car1), headers: header, as: :json
         expect(JSON.parse(response.body)).to include("id","name","description","image","userId")
         expect(JSON.parse(response.body)['name']).to eq("Wrenches")
         expect(JSON.parse(response.body)['description']).to eq("Michael's wrenches")
         expect(JSON.parse(response.body)['image']).to match(/http.*\/allen-wrenches\.jpg/)
         expect(JSON.parse(response.body)['userId']).to eq(user1.id)
       end
-      it "gets one widget (without avatar)" do
+      it "gets one car (without avatar)" do
         user1 = User.create! valid_create_user_1_params
         user1.avatar.attach(io: URI.open("#{Rails.root}" + user_1_attachment), filename: user_1_image)
         user1.save!
         user2 = User.create! valid_create_user_2_params
         header = header_from_user(user2,valid_user_2_login_params)
-        widget2 = Widget.create(name: "Bolts", description: "Michael's bolts", user_id: user1.id)
-        widget2.save!
-        get widget_url(widget2), headers: header, as: :json
+        car2 = Car.create(name: "Bolts", description: "Michael's bolts", user_id: user1.id)
+        car2.save!
+        get car_url(car2), headers: header, as: :json
         expect(JSON.parse(response.body)).to include("id","name","description","image","userId")
         expect(JSON.parse(response.body)['name']).to eq("Bolts")
         expect(JSON.parse(response.body)['description']).to eq("Michael's bolts")
@@ -1896,19 +1896,19 @@ RSpec.describe "/widgets", type: :request do
     context "with invalid auth header" do
       it "renders a 401 response" do
         user1 = User.create! valid_create_user_1_params
-        widget1 = Widget.create(name: "Wrenches", description: "Michael's wrenches", user_id: user1.id)
-        widget1.image.attach(io: URI.open("#{Rails.root}/app/assets/images/widgets/allen-wrenches.jpg"), filename: "allen-wrenches.jpg")
-        widget1.save!
-        get widget_url(widget1), headers: invalid_auth_header, as: :json
+        car1 = Car.create(name: "Wrenches", description: "Michael's wrenches", user_id: user1.id)
+        car1.image.attach(io: URI.open("#{Rails.root}/app/assets/images/cars/allen-wrenches.jpg"), filename: "allen-wrenches.jpg")
+        car1.save!
+        get car_url(car1), headers: invalid_auth_header, as: :json
         expect(response).to have_http_status(401)
       end
       it "renders a 401 response" do
         user1 = User.create! valid_create_user_1_params
         user2 = User.create! valid_create_user_2_params
-        widget1 = Widget.create(name: "Wrenches", description: "Michael's wrenches", user_id: user1.id)
-        widget1.image.attach(io: URI.open("#{Rails.root}/app/assets/images/widgets/allen-wrenches.jpg"), filename: "allen-wrenches.jpg")
-        widget1.save!
-        get widget_url(widget1), headers: poorly_formed_header(valid_create_user_2_params), as: :json
+        car1 = Car.create(name: "Wrenches", description: "Michael's wrenches", user_id: user1.id)
+        car1.image.attach(io: URI.open("#{Rails.root}/app/assets/images/cars/allen-wrenches.jpg"), filename: "allen-wrenches.jpg")
+        car1.save!
+        get car_url(car1), headers: poorly_formed_header(valid_create_user_2_params), as: :json
         expect(response).to have_http_status(401)
       end
     end
@@ -1918,16 +1918,16 @@ RSpec.describe "/widgets", type: :request do
     context "without auth header" do
       it "returns 401" do
         user1 = User.create! valid_create_user_1_params
-        post widgets_url, params: { name: "Wrenches", description: "Michael's wrenches", user_id: user1.id }
+        post cars_url, params: { name: "Wrenches", description: "Michael's wrenches", user_id: user1.id }
         expect(response).to have_http_status(401)
       end
     end
     context "with valid params (without image)" do
-      it "creates widget" do
+      it "creates car" do
         user1 = User.create! valid_create_user_1_params
         user2 = User.create! valid_create_user_2_params
         header = header_from_user(user2,valid_user_2_login_params)
-        post widgets_url, headers: header, params: { name: "Wrenches", description: "Michael's wrenches", user_id: user1.id }
+        post cars_url, headers: header, params: { name: "Wrenches", description: "Michael's wrenches", user_id: user1.id }
         expect(response).to have_http_status(201)
         expect(JSON.parse(response.body)).to include("id","name","description","image","userId")
         expect(JSON.parse(response.body)['name']).to eq("Wrenches")
@@ -1937,12 +1937,12 @@ RSpec.describe "/widgets", type: :request do
       end
     end
     context "with valid params (with image)" do
-      it "creates widget" do
+      it "creates car" do
         user1 = User.create! valid_create_user_1_params
         user2 = User.create! valid_create_user_2_params
         header = header_from_user(user2,valid_user_2_login_params)
-        image = Rack::Test::UploadedFile.new(Rails.root.join("app/assets/images/widgets/allen-wrenches.jpg"))
-        post widgets_url, headers: header, params: { name: "Wrenches", description: "Michael's wrenches", image: image, user_id: user1.id }
+        image = Rack::Test::UploadedFile.new(Rails.root.join("app/assets/images/cars/allen-wrenches.jpg"))
+        post cars_url, headers: header, params: { name: "Wrenches", description: "Michael's wrenches", image: image, user_id: user1.id }
         expect(response).to have_http_status(201)
         expect(JSON.parse(response.body)).to include("id","name","description","image","userId")
         expect(JSON.parse(response.body)['name']).to eq("Wrenches")
@@ -1950,26 +1950,26 @@ RSpec.describe "/widgets", type: :request do
         expect(JSON.parse(response.body)['image']).to match(/http.*\/allen-wrenches\.jpg/)
         expect(JSON.parse(response.body)['userId']).to eq(user1.id)
       end
-      it "creates widget" do
+      it "creates car" do
         user1 = User.create! valid_create_user_1_params
         user2 = User.create! valid_create_user_2_params
         header = header_from_user(user2,valid_user_2_login_params)
-        image = Rack::Test::UploadedFile.new(Rails.root.join("app/assets/images/widgets/allen-wrenches.jpg"))
-        expect { post widgets_url, headers: header, params: { name: "Wrenches", description: "Michael's wrenches", image: image, user_id: user1.id } }
-          .to change(Widget, :count).by(1)
+        image = Rack::Test::UploadedFile.new(Rails.root.join("app/assets/images/cars/allen-wrenches.jpg"))
+        expect { post cars_url, headers: header, params: { name: "Wrenches", description: "Michael's wrenches", image: image, user_id: user1.id } }
+          .to change(Car, :count).by(1)
       end
     end
     context "with invalid parameters (missing user id)" do
       it "does not create a new User" do
         user2 = User.create! valid_create_user_2_params
         header = header_from_user(user2,valid_user_2_login_params)
-        expect { post widgets_url, headers: header, params: { name: "Wrenches", description: "Michael's wrenches" }, as: :json}
+        expect { post cars_url, headers: header, params: { name: "Wrenches", description: "Michael's wrenches" }, as: :json}
           .to change(User, :count).by(0)
       end
       it "renders a JSON error response" do
         user2 = User.create! valid_create_user_2_params
         header = header_from_user(user2,valid_user_2_login_params)
-        post widgets_url, headers: header, params: { name: "Wrenches", description: "Michael's wrenches" }, as: :json
+        post cars_url, headers: header, params: { name: "Wrenches", description: "Michael's wrenches" }, as: :json
         expect(response).to have_http_status(:unprocessable_entity)
         expect(response.content_type).to match(a_string_including("application/json"))
       end
@@ -1978,28 +1978,28 @@ RSpec.describe "/widgets", type: :request do
 
   describe "PATCH /update" do
     context "with valid parameters" do
-      it "updates the requested widget's name" do
+      it "updates the requested car's name" do
         user1 = User.create! valid_create_user_1_params
         user2 = User.create! valid_create_user_2_params
         header = header_from_user(user2,valid_user_2_login_params)
-        widget1 = Widget.create(name: "Wrenches", description: "Michael's wrenches", user_id: user1.id)
-        widget1.image.attach(io: URI.open("#{Rails.root}/app/assets/images/widgets/allen-wrenches.jpg"), filename: "allen-wrenches.jpg")
-        widget1.save!        
-        patch widget_url(widget1), params: { name: "Updated Name!!"}, headers: header, as: :json
-        widget1.reload
+        car1 = Car.create(name: "Wrenches", description: "Michael's wrenches", user_id: user1.id)
+        car1.image.attach(io: URI.open("#{Rails.root}/app/assets/images/cars/allen-wrenches.jpg"), filename: "allen-wrenches.jpg")
+        car1.save!        
+        patch car_url(car1), params: { name: "Updated Name!!"}, headers: header, as: :json
+        car1.reload
         expect(JSON.parse(response.body)['name']).to eq "Updated Name!!"
         expect(response).to have_http_status(:ok)
         expect(response.content_type).to match(a_string_including("application/json"))
       end
-      it "updates the requested widgets's image" do
+      it "updates the requested cars's image" do
         user1 = User.create! valid_create_user_1_params   
         user2 = User.create! valid_create_user_2_params
         header = header_from_user(user2,valid_user_2_login_params)
-        widget1 = Widget.create(name: "Wrenches", description: "Michael's wrenches", user_id: user1.id)
-        widget1.image.attach(io: URI.open("#{Rails.root}/app/assets/images/widgets/allen-wrenches.jpg"), filename: "allen-wrenches.jpg")
-        widget1.save!
+        car1 = Car.create(name: "Wrenches", description: "Michael's wrenches", user_id: user1.id)
+        car1.image.attach(io: URI.open("#{Rails.root}/app/assets/images/cars/allen-wrenches.jpg"), filename: "allen-wrenches.jpg")
+        car1.save!
         updated_image = Rack::Test::UploadedFile.new(Rails.root.join('spec/fixtures/files/images/office-avatars/erin-hannon.png'))
-        patch widget_url(widget1), params: { name: "test", image: updated_image }, headers: header
+        patch car_url(car1), params: { name: "test", image: updated_image }, headers: header
         expect(response).to have_http_status(:ok)
         expect(response.content_type).to match(a_string_including("application/json"))
         expect(JSON.parse(response.body)['name']).to eq("test")
@@ -2010,27 +2010,27 @@ RSpec.describe "/widgets", type: :request do
   end
 
   describe "DELETE /destroy" do
-    it "destroys the requested widget (without avatar)" do
+    it "destroys the requested car (without avatar)" do
       user1 = User.create! valid_create_user_1_params
       user2 = User.create! valid_create_user_2_params      
       header = header_from_user(user2,valid_user_2_login_params)
-      widget1 = Widget.create(name: "Wrenches", description: "Michael's wrenches", user_id: user1.id)
+      car1 = Car.create(name: "Wrenches", description: "Michael's wrenches", user_id: user1.id)
       expect {
-        delete widget_url(widget1), headers: header, as: :json
-      }.to change(Widget, :count).by(-1)
+        delete car_url(car1), headers: header, as: :json
+      }.to change(Car, :count).by(-1)
     end
-    it "destroys the requested widget (with avatar)" do
+    it "destroys the requested car (with avatar)" do
       file = Rack::Test::UploadedFile.new(Rails.root.join("spec/fixtures/files/images/office-avatars/michael-scott.png"))
       valid_create_user_1_params['avatar'] = file
       user1 = User.create! valid_create_user_1_params
       user2 = User.create! valid_create_user_2_params
       header = header_from_user(user2,valid_user_2_login_params)
-      widget1 = Widget.create(name: "Wrenches", description: "Michael's wrenches", user_id: user1.id)
-      widget1.image.attach(io: URI.open("#{Rails.root}/app/assets/images/widgets/allen-wrenches.jpg"), filename: "allen-wrenches.jpg")
-      widget1.save!
+      car1 = Car.create(name: "Wrenches", description: "Michael's wrenches", user_id: user1.id)
+      car1.image.attach(io: URI.open("#{Rails.root}/app/assets/images/cars/allen-wrenches.jpg"), filename: "allen-wrenches.jpg")
+      car1.save!
       expect {
-        delete widget_url(widget1), headers: header, as: :json
-      }.to change(Widget, :count).by(-1)
+        delete car_url(car1), headers: header, as: :json
+      }.to change(Car, :count).by(-1)
     end
   end
 end
@@ -2093,7 +2093,7 @@ require 'spec_helper'
 
 RSpec.describe "/users", type: :request do
   fixtures :users
-  fixtures :widgets
+  fixtures :cars
   let(:valid_headers) {{ Authorization: "Bearer " + @michael_token }}
   let(:admin_2_headers) {{ Authorization: "Bearer " + @ryan_token }}
   let(:invalid_token_header) {{ Authorization: "Bearer xyz" }}
@@ -2115,13 +2115,13 @@ RSpec.describe "/users", type: :request do
     @user2 = users(:jim)
     avatar2 = fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'jim-halpert.png'),'image/png')
     @user2.avatar.attach(avatar2)
-    widgets(:wrenches).image.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'allen-wrenches.jpg'),'image/jpeg'))
-    widgets(:bolts).image.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'bolts.jpg'),'image/jpeg'))
-    widgets(:brackets).image.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'brackets.png'),'image/png'))
-    widgets(:nuts).image.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'nuts.jpg'),'image/jpeg'))
-    widgets(:pipes).image.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'pipes.jpg'),'image/jpeg'))
-    widgets(:screws).image.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'screws.jpg'),'image/jpeg'))
-    widgets(:washers).image.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'washers.jpg'),'image/jpeg'))
+    cars(:wrenches).image.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'allen-wrenches.jpg'),'image/jpeg'))
+    cars(:bolts).image.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'bolts.jpg'),'image/jpeg'))
+    cars(:brackets).image.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'brackets.png'),'image/png'))
+    cars(:nuts).image.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'nuts.jpg'),'image/jpeg'))
+    cars(:pipes).image.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'pipes.jpg'),'image/jpeg'))
+    cars(:screws).image.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'screws.jpg'),'image/jpeg'))
+    cars(:washers).image.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'washers.jpg'),'image/jpeg'))
   end
 
   describe "GET /index" do
@@ -2140,10 +2140,10 @@ RSpec.describe "/users", type: :request do
         get users_url, headers: valid_headers
         users = JSON.parse(response.body)
         michael = users.find { |user| user['email'] == "michaelscott@dundermifflin.com" }
-        widget_ids = michael['widget_ids']
-        widgets = michael['widgets']
-        wrenches = widgets.find { |widget| widget['name'] == "Wrenches" }
-        bolts = widgets.find { |widget| widget['name'] == "Bolts" }
+        car_ids = michael['car_ids']
+        cars = michael['cars']
+        wrenches = cars.find { |car| car['name'] == "Wrenches" }
+        bolts = cars.find { |car| car['name'] == "Bolts" }
         expect(michael['name']).to eq "Michael Scott"
         expect(michael['email']).to eq "michaelscott@dundermifflin.com"
         expect(michael['admin']).to eq true
@@ -2165,11 +2165,11 @@ RSpec.describe "/users", type: :request do
         get users_url, headers: valid_headers
         users = JSON.parse(response.body)
         jim = users.find { |user| user['email'] == "jimhalpert@dundermifflin.com" }
-        widget_ids = jim['widget_ids']
-        widgets = jim['widgets']
-        brackets = widgets.find { |widget| widget['name'] == "Brackets" }
-        nuts  = widgets.find { |widget| widget['name'] == "Nuts" }
-        pipes  = widgets.find { |widget| widget['name'] == "Pipes" }
+        car_ids = jim['car_ids']
+        cars = jim['cars']
+        brackets = cars.find { |car| car['name'] == "Brackets" }
+        nuts  = cars.find { |car| car['name'] == "Nuts" }
+        pipes  = cars.find { |car| car['name'] == "Pipes" }
         expect(jim['name']).to eq "Jim Halpert"
         expect(jim['email']).to eq "jimhalpert@dundermifflin.com"
         expect(jim['admin']).to be_nil or eq false
@@ -2210,10 +2210,10 @@ RSpec.describe "/users", type: :request do
       it "gets users' correct details" do
         get user_url(@user1), headers: valid_headers
         michael = JSON.parse(response.body)
-        widget_ids = michael['widget_ids']
-        widgets = michael['widgets']
-        wrenches = widgets.find { |widget| widget['name'] == "Wrenches" }
-        bolts = widgets.find { |widget| widget['name'] == "Bolts" }
+        car_ids = michael['car_ids']
+        cars = michael['cars']
+        wrenches = cars.find { |car| car['name'] == "Wrenches" }
+        bolts = cars.find { |car| car['name'] == "Bolts" }
         expect(michael['name']).to eq "Michael Scott"
         expect(michael['email']).to eq "michaelscott@dundermifflin.com"
         expect(michael['admin']).to eq true
@@ -2300,10 +2300,10 @@ RSpec.describe "/users", type: :request do
         @user1.reload
         get user_url(@user1), headers: valid_headers
         user = JSON.parse(response.body)
-        widget_ids = user['widget_ids']
-        widgets = user['widgets']
-        wrenches = widgets.find { |widget| widget['name'] == "Wrenches" }
-        bolts = widgets.find { |widget| widget['name'] == "Bolts" }
+        car_ids = user['car_ids']
+        cars = user['cars']
+        wrenches = cars.find { |car| car['name'] == "Wrenches" }
+        bolts = cars.find { |car| car['name'] == "Bolts" }
         expect(@user1['email']).to eq "michaelscott@dundermifflin.com"
         expect(@user1['admin']).to eq true
         expect(@user1['avatar']).to be_nil
@@ -2375,76 +2375,76 @@ end
 ```
 - `rspec`
 
-### Subwidgets (Backend)
-- `# rails g scaffold subwidget name description image:attachment widget:references`
-- `rails g scaffold subwidget name description image:attachment ref_id:integer ref_type`
+### Documents (Backend)
+- `# rails g scaffold document name description image:attachment car:references`
+- `rails g scaffold document name description image:attachment ref_id:integer ref_type`
 - `rails db:migrate`
-- `puravida app/controllers/subwidgets_controller.rb ~`
+- `puravida app/controllers/documents_controller.rb ~`
 ```
-class SubwidgetsController < ApplicationController
-  before_action :set_subwidget, only: %i[ show update destroy ]
+class DocumentsController < ApplicationController
+  before_action :set_document, only: %i[ show update destroy ]
 
-  # GET /subwidgets
+  # GET /documents
   def index
     if params['user_id'].present?
-      @subwidgets = Subwidget.joins(widget: [:user]).where(users: {id: params['user_id']}).map { |subwidget| prep_raw_subwidget(subwidget) }
+      @documents = Document.joins(car: [:user]).where(users: {id: params['user_id']}).map { |document| prep_raw_document(document) }
     else
-      @subwidgets = Subwidget.all.map { |subwidget| prep_raw_subwidget(subwidget) }
+      @documents = Document.all.map { |document| prep_raw_document(document) }
     end
-    render json: @subwidgets
+    render json: @documents
   end
 
-  # GET /subwidgets/1
+  # GET /documents/1
   def show
-    render json: prep_raw_subwidget(@subwidget)
+    render json: prep_raw_document(@document)
   end
 
-  # POST /subwidgets
+  # POST /documents
   def create
-    create_params = subwidget_params
-    create_params['image'] = params['image'].blank? ? nil : params['image'] # if no image is chosen on new subwidget page, params['image'] comes in as a blank string, which throws a 500 error at Subwidget.new(create_params). This changes any params['avatar'] blank string to nil, which is fine in Subwidget.new(create_params).
-    create_params['widget_id'] = create_params['widget_id'].to_i
-    @subwidget = Subwidget.new(create_params)
-    if @subwidget.save
-      render json: prep_raw_subwidget(@subwidget), status: :created, location: @subwidget
+    create_params = document_params
+    create_params['image'] = params['image'].blank? ? nil : params['image'] # if no image is chosen on new document page, params['image'] comes in as a blank string, which throws a 500 error at Document.new(create_params). This changes any params['avatar'] blank string to nil, which is fine in Document.new(create_params).
+    create_params['car_id'] = create_params['car_id'].to_i
+    @document = Document.new(create_params)
+    if @document.save
+      render json: prep_raw_document(@document), status: :created, location: @document
     else
-      render json: @subwidget.errors, status: :unprocessable_entity
+      render json: @document.errors, status: :unprocessable_entity
     end
   end
 
-  # PATCH/PUT /subwidgets/1
+  # PATCH/PUT /documents/1
   def update
-    if @subwidget.update(subwidget_params)
-      render json: prep_raw_subwidget(@subwidget)
+    if @document.update(document_params)
+      render json: prep_raw_document(@document)
     else
-      render json: @subwidget.errors, status: :unprocessable_entity
+      render json: @document.errors, status: :unprocessable_entity
     end
   end
 
-  # DELETE /subwidgets/1
+  # DELETE /documents/1
   def destroy
-    @subwidget.destroy
+    @document.destroy
   end
 
   private
     # Use callbacks to share common setup or constraints between actions.
-    def set_subwidget
-      @subwidget = Subwidget.find(params[:id])
+    def set_document
+      @document = Document.find(params[:id])
     end
 
     # Only allow a list of trusted parameters through.
-    def subwidget_params
-      params.permit(:id, :name, :description, :image, :widget_id)
+    def document_params
+      params.permit(:id, :name, :description, :image, :car_id)
     end
 end
 ~
 ```
-- `puravida spec/requests/subwidgets_spec.rb ~`
+- `puravida spec/requests/documents_spec.rb ~`
 ```
 # frozen_string_literal: true
 require 'open-uri'
 require 'rails_helper'
-RSpec.describe "/widgets", type: :request do
+RSpec.describe "/cars", type: :request do
   let(:valid_create_user_1_params) { { name: "Michael Scott", email: "michaelscott@dundermifflin.com", admin: "true", password: "password" } }
   let(:user_1_attachment) { "/spec/fixtures/files/images/office-avatars/michael-scott.png" }
   let(:user_1_image) { "michael-scott.png" }
@@ -2467,30 +2467,30 @@ RSpec.describe "/widgets", type: :request do
         user1.save!
         user2 = User.create! valid_create_user_2_params
         header = header_from_user(user2,valid_user_2_login_params)
-        widget1 = Widget.create(name: "Wrenches", description: "Michael's wrenches", user_id: user1.id)
+        car1 = Car.create(name: "Wrenches", description: "Michael's wrenches", user_id: user1.id)
         image_filename = "allen-wrenches.jpg"
-        image_path = "#{Rails.root}/app/assets/images/widgets/allen-wrenches.jpg"
+        image_path = "#{Rails.root}/app/assets/images/cars/allen-wrenches.jpg"
         open_image = URI.open(image_path)
-        widget1.image.attach(io: open_image, filename: image_filename)
-        widget1.save!
-        widget2 = Widget.create(name: "Bolts", description: "Michael's bolts", user_id: user1.id)
-        widget2.save!
-        get widgets_url, headers: header, as: :json
+        car1.image.attach(io: open_image, filename: image_filename)
+        car1.save!
+        car2 = Car.create(name: "Bolts", description: "Michael's bolts", user_id: user1.id)
+        car2.save!
+        get cars_url, headers: header, as: :json
         expect(response).to be_successful
       end
       
-      it "gets two widgets (one with image, one without)" do
+      it "gets two cars (one with image, one without)" do
         user1 = User.create! valid_create_user_1_params
         user1.avatar.attach(io: URI.open("#{Rails.root}" + user_1_attachment), filename: user_1_image)
         user1.save!
         user2 = User.create! valid_create_user_2_params
-        widget1 = Widget.create(name: "Wrenches", description: "Michael's wrenches", user_id: user1.id)
-        widget1.image.attach(io: URI.open("#{Rails.root}/app/assets/images/widgets/allen-wrenches.jpg"), filename: "allen-wrenches.jpg")
-        widget1.save!
-        widget2 = Widget.create(name: "Bolts", description: "Michael's bolts", user_id: user1.id)
-        widget2.save!
+        car1 = Car.create(name: "Wrenches", description: "Michael's wrenches", user_id: user1.id)
+        car1.image.attach(io: URI.open("#{Rails.root}/app/assets/images/cars/allen-wrenches.jpg"), filename: "allen-wrenches.jpg")
+        car1.save!
+        car2 = Car.create(name: "Bolts", description: "Michael's bolts", user_id: user1.id)
+        car2.save!
         header = header_from_user(user2,valid_user_2_login_params)
-        get widgets_url, headers: header, as: :json
+        get cars_url, headers: header, as: :json
         expect(response).to be_successful
         expect(JSON.parse(response.body).length).to eq 2
         expect(JSON.parse(response.body)[0]).to include("id","name","description","image","userId")
@@ -2505,19 +2505,19 @@ RSpec.describe "/widgets", type: :request do
         expect(JSON.parse(response.body)[1]['userId']).to eq(user1.id)
       end
 
-      it "gets user one's widgets" do
+      it "gets user one's cars" do
         user1 = User.create! valid_create_user_1_params
         user1.avatar.attach(io: URI.open("#{Rails.root}" + user_1_attachment), filename: user_1_image)
         user1.save!
         user2 = User.create! valid_create_user_2_params
-        widget1 = Widget.create(name: "Wrenches", description: "Michael's wrenches", user_id: user1.id)
-        widget1.image.attach(io: URI.open("#{Rails.root}/app/assets/images/widgets/allen-wrenches.jpg"), filename: "allen-wrenches.jpg")
-        widget1.save!
-        widget2 = Widget.create(name: "Bolts", description: "Michael's bolts", user_id: user1.id)
-        widget3 = Widget.create(name: "test3", description: "test3", user_id: user2.id)
-        widget3 = Widget.create(name: "test4", description: "test4", user_id: user2.id)
+        car1 = Car.create(name: "Wrenches", description: "Michael's wrenches", user_id: user1.id)
+        car1.image.attach(io: URI.open("#{Rails.root}/app/assets/images/cars/allen-wrenches.jpg"), filename: "allen-wrenches.jpg")
+        car1.save!
+        car2 = Car.create(name: "Bolts", description: "Michael's bolts", user_id: user1.id)
+        car3 = Car.create(name: "test3", description: "test3", user_id: user2.id)
+        car3 = Car.create(name: "test4", description: "test4", user_id: user2.id)
         header = header_from_user(user2,valid_user_2_login_params)
-        get widgets_url, params: { user_id: user1.id }, headers: header
+        get cars_url, params: { user_id: user1.id }, headers: header
         expect(response).to be_successful
         expect(JSON.parse(response.body).length).to eq 2
         expect(JSON.parse(response.body)[0]).to include("id","name","description","image","userId")
@@ -2532,19 +2532,19 @@ RSpec.describe "/widgets", type: :request do
         expect(JSON.parse(response.body)[1]['userId']).to eq(user1.id)
       end
 
-      it "gets user two's widgets" do
+      it "gets user two's cars" do
         user1 = User.create! valid_create_user_1_params
         user1.avatar.attach(io: URI.open("#{Rails.root}" + user_1_attachment), filename: user_1_image)
         user1.save!
         user2 = User.create! valid_create_user_2_params
-        widget1 = Widget.create(name: "Wrenches", description: "Michael's wrenches", user_id: user1.id)
-        widget1.image.attach(io: URI.open("#{Rails.root}/app/assets/images/widgets/allen-wrenches.jpg"), filename: "allen-wrenches.jpg")
-        widget1.save!
-        widget2 = Widget.create(name: "Bolts", description: "Michael's bolts", user_id: user1.id)
-        widget3 = Widget.create(name: "test3", description: "test3", user_id: user2.id)
-        widget3 = Widget.create(name: "test4", description: "test4", user_id: user2.id)
+        car1 = Car.create(name: "Wrenches", description: "Michael's wrenches", user_id: user1.id)
+        car1.image.attach(io: URI.open("#{Rails.root}/app/assets/images/cars/allen-wrenches.jpg"), filename: "allen-wrenches.jpg")
+        car1.save!
+        car2 = Car.create(name: "Bolts", description: "Michael's bolts", user_id: user1.id)
+        car3 = Car.create(name: "test3", description: "test3", user_id: user2.id)
+        car3 = Car.create(name: "test4", description: "test4", user_id: user2.id)
         header = header_from_user(user2,valid_user_2_login_params)
-        get widgets_url, params: { user_id: user2.id }, headers: header
+        get cars_url, params: { user_id: user2.id }, headers: header
         expect(response).to be_successful
         expect(JSON.parse(response.body).length).to eq 2
         expect(JSON.parse(response.body)[0]).to include("id","name","description","image","userId")
@@ -2564,12 +2564,12 @@ RSpec.describe "/widgets", type: :request do
     context "with invalid auth header" do
       it "renders a 401 response" do
         User.create! valid_create_user_1_params
-        get widgets_url, headers: invalid_auth_header, as: :json
+        get cars_url, headers: invalid_auth_header, as: :json
         expect(response).to have_http_status(401)
       end
       it "renders a 401 response" do
         User.create! valid_create_user_1_params
-        get widgets_url, headers: poorly_formed_header(valid_create_user_2_params), as: :json
+        get cars_url, headers: poorly_formed_header(valid_create_user_2_params), as: :json
         expect(response).to have_http_status(401)
       end
     end
@@ -2583,37 +2583,37 @@ RSpec.describe "/widgets", type: :request do
         user1.save!
         user2 = User.create! valid_create_user_2_params
         header = header_from_user(user2,valid_user_2_login_params)
-        widget1 = Widget.create(name: "Wrenches", description: "Michael's wrenches", user_id: user1.id)
-        widget1.image.attach(io: URI.open("#{Rails.root}/app/assets/images/widgets/allen-wrenches.jpg"), filename: "allen-wrenches.jpg")
-        widget1.save!
-        get widget_url(widget1), headers: header, as: :json
+        car1 = Car.create(name: "Wrenches", description: "Michael's wrenches", user_id: user1.id)
+        car1.image.attach(io: URI.open("#{Rails.root}/app/assets/images/cars/allen-wrenches.jpg"), filename: "allen-wrenches.jpg")
+        car1.save!
+        get car_url(car1), headers: header, as: :json
         expect(response).to be_successful
       end
-      it "gets one widget (with image)" do
+      it "gets one car (with image)" do
         user1 = User.create! valid_create_user_1_params
         user1.avatar.attach(io: URI.open("#{Rails.root}" + user_1_attachment), filename: user_1_image)
         user1.save!
         user2 = User.create! valid_create_user_2_params
         header = header_from_user(user2,valid_user_2_login_params)
-        widget1 = Widget.create(name: "Wrenches", description: "Michael's wrenches", user_id: user1.id)
-        widget1.image.attach(io: URI.open("#{Rails.root}/app/assets/images/widgets/allen-wrenches.jpg"), filename: "allen-wrenches.jpg")
-        widget1.save!
-        get widget_url(widget1), headers: header, as: :json
+        car1 = Car.create(name: "Wrenches", description: "Michael's wrenches", user_id: user1.id)
+        car1.image.attach(io: URI.open("#{Rails.root}/app/assets/images/cars/allen-wrenches.jpg"), filename: "allen-wrenches.jpg")
+        car1.save!
+        get car_url(car1), headers: header, as: :json
         expect(JSON.parse(response.body)).to include("id","name","description","image","userId")
         expect(JSON.parse(response.body)['name']).to eq("Wrenches")
         expect(JSON.parse(response.body)['description']).to eq("Michael's wrenches")
         expect(JSON.parse(response.body)['image']).to match(/http.*\/allen-wrenches\.jpg/)
         expect(JSON.parse(response.body)['userId']).to eq(user1.id)
       end
-      it "gets one widget (without avatar)" do
+      it "gets one car (without avatar)" do
         user1 = User.create! valid_create_user_1_params
         user1.avatar.attach(io: URI.open("#{Rails.root}" + user_1_attachment), filename: user_1_image)
         user1.save!
         user2 = User.create! valid_create_user_2_params
         header = header_from_user(user2,valid_user_2_login_params)
-        widget2 = Widget.create(name: "Bolts", description: "Michael's bolts", user_id: user1.id)
-        widget2.save!
-        get widget_url(widget2), headers: header, as: :json
+        car2 = Car.create(name: "Bolts", description: "Michael's bolts", user_id: user1.id)
+        car2.save!
+        get car_url(car2), headers: header, as: :json
         expect(JSON.parse(response.body)).to include("id","name","description","image","userId")
         expect(JSON.parse(response.body)['name']).to eq("Bolts")
         expect(JSON.parse(response.body)['description']).to eq("Michael's bolts")
@@ -2624,19 +2624,19 @@ RSpec.describe "/widgets", type: :request do
     context "with invalid auth header" do
       it "renders a 401 response" do
         user1 = User.create! valid_create_user_1_params
-        widget1 = Widget.create(name: "Wrenches", description: "Michael's wrenches", user_id: user1.id)
-        widget1.image.attach(io: URI.open("#{Rails.root}/app/assets/images/widgets/allen-wrenches.jpg"), filename: "allen-wrenches.jpg")
-        widget1.save!
-        get widget_url(widget1), headers: invalid_auth_header, as: :json
+        car1 = Car.create(name: "Wrenches", description: "Michael's wrenches", user_id: user1.id)
+        car1.image.attach(io: URI.open("#{Rails.root}/app/assets/images/cars/allen-wrenches.jpg"), filename: "allen-wrenches.jpg")
+        car1.save!
+        get car_url(car1), headers: invalid_auth_header, as: :json
         expect(response).to have_http_status(401)
       end
       it "renders a 401 response" do
         user1 = User.create! valid_create_user_1_params
         user2 = User.create! valid_create_user_2_params
-        widget1 = Widget.create(name: "Wrenches", description: "Michael's wrenches", user_id: user1.id)
-        widget1.image.attach(io: URI.open("#{Rails.root}/app/assets/images/widgets/allen-wrenches.jpg"), filename: "allen-wrenches.jpg")
-        widget1.save!
-        get widget_url(widget1), headers: poorly_formed_header(valid_create_user_2_params), as: :json
+        car1 = Car.create(name: "Wrenches", description: "Michael's wrenches", user_id: user1.id)
+        car1.image.attach(io: URI.open("#{Rails.root}/app/assets/images/cars/allen-wrenches.jpg"), filename: "allen-wrenches.jpg")
+        car1.save!
+        get car_url(car1), headers: poorly_formed_header(valid_create_user_2_params), as: :json
         expect(response).to have_http_status(401)
       end
     end
@@ -2646,16 +2646,16 @@ RSpec.describe "/widgets", type: :request do
     context "without auth header" do
       it "returns 401" do
         user1 = User.create! valid_create_user_1_params
-        post widgets_url, params: { name: "Wrenches", description: "Michael's wrenches", user_id: user1.id }
+        post cars_url, params: { name: "Wrenches", description: "Michael's wrenches", user_id: user1.id }
         expect(response).to have_http_status(401)
       end
     end
     context "with valid params (without image)" do
-      it "creates widget" do
+      it "creates car" do
         user1 = User.create! valid_create_user_1_params
         user2 = User.create! valid_create_user_2_params
         header = header_from_user(user2,valid_user_2_login_params)
-        post widgets_url, headers: header, params: { name: "Wrenches", description: "Michael's wrenches", user_id: user1.id }
+        post cars_url, headers: header, params: { name: "Wrenches", description: "Michael's wrenches", user_id: user1.id }
         expect(response).to have_http_status(201)
         expect(JSON.parse(response.body)).to include("id","name","description","image","userId")
         expect(JSON.parse(response.body)['name']).to eq("Wrenches")
@@ -2665,12 +2665,12 @@ RSpec.describe "/widgets", type: :request do
       end
     end
     context "with valid params (with image)" do
-      it "creates widget" do
+      it "creates car" do
         user1 = User.create! valid_create_user_1_params
         user2 = User.create! valid_create_user_2_params
         header = header_from_user(user2,valid_user_2_login_params)
-        image = Rack::Test::UploadedFile.new(Rails.root.join("app/assets/images/widgets/allen-wrenches.jpg"))
-        post widgets_url, headers: header, params: { name: "Wrenches", description: "Michael's wrenches", image: image, user_id: user1.id }
+        image = Rack::Test::UploadedFile.new(Rails.root.join("app/assets/images/cars/allen-wrenches.jpg"))
+        post cars_url, headers: header, params: { name: "Wrenches", description: "Michael's wrenches", image: image, user_id: user1.id }
         expect(response).to have_http_status(201)
         expect(JSON.parse(response.body)).to include("id","name","description","image","userId")
         expect(JSON.parse(response.body)['name']).to eq("Wrenches")
@@ -2678,26 +2678,26 @@ RSpec.describe "/widgets", type: :request do
         expect(JSON.parse(response.body)['image']).to match(/http.*\/allen-wrenches\.jpg/)
         expect(JSON.parse(response.body)['userId']).to eq(user1.id)
       end
-      it "creates widget" do
+      it "creates car" do
         user1 = User.create! valid_create_user_1_params
         user2 = User.create! valid_create_user_2_params
         header = header_from_user(user2,valid_user_2_login_params)
-        image = Rack::Test::UploadedFile.new(Rails.root.join("app/assets/images/widgets/allen-wrenches.jpg"))
-        expect { post widgets_url, headers: header, params: { name: "Wrenches", description: "Michael's wrenches", image: image, user_id: user1.id } }
-          .to change(Widget, :count).by(1)
+        image = Rack::Test::UploadedFile.new(Rails.root.join("app/assets/images/cars/allen-wrenches.jpg"))
+        expect { post cars_url, headers: header, params: { name: "Wrenches", description: "Michael's wrenches", image: image, user_id: user1.id } }
+          .to change(Car, :count).by(1)
       end
     end
     context "with invalid parameters (missing user id)" do
       it "does not create a new User" do
         user2 = User.create! valid_create_user_2_params
         header = header_from_user(user2,valid_user_2_login_params)
-        expect { post widgets_url, headers: header, params: { name: "Wrenches", description: "Michael's wrenches" }, as: :json}
+        expect { post cars_url, headers: header, params: { name: "Wrenches", description: "Michael's wrenches" }, as: :json}
           .to change(User, :count).by(0)
       end
       it "renders a JSON error response" do
         user2 = User.create! valid_create_user_2_params
         header = header_from_user(user2,valid_user_2_login_params)
-        post widgets_url, headers: header, params: { name: "Wrenches", description: "Michael's wrenches" }, as: :json
+        post cars_url, headers: header, params: { name: "Wrenches", description: "Michael's wrenches" }, as: :json
         expect(response).to have_http_status(:unprocessable_entity)
         expect(response.content_type).to match(a_string_including("application/json"))
       end
@@ -2706,28 +2706,28 @@ RSpec.describe "/widgets", type: :request do
 
   describe "PATCH /update" do
     context "with valid parameters" do
-      it "updates the requested widget's name" do
+      it "updates the requested car's name" do
         user1 = User.create! valid_create_user_1_params
         user2 = User.create! valid_create_user_2_params
         header = header_from_user(user2,valid_user_2_login_params)
-        widget1 = Widget.create(name: "Wrenches", description: "Michael's wrenches", user_id: user1.id)
-        widget1.image.attach(io: URI.open("#{Rails.root}/app/assets/images/widgets/allen-wrenches.jpg"), filename: "allen-wrenches.jpg")
-        widget1.save!        
-        patch widget_url(widget1), params: { name: "Updated Name!!"}, headers: header, as: :json
-        widget1.reload
+        car1 = Car.create(name: "Wrenches", description: "Michael's wrenches", user_id: user1.id)
+        car1.image.attach(io: URI.open("#{Rails.root}/app/assets/images/cars/allen-wrenches.jpg"), filename: "allen-wrenches.jpg")
+        car1.save!        
+        patch car_url(car1), params: { name: "Updated Name!!"}, headers: header, as: :json
+        car1.reload
         expect(JSON.parse(response.body)['name']).to eq "Updated Name!!"
         expect(response).to have_http_status(:ok)
         expect(response.content_type).to match(a_string_including("application/json"))
       end
-      it "updates the requested widgets's image" do
+      it "updates the requested cars's image" do
         user1 = User.create! valid_create_user_1_params   
         user2 = User.create! valid_create_user_2_params
         header = header_from_user(user2,valid_user_2_login_params)
-        widget1 = Widget.create(name: "Wrenches", description: "Michael's wrenches", user_id: user1.id)
-        widget1.image.attach(io: URI.open("#{Rails.root}/app/assets/images/widgets/allen-wrenches.jpg"), filename: "allen-wrenches.jpg")
-        widget1.save!
+        car1 = Car.create(name: "Wrenches", description: "Michael's wrenches", user_id: user1.id)
+        car1.image.attach(io: URI.open("#{Rails.root}/app/assets/images/cars/allen-wrenches.jpg"), filename: "allen-wrenches.jpg")
+        car1.save!
         updated_image = Rack::Test::UploadedFile.new(Rails.root.join('spec/fixtures/files/images/office-avatars/erin-hannon.png'))
-        patch widget_url(widget1), params: { name: "test", image: updated_image }, headers: header
+        patch car_url(car1), params: { name: "test", image: updated_image }, headers: header
         expect(response).to have_http_status(:ok)
         expect(response.content_type).to match(a_string_including("application/json"))
         expect(JSON.parse(response.body)['name']).to eq("test")
@@ -2738,27 +2738,27 @@ RSpec.describe "/widgets", type: :request do
   end
 
   describe "DELETE /destroy" do
-    it "destroys the requested widget (without avatar)" do
+    it "destroys the requested car (without avatar)" do
       user1 = User.create! valid_create_user_1_params
       user2 = User.create! valid_create_user_2_params      
       header = header_from_user(user2,valid_user_2_login_params)
-      widget1 = Widget.create(name: "Wrenches", description: "Michael's wrenches", user_id: user1.id)
+      car1 = Car.create(name: "Wrenches", description: "Michael's wrenches", user_id: user1.id)
       expect {
-        delete widget_url(widget1), headers: header, as: :json
-      }.to change(Widget, :count).by(-1)
+        delete car_url(car1), headers: header, as: :json
+      }.to change(Car, :count).by(-1)
     end
-    it "destroys the requested widget (with avatar)" do
+    it "destroys the requested car (with avatar)" do
       file = Rack::Test::UploadedFile.new(Rails.root.join("spec/fixtures/files/images/office-avatars/michael-scott.png"))
       valid_create_user_1_params['avatar'] = file
       user1 = User.create! valid_create_user_1_params
       user2 = User.create! valid_create_user_2_params
       header = header_from_user(user2,valid_user_2_login_params)
-      widget1 = Widget.create(name: "Wrenches", description: "Michael's wrenches", user_id: user1.id)
-      widget1.image.attach(io: URI.open("#{Rails.root}/app/assets/images/widgets/allen-wrenches.jpg"), filename: "allen-wrenches.jpg")
-      widget1.save!
+      car1 = Car.create(name: "Wrenches", description: "Michael's wrenches", user_id: user1.id)
+      car1.image.attach(io: URI.open("#{Rails.root}/app/assets/images/cars/allen-wrenches.jpg"), filename: "allen-wrenches.jpg")
+      car1.save!
       expect {
-        delete widget_url(widget1), headers: header, as: :json
-      }.to change(Widget, :count).by(-1)
+        delete car_url(car1), headers: header, as: :json
+      }.to change(Car, :count).by(-1)
     end
   end
 end
@@ -2815,7 +2815,7 @@ end
 ```
 
 ### Documents (Backend)
-- `rails g scaffold document name description image:attachment user:references widget:references`
+- `rails g scaffold document name description image:attachment user:references car:references`
 - `rails db:migrate`
 - `puravida app/controllers/documents_controller.rb ~`
 ```
@@ -2825,7 +2825,7 @@ class DocumentsController < ApplicationController
   # GET /documents
   def index
     if params['user_id'].present?
-      @documents = Document.joins(widget: [:user]).where(users: {id: params['user_id']}).map { |subwidget| prep_raw_document(document) }
+      @documents = Document.joins(car: [:user]).where(users: {id: params['user_id']}).map { |document| prep_raw_document(document) }
     else
       @documents = Document.all.map { |document| prep_raw_document(document) }
     end
@@ -2841,7 +2841,7 @@ class DocumentsController < ApplicationController
   def create
     create_params = document_params
     create_params['image'] = params['image'].blank? ? nil : params['image'] # if no image is chosen on new document page, params['image'] comes in as a blank string, which throws a 500 error at Document.new(create_params). This changes any params['image'] blank string to nil, which is fine in Document.new(create_params).
-    create_params['widget_id'] = create_params['widget_id'].to_i
+    create_params['car_id'] = create_params['car_id'].to_i
     @document = Document.new(create_params)
     if @document.save
       render json: prep_raw_document(@document), status: :created, location: @document
@@ -2872,7 +2872,7 @@ class DocumentsController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def document_params
-      params.permit(:id, :name, :description, :image, :widget_id)
+      params.permit(:id, :name, :description, :image, :car_id)
     end
 end
 ~
@@ -2905,31 +2905,31 @@ RSpec.describe "/documents", type: :request do
         user1.save!
         user2 = User.create! valid_create_user_2_params
         header = header_from_user(user2,valid_user_2_login_params)
-        widget1 = Widget.create(name: "Wrenches", description: "Michael's wrenches", user_id: user1.id)
+        car1 = Car.create(name: "Wrenches", description: "Michael's wrenches", user_id: user1.id)
         image_filename = "allen-wrenches.jpg"
-        image_path = "#{Rails.root}/app/assets/images/widgets/allen-wrenches.jpg"
+        image_path = "#{Rails.root}/app/assets/images/cars/allen-wrenches.jpg"
         open_image = URI.open(image_path)
-        widget1.image.attach(io: open_image, filename: image_filename)
-        widget1.save!
-        widget2 = Widget.create(name: "Bolts", description: "Michael's bolts", user_id: user1.id)
-        widget2.save!
+        car1.image.attach(io: open_image, filename: image_filename)
+        car1.save!
+        car2 = Car.create(name: "Bolts", description: "Michael's bolts", user_id: user1.id)
+        car2.save!
         document1 = Document.create(name: "Wrenches", description: "Michael's wrenches", user_id: user1.id)document.create
         get documents_url, headers: header, as: :json
         expect(response).to be_successful
       end
       
-      it "gets two widgets (one with image, one without)" do
+      it "gets two cars (one with image, one without)" do
         user1 = User.create! valid_create_user_1_params
         user1.avatar.attach(io: URI.open("#{Rails.root}" + user_1_attachment), filename: user_1_image)
         user1.save!
         user2 = User.create! valid_create_user_2_params
-        widget1 = Widget.create(name: "Wrenches", description: "Michael's wrenches", user_id: user1.id)
-        widget1.image.attach(io: URI.open("#{Rails.root}/app/assets/images/widgets/allen-wrenches.jpg"), filename: "allen-wrenches.jpg")
-        widget1.save!
-        widget2 = Widget.create(name: "Bolts", description: "Michael's bolts", user_id: user1.id)
-        widget2.save!
+        car1 = Car.create(name: "Wrenches", description: "Michael's wrenches", user_id: user1.id)
+        car1.image.attach(io: URI.open("#{Rails.root}/app/assets/images/cars/allen-wrenches.jpg"), filename: "allen-wrenches.jpg")
+        car1.save!
+        car2 = Car.create(name: "Bolts", description: "Michael's bolts", user_id: user1.id)
+        car2.save!
         header = header_from_user(user2,valid_user_2_login_params)
-        get widgets_url, headers: header, as: :json
+        get cars_url, headers: header, as: :json
         expect(response).to be_successful
         expect(JSON.parse(response.body).length).to eq 2
         expect(JSON.parse(response.body)[0]).to include("id","name","description","image","userId")
@@ -2944,19 +2944,19 @@ RSpec.describe "/documents", type: :request do
         expect(JSON.parse(response.body)[1]['userId']).to eq(user1.id)
       end
 
-      it "gets user one's widgets" do
+      it "gets user one's cars" do
         user1 = User.create! valid_create_user_1_params
         user1.avatar.attach(io: URI.open("#{Rails.root}" + user_1_attachment), filename: user_1_image)
         user1.save!
         user2 = User.create! valid_create_user_2_params
-        widget1 = Widget.create(name: "Wrenches", description: "Michael's wrenches", user_id: user1.id)
-        widget1.image.attach(io: URI.open("#{Rails.root}/app/assets/images/widgets/allen-wrenches.jpg"), filename: "allen-wrenches.jpg")
-        widget1.save!
-        widget2 = Widget.create(name: "Bolts", description: "Michael's bolts", user_id: user1.id)
-        widget3 = Widget.create(name: "test3", description: "test3", user_id: user2.id)
-        widget3 = Widget.create(name: "test4", description: "test4", user_id: user2.id)
+        car1 = Car.create(name: "Wrenches", description: "Michael's wrenches", user_id: user1.id)
+        car1.image.attach(io: URI.open("#{Rails.root}/app/assets/images/cars/allen-wrenches.jpg"), filename: "allen-wrenches.jpg")
+        car1.save!
+        car2 = Car.create(name: "Bolts", description: "Michael's bolts", user_id: user1.id)
+        car3 = Car.create(name: "test3", description: "test3", user_id: user2.id)
+        car3 = Car.create(name: "test4", description: "test4", user_id: user2.id)
         header = header_from_user(user2,valid_user_2_login_params)
-        get widgets_url, params: { user_id: user1.id }, headers: header
+        get cars_url, params: { user_id: user1.id }, headers: header
         expect(response).to be_successful
         expect(JSON.parse(response.body).length).to eq 2
         expect(JSON.parse(response.body)[0]).to include("id","name","description","image","userId")
@@ -2971,19 +2971,19 @@ RSpec.describe "/documents", type: :request do
         expect(JSON.parse(response.body)[1]['userId']).to eq(user1.id)
       end
 
-      it "gets user two's widgets" do
+      it "gets user two's cars" do
         user1 = User.create! valid_create_user_1_params
         user1.avatar.attach(io: URI.open("#{Rails.root}" + user_1_attachment), filename: user_1_image)
         user1.save!
         user2 = User.create! valid_create_user_2_params
-        widget1 = Widget.create(name: "Wrenches", description: "Michael's wrenches", user_id: user1.id)
-        widget1.image.attach(io: URI.open("#{Rails.root}/app/assets/images/widgets/allen-wrenches.jpg"), filename: "allen-wrenches.jpg")
-        widget1.save!
-        widget2 = Widget.create(name: "Bolts", description: "Michael's bolts", user_id: user1.id)
-        widget3 = Widget.create(name: "test3", description: "test3", user_id: user2.id)
-        widget3 = Widget.create(name: "test4", description: "test4", user_id: user2.id)
+        car1 = Car.create(name: "Wrenches", description: "Michael's wrenches", user_id: user1.id)
+        car1.image.attach(io: URI.open("#{Rails.root}/app/assets/images/cars/allen-wrenches.jpg"), filename: "allen-wrenches.jpg")
+        car1.save!
+        car2 = Car.create(name: "Bolts", description: "Michael's bolts", user_id: user1.id)
+        car3 = Car.create(name: "test3", description: "test3", user_id: user2.id)
+        car3 = Car.create(name: "test4", description: "test4", user_id: user2.id)
         header = header_from_user(user2,valid_user_2_login_params)
-        get widgets_url, params: { user_id: user2.id }, headers: header
+        get cars_url, params: { user_id: user2.id }, headers: header
         expect(response).to be_successful
         expect(JSON.parse(response.body).length).to eq 2
         expect(JSON.parse(response.body)[0]).to include("id","name","description","image","userId")
@@ -3003,12 +3003,12 @@ RSpec.describe "/documents", type: :request do
     context "with invalid auth header" do
       it "renders a 401 response" do
         User.create! valid_create_user_1_params
-        get widgets_url, headers: invalid_auth_header, as: :json
+        get cars_url, headers: invalid_auth_header, as: :json
         expect(response).to have_http_status(401)
       end
       it "renders a 401 response" do
         User.create! valid_create_user_1_params
-        get widgets_url, headers: poorly_formed_header(valid_create_user_2_params), as: :json
+        get cars_url, headers: poorly_formed_header(valid_create_user_2_params), as: :json
         expect(response).to have_http_status(401)
       end
     end
@@ -3022,37 +3022,37 @@ RSpec.describe "/documents", type: :request do
         user1.save!
         user2 = User.create! valid_create_user_2_params
         header = header_from_user(user2,valid_user_2_login_params)
-        widget1 = Widget.create(name: "Wrenches", description: "Michael's wrenches", user_id: user1.id)
-        widget1.image.attach(io: URI.open("#{Rails.root}/app/assets/images/widgets/allen-wrenches.jpg"), filename: "allen-wrenches.jpg")
-        widget1.save!
-        get widget_url(widget1), headers: header, as: :json
+        car1 = Car.create(name: "Wrenches", description: "Michael's wrenches", user_id: user1.id)
+        car1.image.attach(io: URI.open("#{Rails.root}/app/assets/images/cars/allen-wrenches.jpg"), filename: "allen-wrenches.jpg")
+        car1.save!
+        get car_url(car1), headers: header, as: :json
         expect(response).to be_successful
       end
-      it "gets one widget (with image)" do
+      it "gets one car (with image)" do
         user1 = User.create! valid_create_user_1_params
         user1.avatar.attach(io: URI.open("#{Rails.root}" + user_1_attachment), filename: user_1_image)
         user1.save!
         user2 = User.create! valid_create_user_2_params
         header = header_from_user(user2,valid_user_2_login_params)
-        widget1 = Widget.create(name: "Wrenches", description: "Michael's wrenches", user_id: user1.id)
-        widget1.image.attach(io: URI.open("#{Rails.root}/app/assets/images/widgets/allen-wrenches.jpg"), filename: "allen-wrenches.jpg")
-        widget1.save!
-        get widget_url(widget1), headers: header, as: :json
+        car1 = Car.create(name: "Wrenches", description: "Michael's wrenches", user_id: user1.id)
+        car1.image.attach(io: URI.open("#{Rails.root}/app/assets/images/cars/allen-wrenches.jpg"), filename: "allen-wrenches.jpg")
+        car1.save!
+        get car_url(car1), headers: header, as: :json
         expect(JSON.parse(response.body)).to include("id","name","description","image","userId")
         expect(JSON.parse(response.body)['name']).to eq("Wrenches")
         expect(JSON.parse(response.body)['description']).to eq("Michael's wrenches")
         expect(JSON.parse(response.body)['image']).to match(/http.*\/allen-wrenches\.jpg/)
         expect(JSON.parse(response.body)['userId']).to eq(user1.id)
       end
-      it "gets one widget (without avatar)" do
+      it "gets one car (without avatar)" do
         user1 = User.create! valid_create_user_1_params
         user1.avatar.attach(io: URI.open("#{Rails.root}" + user_1_attachment), filename: user_1_image)
         user1.save!
         user2 = User.create! valid_create_user_2_params
         header = header_from_user(user2,valid_user_2_login_params)
-        widget2 = Widget.create(name: "Bolts", description: "Michael's bolts", user_id: user1.id)
-        widget2.save!
-        get widget_url(widget2), headers: header, as: :json
+        car2 = Car.create(name: "Bolts", description: "Michael's bolts", user_id: user1.id)
+        car2.save!
+        get car_url(car2), headers: header, as: :json
         expect(JSON.parse(response.body)).to include("id","name","description","image","userId")
         expect(JSON.parse(response.body)['name']).to eq("Bolts")
         expect(JSON.parse(response.body)['description']).to eq("Michael's bolts")
@@ -3063,19 +3063,19 @@ RSpec.describe "/documents", type: :request do
     context "with invalid auth header" do
       it "renders a 401 response" do
         user1 = User.create! valid_create_user_1_params
-        widget1 = Widget.create(name: "Wrenches", description: "Michael's wrenches", user_id: user1.id)
-        widget1.image.attach(io: URI.open("#{Rails.root}/app/assets/images/widgets/allen-wrenches.jpg"), filename: "allen-wrenches.jpg")
-        widget1.save!
-        get widget_url(widget1), headers: invalid_auth_header, as: :json
+        car1 = Car.create(name: "Wrenches", description: "Michael's wrenches", user_id: user1.id)
+        car1.image.attach(io: URI.open("#{Rails.root}/app/assets/images/cars/allen-wrenches.jpg"), filename: "allen-wrenches.jpg")
+        car1.save!
+        get car_url(car1), headers: invalid_auth_header, as: :json
         expect(response).to have_http_status(401)
       end
       it "renders a 401 response" do
         user1 = User.create! valid_create_user_1_params
         user2 = User.create! valid_create_user_2_params
-        widget1 = Widget.create(name: "Wrenches", description: "Michael's wrenches", user_id: user1.id)
-        widget1.image.attach(io: URI.open("#{Rails.root}/app/assets/images/widgets/allen-wrenches.jpg"), filename: "allen-wrenches.jpg")
-        widget1.save!
-        get widget_url(widget1), headers: poorly_formed_header(valid_create_user_2_params), as: :json
+        car1 = Car.create(name: "Wrenches", description: "Michael's wrenches", user_id: user1.id)
+        car1.image.attach(io: URI.open("#{Rails.root}/app/assets/images/cars/allen-wrenches.jpg"), filename: "allen-wrenches.jpg")
+        car1.save!
+        get car_url(car1), headers: poorly_formed_header(valid_create_user_2_params), as: :json
         expect(response).to have_http_status(401)
       end
     end
@@ -3085,16 +3085,16 @@ RSpec.describe "/documents", type: :request do
     context "without auth header" do
       it "returns 401" do
         user1 = User.create! valid_create_user_1_params
-        post widgets_url, params: { name: "Wrenches", description: "Michael's wrenches", user_id: user1.id }
+        post cars_url, params: { name: "Wrenches", description: "Michael's wrenches", user_id: user1.id }
         expect(response).to have_http_status(401)
       end
     end
     context "with valid params (without image)" do
-      it "creates widget" do
+      it "creates car" do
         user1 = User.create! valid_create_user_1_params
         user2 = User.create! valid_create_user_2_params
         header = header_from_user(user2,valid_user_2_login_params)
-        post widgets_url, headers: header, params: { name: "Wrenches", description: "Michael's wrenches", user_id: user1.id }
+        post cars_url, headers: header, params: { name: "Wrenches", description: "Michael's wrenches", user_id: user1.id }
         expect(response).to have_http_status(201)
         expect(JSON.parse(response.body)).to include("id","name","description","image","userId")
         expect(JSON.parse(response.body)['name']).to eq("Wrenches")
@@ -3104,12 +3104,12 @@ RSpec.describe "/documents", type: :request do
       end
     end
     context "with valid params (with image)" do
-      it "creates widget" do
+      it "creates car" do
         user1 = User.create! valid_create_user_1_params
         user2 = User.create! valid_create_user_2_params
         header = header_from_user(user2,valid_user_2_login_params)
-        image = Rack::Test::UploadedFile.new(Rails.root.join("app/assets/images/widgets/allen-wrenches.jpg"))
-        post widgets_url, headers: header, params: { name: "Wrenches", description: "Michael's wrenches", image: image, user_id: user1.id }
+        image = Rack::Test::UploadedFile.new(Rails.root.join("app/assets/images/cars/allen-wrenches.jpg"))
+        post cars_url, headers: header, params: { name: "Wrenches", description: "Michael's wrenches", image: image, user_id: user1.id }
         expect(response).to have_http_status(201)
         expect(JSON.parse(response.body)).to include("id","name","description","image","userId")
         expect(JSON.parse(response.body)['name']).to eq("Wrenches")
@@ -3117,26 +3117,26 @@ RSpec.describe "/documents", type: :request do
         expect(JSON.parse(response.body)['image']).to match(/http.*\/allen-wrenches\.jpg/)
         expect(JSON.parse(response.body)['userId']).to eq(user1.id)
       end
-      it "creates widget" do
+      it "creates car" do
         user1 = User.create! valid_create_user_1_params
         user2 = User.create! valid_create_user_2_params
         header = header_from_user(user2,valid_user_2_login_params)
-        image = Rack::Test::UploadedFile.new(Rails.root.join("app/assets/images/widgets/allen-wrenches.jpg"))
-        expect { post widgets_url, headers: header, params: { name: "Wrenches", description: "Michael's wrenches", image: image, user_id: user1.id } }
-          .to change(Widget, :count).by(1)
+        image = Rack::Test::UploadedFile.new(Rails.root.join("app/assets/images/cars/allen-wrenches.jpg"))
+        expect { post cars_url, headers: header, params: { name: "Wrenches", description: "Michael's wrenches", image: image, user_id: user1.id } }
+          .to change(Car, :count).by(1)
       end
     end
     context "with invalid parameters (missing user id)" do
       it "does not create a new User" do
         user2 = User.create! valid_create_user_2_params
         header = header_from_user(user2,valid_user_2_login_params)
-        expect { post widgets_url, headers: header, params: { name: "Wrenches", description: "Michael's wrenches" }, as: :json}
+        expect { post cars_url, headers: header, params: { name: "Wrenches", description: "Michael's wrenches" }, as: :json}
           .to change(User, :count).by(0)
       end
       it "renders a JSON error response" do
         user2 = User.create! valid_create_user_2_params
         header = header_from_user(user2,valid_user_2_login_params)
-        post widgets_url, headers: header, params: { name: "Wrenches", description: "Michael's wrenches" }, as: :json
+        post cars_url, headers: header, params: { name: "Wrenches", description: "Michael's wrenches" }, as: :json
         expect(response).to have_http_status(:unprocessable_entity)
         expect(response.content_type).to match(a_string_including("application/json"))
       end
@@ -3145,28 +3145,28 @@ RSpec.describe "/documents", type: :request do
 
   describe "PATCH /update" do
     context "with valid parameters" do
-      it "updates the requested widget's name" do
+      it "updates the requested car's name" do
         user1 = User.create! valid_create_user_1_params
         user2 = User.create! valid_create_user_2_params
         header = header_from_user(user2,valid_user_2_login_params)
-        widget1 = Widget.create(name: "Wrenches", description: "Michael's wrenches", user_id: user1.id)
-        widget1.image.attach(io: URI.open("#{Rails.root}/app/assets/images/widgets/allen-wrenches.jpg"), filename: "allen-wrenches.jpg")
-        widget1.save!        
-        patch widget_url(widget1), params: { name: "Updated Name!!"}, headers: header, as: :json
-        widget1.reload
+        car1 = Car.create(name: "Wrenches", description: "Michael's wrenches", user_id: user1.id)
+        car1.image.attach(io: URI.open("#{Rails.root}/app/assets/images/cars/allen-wrenches.jpg"), filename: "allen-wrenches.jpg")
+        car1.save!        
+        patch car_url(car1), params: { name: "Updated Name!!"}, headers: header, as: :json
+        car1.reload
         expect(JSON.parse(response.body)['name']).to eq "Updated Name!!"
         expect(response).to have_http_status(:ok)
         expect(response.content_type).to match(a_string_including("application/json"))
       end
-      it "updates the requested widgets's image" do
+      it "updates the requested cars's image" do
         user1 = User.create! valid_create_user_1_params   
         user2 = User.create! valid_create_user_2_params
         header = header_from_user(user2,valid_user_2_login_params)
-        widget1 = Widget.create(name: "Wrenches", description: "Michael's wrenches", user_id: user1.id)
-        widget1.image.attach(io: URI.open("#{Rails.root}/app/assets/images/widgets/allen-wrenches.jpg"), filename: "allen-wrenches.jpg")
-        widget1.save!
+        car1 = Car.create(name: "Wrenches", description: "Michael's wrenches", user_id: user1.id)
+        car1.image.attach(io: URI.open("#{Rails.root}/app/assets/images/cars/allen-wrenches.jpg"), filename: "allen-wrenches.jpg")
+        car1.save!
         updated_image = Rack::Test::UploadedFile.new(Rails.root.join('spec/fixtures/files/images/office-avatars/erin-hannon.png'))
-        patch widget_url(widget1), params: { name: "test", image: updated_image }, headers: header
+        patch car_url(car1), params: { name: "test", image: updated_image }, headers: header
         expect(response).to have_http_status(:ok)
         expect(response.content_type).to match(a_string_including("application/json"))
         expect(JSON.parse(response.body)['name']).to eq("test")
@@ -3177,27 +3177,27 @@ RSpec.describe "/documents", type: :request do
   end
 
   describe "DELETE /destroy" do
-    it "destroys the requested widget (without avatar)" do
+    it "destroys the requested car (without avatar)" do
       user1 = User.create! valid_create_user_1_params
       user2 = User.create! valid_create_user_2_params      
       header = header_from_user(user2,valid_user_2_login_params)
-      widget1 = Widget.create(name: "Wrenches", description: "Michael's wrenches", user_id: user1.id)
+      car1 = Car.create(name: "Wrenches", description: "Michael's wrenches", user_id: user1.id)
       expect {
-        delete widget_url(widget1), headers: header, as: :json
-      }.to change(Widget, :count).by(-1)
+        delete car_url(car1), headers: header, as: :json
+      }.to change(Car, :count).by(-1)
     end
-    it "destroys the requested widget (with avatar)" do
+    it "destroys the requested car (with avatar)" do
       file = Rack::Test::UploadedFile.new(Rails.root.join("spec/fixtures/files/images/office-avatars/michael-scott.png"))
       valid_create_user_1_params['avatar'] = file
       user1 = User.create! valid_create_user_1_params
       user2 = User.create! valid_create_user_2_params
       header = header_from_user(user2,valid_user_2_login_params)
-      widget1 = Widget.create(name: "Wrenches", description: "Michael's wrenches", user_id: user1.id)
-      widget1.image.attach(io: URI.open("#{Rails.root}/app/assets/images/widgets/allen-wrenches.jpg"), filename: "allen-wrenches.jpg")
-      widget1.save!
+      car1 = Car.create(name: "Wrenches", description: "Michael's wrenches", user_id: user1.id)
+      car1.image.attach(io: URI.open("#{Rails.root}/app/assets/images/cars/allen-wrenches.jpg"), filename: "allen-wrenches.jpg")
+      car1.save!
       expect {
-        delete widget_url(widget1), headers: header, as: :json
-      }.to change(Widget, :count).by(-1)
+        delete car_url(car1), headers: header, as: :json
+      }.to change(Car, :count).by(-1)
     end
   end
 end
@@ -3265,57 +3265,57 @@ user.save!
 user = User.create(name: "Pam Beesly", email: "pambeesly@dundermifflin.com", admin: "false", password: "password")
 user.avatar.attach(io: URI.open("#{Rails.root}/app/assets/images/office-avatars/pam-beesly.png"), filename: "jim-halpert.png")
 user.save!
-widget = Widget.create(name: "Wrenches", description: "Michael's wrench", user_id: 1)
-widget.image.attach(io: URI.open("#{Rails.root}/app/assets/images/widgets/allen-wrenches.jpg"), filename: "allen-wrenches.jpg")
-widget.save!
-widget = Widget.create(name: "Bolts", description: "Michael's bolt", user_id: 1)
-widget.image.attach(io: URI.open("#{Rails.root}/app/assets/images/widgets/bolts.jpg"), filename: "bolts.jpg")
-widget.save!
-widget = Widget.create(name: "Brackets", description: "Jim's bracket", user_id: 2)
-widget.image.attach(io: URI.open("#{Rails.root}/app/assets/images/widgets/brackets.png"), filename: "brackets.png")
-widget.save!
-widget = Widget.create(name: "Nuts", description: "Jim's nut", user_id: 2)
-widget.image.attach(io: URI.open("#{Rails.root}/app/assets/images/widgets/nuts.jpg"), filename: "nuts.jpg")
-widget.save!
-widget = Widget.create(name: "Pipes", description: "Jim's pipe", user_id: 2)
-widget.image.attach(io: URI.open("#{Rails.root}/app/assets/images/widgets/pipes.jpg"), filename: "pipes.jpg")
-widget.save!
-widget = Widget.create(name: "Screws", description: "Pam's screw", user_id: 3)
-widget.image.attach(io: URI.open("#{Rails.root}/app/assets/images/widgets/screws.jpg"), filename: "screws.jpg")
-widget.save!
-widget = Widget.create(name: "Washers", description: "Pam's washer", user_id: 3)
-widget.image.attach(io: URI.open("#{Rails.root}/app/assets/images/widgets/washers.jpg"), filename: "washers.jpg")
-widget.save!
-subwidget = Subwidget.create(name: "Sub-Button", description: "Michael's wrench's button", widget_id: 1)
-subwidget.image.attach(io: URI.open("#{Rails.root}/app/assets/images/subwidgets/button.jpg"), filename: "button.jpg")
-subwidget.save!
-subwidget = Subwidget.create(name: "Sub-Buzzer", description: "Michael's bolt's buzzer", widget_id: 2)
-subwidget.image.attach(io: URI.open("#{Rails.root}/app/assets/images/subwidgets/buzzer.jpg"), filename: "buzzer.jpg")
-subwidget.save!
-subwidget = Subwidget.create(name: "Sub-Capacitor", description: "Jim's bracket's capacitor", widget_id: 3)
-subwidget.image.attach(io: URI.open("#{Rails.root}/app/assets/images/subwidgets/capacitor.jpg"), filename: "capacitor.jpg")
-subwidget.save!
-subwidget = Subwidget.create(name: "Sub-Dipswitch", description: "Jim's nut's dipswitch", widget_id: 4)
-subwidget.image.attach(io: URI.open("#{Rails.root}/app/assets/images/subwidgets/dip.jpg"), filename: "dip.jpg")
-subwidget.save!
-subwidget = Subwidget.create(name: "Sub-Led", description: "Jim's pipe's led", widget_id: 5)
-subwidget.image.attach(io: URI.open("#{Rails.root}/app/assets/images/subwidgets/led.jpg"), filename: "led.jpg")
-subwidget.save!
-subwidget = Subwidget.create(name: "Sub-Relay", description: "Pam's screw's relay", widget_id: 6)
-subwidget.image.attach(io: URI.open("#{Rails.root}/app/assets/images/subwidgets/relay.png"), filename: "relay.png")
-subwidget.save!
-subwidget = Subwidget.create(name: "Sub-Resistor", description: "Pam's washer's resistor", widget_id: 7)
-subwidget.image.attach(io: URI.open("#{Rails.root}/app/assets/images/subwidgets/resistor.jpg"), filename: "resistor.jpg")
-subwidget.save!
-subwidget = Subwidget.create(name: "Sub-Semiconductor", description: "Pam's washer's semiconductor", widget_id: 7)
-subwidget.image.attach(io: URI.open("#{Rails.root}/app/assets/images/subwidgets/semiconductor.jpg"), filename: "semiconductor.jpg")
-subwidget.save!
-subwidget = Subwidget.create(name: "Sub-Toggle", description: "Michel's wrench's toggle", widget_id: 1)
-subwidget.image.attach(io: URI.open("#{Rails.root}/app/assets/images/subwidgets/toggle.jpg"), filename: "toggle.jpg")
-subwidget.save!
-subwidget = Subwidget.create(name: "Sub-Tube", description: "Jim's bracket's tube", widget_id: 3)
-subwidget.image.attach(io: URI.open("#{Rails.root}/app/assets/images/subwidgets/tube.jpg"), filename: "tube.jpg")
-subwidget.save!
+car = Car.create(name: "Wrenches", description: "Michael's wrench", user_id: 1)
+car.image.attach(io: URI.open("#{Rails.root}/app/assets/images/cars/allen-wrenches.jpg"), filename: "allen-wrenches.jpg")
+car.save!
+car = Car.create(name: "Bolts", description: "Michael's bolt", user_id: 1)
+car.image.attach(io: URI.open("#{Rails.root}/app/assets/images/cars/bolts.jpg"), filename: "bolts.jpg")
+car.save!
+car = Car.create(name: "Brackets", description: "Jim's bracket", user_id: 2)
+car.image.attach(io: URI.open("#{Rails.root}/app/assets/images/cars/brackets.png"), filename: "brackets.png")
+car.save!
+car = Car.create(name: "Nuts", description: "Jim's nut", user_id: 2)
+car.image.attach(io: URI.open("#{Rails.root}/app/assets/images/cars/nuts.jpg"), filename: "nuts.jpg")
+car.save!
+car = Car.create(name: "Pipes", description: "Jim's pipe", user_id: 2)
+car.image.attach(io: URI.open("#{Rails.root}/app/assets/images/cars/pipes.jpg"), filename: "pipes.jpg")
+car.save!
+car = Car.create(name: "Screws", description: "Pam's screw", user_id: 3)
+car.image.attach(io: URI.open("#{Rails.root}/app/assets/images/cars/screws.jpg"), filename: "screws.jpg")
+car.save!
+car = Car.create(name: "Washers", description: "Pam's washer", user_id: 3)
+car.image.attach(io: URI.open("#{Rails.root}/app/assets/images/cars/washers.jpg"), filename: "washers.jpg")
+car.save!
+document = Document.create(name: "Sub-Button", description: "Michael's wrench's button", car_id: 1)
+document.image.attach(io: URI.open("#{Rails.root}/app/assets/images/documents/button.jpg"), filename: "button.jpg")
+document.save!
+document = Document.create(name: "Sub-Buzzer", description: "Michael's bolt's buzzer", car_id: 2)
+document.image.attach(io: URI.open("#{Rails.root}/app/assets/images/documents/buzzer.jpg"), filename: "buzzer.jpg")
+document.save!
+document = Document.create(name: "Sub-Capacitor", description: "Jim's bracket's capacitor", car_id: 3)
+document.image.attach(io: URI.open("#{Rails.root}/app/assets/images/documents/capacitor.jpg"), filename: "capacitor.jpg")
+document.save!
+document = Document.create(name: "Sub-Dipswitch", description: "Jim's nut's dipswitch", car_id: 4)
+document.image.attach(io: URI.open("#{Rails.root}/app/assets/images/documents/dip.jpg"), filename: "dip.jpg")
+document.save!
+document = Document.create(name: "Sub-Led", description: "Jim's pipe's led", car_id: 5)
+document.image.attach(io: URI.open("#{Rails.root}/app/assets/images/documents/led.jpg"), filename: "led.jpg")
+document.save!
+document = Document.create(name: "Sub-Relay", description: "Pam's screw's relay", car_id: 6)
+document.image.attach(io: URI.open("#{Rails.root}/app/assets/images/documents/relay.png"), filename: "relay.png")
+document.save!
+document = Document.create(name: "Sub-Resistor", description: "Pam's washer's resistor", car_id: 7)
+document.image.attach(io: URI.open("#{Rails.root}/app/assets/images/documents/resistor.jpg"), filename: "resistor.jpg")
+document.save!
+document = Document.create(name: "Sub-Semiconductor", description: "Pam's washer's semiconductor", car_id: 7)
+document.image.attach(io: URI.open("#{Rails.root}/app/assets/images/documents/semiconductor.jpg"), filename: "semiconductor.jpg")
+document.save!
+document = Document.create(name: "Sub-Toggle", description: "Michel's wrench's toggle", car_id: 1)
+document.image.attach(io: URI.open("#{Rails.root}/app/assets/images/documents/toggle.jpg"), filename: "toggle.jpg")
+document.save!
+document = Document.create(name: "Sub-Tube", description: "Jim's bracket's tube", car_id: 3)
+document.image.attach(io: URI.open("#{Rails.root}/app/assets/images/documents/tube.jpg"), filename: "tube.jpg")
+document.save!
 ~
 ```
 - `rails db:seed`
@@ -3328,8 +3328,8 @@ subwidget.save!
 ```
 Rails.application.routes.draw do
   resources :users
-  resources :widgets
-  resources :subwidgets
+  resources :cars
+  resources :documents
   get "health", to: "health#index"
   post "login", to: "authentications#create"
   get "me", to: "application#user_from_token"
@@ -3477,16 +3477,16 @@ export default function ({ route, store, redirect }) {
   const splitPath = url.split('/')
   let elemId = null
   let isElemUsers = false
-  let isWidget = false;
-  let isSubwidget = false;
+  let isCar = false;
+  let isDocument = false;
   let isUser = false;
-  const userWidgets = loggedInUser.widget_ids
-  const userSubwidgets = loggedInUser.subwidget_ids
+  const userCars = loggedInUser.car_ids
+  const userDocuments = loggedInUser.document_ids
 
-  if (url.includes("subwidget")) {
-    isSubwidget = true
-  } else if (url.includes("widget")) {
-    isWidget = true
+  if (url.includes("document")) {
+    isDocument = true
+  } else if (url.includes("car")) {
+    isCar = true
   } else if (url.includes("users")) {
     isUser = true
   }
@@ -3497,10 +3497,10 @@ export default function ({ route, store, redirect }) {
     elemId = parseInt(splitPath[splitPath.length-1])
   }
   
-  if (isWidget) {
-    isElemUsers = userWidgets.includes(elemId) ? true : false
-  } else if (isSubwidget) {
-    isElemUsers = userSubwidgets.includes(elemId) ? true : false
+  if (isCar) {
+    isElemUsers = userCars.includes(elemId) ? true : false
+  } else if (isDocument) {
+    isElemUsers = userDocuments.includes(elemId) ? true : false
   } else if (isUser) {
     isElemUsers = loggedInUser.id === elemId ? true : false
   }
@@ -3536,7 +3536,7 @@ export default function ({ route, store, redirect }) {
   if ((isAdminRequest || isQueryEmpty) && !isAdmin) {
     return redirect('/')
   } else if (userIdRequestButNotAdmin && !allowedAccess) {
-    return redirect('/widgets?user_id=' + loggedInUser.id)
+    return redirect('/cars?user_id=' + loggedInUser.id)
   }
 }
 ~
@@ -3804,24 +3804,24 @@ export default { middleware: 'currentOrAdmin-showEdit' }
 ~
 ```
 
-### Widgets (Frontend)
-- `puravida components/widget/Card.vue ~`
+### Cars (Frontend)
+- `puravida components/car/Card.vue ~`
 ```
 <template>
   <article>
     <h2>
-      <NuxtLink :to="`/widgets/${widget.id}`">{{ widget.name }}</NuxtLink> 
-      <NuxtLink :to="`/widgets/${widget.id}/edit`"><font-awesome-icon icon="pencil" /></NuxtLink>
-      <a @click.prevent=deleteWidget(widget.id) href="#"><font-awesome-icon icon="trash" /></a>
+      <NuxtLink :to="`/cars/${car.id}`">{{ car.name }}</NuxtLink> 
+      <NuxtLink :to="`/cars/${car.id}/edit`"><font-awesome-icon icon="pencil" /></NuxtLink>
+      <a @click.prevent=deleteCar(car.id) href="#"><font-awesome-icon icon="trash" /></a>
     </h2>
-    <p>id: {{ widget.id }}</p>
-    <p>description: {{ widget.description }}</p>
-    <p v-if="widget.image !== null" class="no-margin">image:</p>
-    <img v-if="widget.image !== null" :src="widget.image" />
-    <h4 v-if="widget.subwidgets !== null">Subwidgets</h4>
-    <ul v-if="widget.subwidgets !== null">
-      <li v-for="subwidget in widget.subwidgets" :key="subwidget.id">
-        <NuxtLink :to="`/subwidgets/${subwidget.id}`">{{ subwidget.name }} - {{ subwidget.description }}</NuxtLink>
+    <p>id: {{ car.id }}</p>
+    <p>description: {{ car.description }}</p>
+    <p v-if="car.image !== null" class="no-margin">image:</p>
+    <img v-if="car.image !== null" :src="car.image" />
+    <h4 v-if="car.documents !== null">Documents</h4>
+    <ul v-if="car.documents !== null">
+      <li v-for="document in car.documents" :key="document.id">
+        <NuxtLink :to="`/documents/${document.id}`">{{ document.name }} - {{ document.description }}</NuxtLink>
       </li>
     </ul>
   </article>
@@ -3830,14 +3830,14 @@ export default { middleware: 'currentOrAdmin-showEdit' }
 <script>
 import { mapGetters } from 'vuex'
 export default {
-  name: 'WidgetCard',
+  name: 'CarCard',
   computed: { ...mapGetters(['isAdmin']) },
   props: {
-    widget: {
+    car: {
       type: Object,
       default: () => ({}),
     },
-    widgets: {
+    cars: {
       type: Array,
       default: () => ([]),
     },
@@ -3846,10 +3846,10 @@ export default {
     uploadImage: function() {
       this.image = this.$refs.inputFile.files[0];
     },
-    deleteWidget: function(id) {
-      this.$axios.$delete(`widgets/${id}`)
-      const index = this.widgets.findIndex((i) => { return i.id === id })
-      this.widgets.splice(index, 1);
+    deleteCar: function(id) {
+      this.$axios.$delete(`cars/${id}`)
+      const index = this.cars.findIndex((i) => { return i.id === id })
+      this.cars.splice(index, 1);
     }
   }
 }
@@ -3857,12 +3857,12 @@ export default {
 ~
 ```
 
-- `puravida components/widget/Set.vue ~`
+- `puravida components/car/Set.vue ~`
 ```
 <template>
   <section>
-    <div v-for="widget in widgets" :key="widget.id">
-      <WidgetCard :widget="widget" :widgets="widgets" />
+    <div v-for="car in cars" :key="car.id">
+      <CarCard :car="car" :cars="cars" />
     </div>
   </section>
 </template>
@@ -3872,7 +3872,7 @@ import { mapGetters } from 'vuex'
 export default {
   computed: { ...mapGetters(['isAuthenticated', 'isAdmin', 'loggedInUser']) }, 
   data: () => ({
-    widgets: []
+    cars: []
   }),
   async fetch() {
     const query = this.$store.$auth.ctx.query
@@ -3880,13 +3880,13 @@ export default {
     const idQuery = query.user_id
     
     if (this.isAdmin && adminQuery) {
-      this.widgets = await this.$axios.$get('widgets')
+      this.cars = await this.$axios.$get('cars')
     } else if (idQuery) {
-      this.widgets = await this.$axios.$get('widgets', {
+      this.cars = await this.$axios.$get('cars', {
         params: { user_id: idQuery }
       })
     } else {
-      this.widgets = await this.$axios.$get('widgets', {
+      this.cars = await this.$axios.$get('cars', {
         params: { user_id: this.loggedInUser.id }
       })
     }
@@ -3895,12 +3895,12 @@ export default {
 </script>
 ~
 ```
-- `puravida components/widget/Form.vue ~`
+- `puravida components/car/Form.vue ~`
 ```
 <template>
   <section>
-    <h1 v-if="editOrNew === 'edit'">Edit Widget</h1>
-    <h1 v-else-if="editOrNew === 'new'">Add Widget</h1>
+    <h1 v-if="editOrNew === 'edit'">Edit Car</h1>
+    <h1 v-else-if="editOrNew === 'new'">Add Car</h1>
     <article>
       <form enctype="multipart/form-data">
         <p v-if="editOrNew === 'edit'">id: {{ $route.params.id }}</p>
@@ -3909,8 +3909,8 @@ export default {
         <p class="no-margin">Image: </p>
         <img v-if="!hideImage && editOrNew === 'edit'" :src="image" />    
         <input type="file" ref="inputFile" @change=uploadImage()>
-        <button v-if="editOrNew !== 'edit'" @click.prevent=createWidget>Create Widget</button>
-        <button v-else-if="editOrNew == 'edit'" @click.prevent=editWidget>Edit Widget</button>
+        <button v-if="editOrNew !== 'edit'" @click.prevent=createCar>Create Car</button>
+        <button v-else-if="editOrNew == 'edit'" @click.prevent=editCar>Edit Car</button>
       </form>
     </article>
   </section>
@@ -3939,10 +3939,10 @@ export default {
     const splitPath = $nuxt.$route.path.split('/')
     this.editOrNew = $nuxt.$route.path.split('/')[$nuxt.$route.path.split('/').length-1]
     if ($nuxt.$route.path.split('/')[$nuxt.$route.path.split('/').length-1]=='edit') {
-      const widget = await this.$axios.$get(`widgets/${this.$route.params.id}`)
-      this.name = widget.name
-      this.description = widget.description,
-      this.image = widget.image  
+      const car = await this.$axios.$get(`cars/${this.$route.params.id}`)
+      this.name = car.name
+      this.description = car.description,
+      this.image = car.image  
     }
   },
   methods: {
@@ -3950,7 +3950,7 @@ export default {
       this.image = this.$refs.inputFile.files[0]
       this.hideImage = true
     },
-    createWidget: function() {
+    createCar: function() {
       const userId = this.$auth.$state.user.id
       const params = {
         'name': this.name,
@@ -3962,13 +3962,13 @@ export default {
       Object.entries(params).forEach(
         ([key, value]) => payload.append(key, value)
       )
-      this.$axios.$post('widgets', payload)
+      this.$axios.$post('cars', payload)
         .then((res) => {
-          const widgetId = res.id
-          this.$router.push(`/widgets/${widgetId}`)
+          const carId = res.id
+          this.$router.push(`/cars/${carId}`)
         })
     },
-    editWidget: function() {
+    editCar: function() {
       let params = {}
       const filePickerFile = this.$refs.inputFile.files[0]
       if (!filePickerFile) {
@@ -3981,9 +3981,9 @@ export default {
       Object.entries(params).forEach(
         ([key, value]) => payload.append(key, value)
       )
-      this.$axios.$patch(`/widgets/${this.$route.params.id}`, payload)
+      this.$axios.$patch(`/cars/${this.$route.params.id}`, payload)
         .then(() => {
-          this.$router.push(`/widgets/${this.$route.params.id}`)
+          this.$router.push(`/cars/${this.$route.params.id}`)
         })
     },
   }
@@ -3991,13 +3991,13 @@ export default {
 </script>
 ~
 ```
-- `puravida pages/widgets/index.vue ~`
+- `puravida pages/cars/index.vue ~`
 ```
 <template>
   <main class="container">
-    <h1>Widgets</h1>
-    <NuxtLink to="/widgets/new" role="button">Add Widget</NuxtLink>
-    <WidgetSet />
+    <h1>Cars</h1>
+    <NuxtLink to="/cars/new" role="button">Add Car</NuxtLink>
+    <CarSet />
   </main>
 </template>
 <script>
@@ -4005,21 +4005,21 @@ export default { middleware: 'currentOrAdmin-index' }
 </script>
 ~
 ```
-- `puravida pages/widgets/new.vue ~`
+- `puravida pages/cars/new.vue ~`
 ```
 <template>
   <main class="container">
-    <WidgetForm />
+    <CarForm />
   </main>
 </template>
 ~
 ```
-- `puravida pages/widgets/_id/index.vue ~`
+- `puravida pages/cars/_id/index.vue ~`
 ```
 <template>
   <main class="container">
     <section>
-      <WidgetCard :widget="widget" />
+      <CarCard :car="car" />
     </section>
   </main>
 </template>
@@ -4027,24 +4027,24 @@ export default { middleware: 'currentOrAdmin-index' }
 <script>
 export default {
   middleware: 'currentOrAdmin-showEdit',
-  data: () => ({ widget: {} }),
-  async fetch() { this.widget = await this.$axios.$get(`widgets/${this.$route.params.id}`) },
+  data: () => ({ car: {} }),
+  async fetch() { this.car = await this.$axios.$get(`cars/${this.$route.params.id}`) },
   methods: {
     uploadImage: function() { this.image = this.$refs.inputFile.files[0] },
-    deleteWidget: function(id) {
-      this.$axios.$delete(`widgets/${this.$route.params.id}`)
-      this.$router.push('/widgets')
+    deleteCar: function(id) {
+      this.$axios.$delete(`cars/${this.$route.params.id}`)
+      this.$router.push('/cars')
     }
   }
 }
 </script>
 ~
 ```
-- `puravida pages/widgets/_id/edit.vue ~`
+- `puravida pages/cars/_id/edit.vue ~`
 ```
 <template>
   <main class="container">
-    <WidgetForm />
+    <CarForm />
   </main>
 </template>
 
@@ -4054,35 +4054,35 @@ export default { middleware: 'currentOrAdmin-showEdit' }
 ~
 ```
 
-### Subwidgets
-- `puravida components/subwidget/Card.vue ~`
+### Documents
+- `puravida components/document/Card.vue ~`
 ```
 <template>
   <article>
     <h2>
-      <NuxtLink :to="`/subwidgets/${subwidget.id}`">{{ subwidget.name }}</NuxtLink> 
-      <NuxtLink :to="`/subwidgets/${subwidget.id}/edit`"><font-awesome-icon icon="pencil" /></NuxtLink>
-      <a @click.prevent=deleteWidget(subwidget.id) href="#"><font-awesome-icon icon="trash" /></a>
+      <NuxtLink :to="`/documents/${document.id}`">{{ document.name }}</NuxtLink> 
+      <NuxtLink :to="`/documents/${document.id}/edit`"><font-awesome-icon icon="pencil" /></NuxtLink>
+      <a @click.prevent=deleteCar(document.id) href="#"><font-awesome-icon icon="trash" /></a>
     </h2>
-    <p>id: {{ subwidget.id }}</p>
-    <p>description: {{ subwidget.description }}</p>
-    <p v-if="subwidget.image !== null" class="no-margin">image:</p>
-    <img v-if="subwidget.image !== null" :src="subwidget.image" />
-    <p>widget: <NuxtLink :to="`/widgets/${subwidget.widgetId}`">{{ subwidget.widgetName }} - {{ subwidget.widgetDescription }}</NuxtLink></p>
+    <p>id: {{ document.id }}</p>
+    <p>description: {{ document.description }}</p>
+    <p v-if="document.image !== null" class="no-margin">image:</p>
+    <img v-if="document.image !== null" :src="document.image" />
+    <p>car: <NuxtLink :to="`/cars/${document.carId}`">{{ document.carName }} - {{ document.carDescription }}</NuxtLink></p>
   </article>
 </template>
 
 <script>
 import { mapGetters } from 'vuex'
 export default {
-  name: 'SubwidgetCard',
+  name: 'DocumentCard',
   computed: { ...mapGetters(['isAdmin']) },
   props: {
-    subwidget: {
+    document: {
       type: Object,
       default: () => ({}),
     },
-    subwidgets: {
+    documents: {
       type: Array,
       default: () => ([]),
     },
@@ -4091,22 +4091,22 @@ export default {
     uploadImage: function() {
       this.image = this.$refs.inputFile.files[0];
     },
-    deleteSubwidget: function(id) {
-      this.$axios.$delete(`subwidgets/${id}`)
-      const index = this.subwidgets.findIndex((i) => { return i.id === id })
-      this.subwidgets.splice(index, 1);
+    deleteDocument: function(id) {
+      this.$axios.$delete(`documents/${id}`)
+      const index = this.documents.findIndex((i) => { return i.id === id })
+      this.documents.splice(index, 1);
     }
   }
 }
 </script>
 ~
 ```
-- `puravida components/subwidget/Set.vue ~`
+- `puravida components/document/Set.vue ~`
 ```
 <template>
   <section>
-    <div v-for="subwidget in subwidgets" :key="subwidget.id">
-      <SubwidgetCard :subwidget="subwidget" :subwidgets= "subwidgets" />
+    <div v-for="document in documents" :key="document.id">
+      <DocumentCard :document="document" :documents= "documents" />
     </div>
   </section>
 </template>
@@ -4116,7 +4116,7 @@ import { mapGetters } from 'vuex'
 export default {
   computed: { ...mapGetters(['isAuthenticated', 'isAdmin', 'loggedInUser']) }, 
   data: () => ({
-    subwidgets: []
+    documents: []
   }),
 async fetch() {
     const query = this.$store.$auth.ctx.query
@@ -4124,13 +4124,13 @@ async fetch() {
     const idQuery = query.user_id
     
     if (this.isAdmin && adminQuery) {
-      this.subwidgets = await this.$axios.$get('subwidgets')
+      this.documents = await this.$axios.$get('documents')
     } else if (idQuery) {
-      this.subwidgets = await this.$axios.$get('subwidgets', {
+      this.documents = await this.$axios.$get('documents', {
         params: { user_id: idQuery }
       })
     } else {
-      this.subwidgets = await this.$axios.$get('subwidgets', {
+      this.documents = await this.$axios.$get('documents', {
         params: { user_id: this.loggedInUser.id }
       })
     }
@@ -4139,12 +4139,12 @@ async fetch() {
 </script>
 ~
 ```
-- `puravida components/subwidget/Form.vue ~`
+- `puravida components/document/Form.vue ~`
 ```
 <template>
   <section>
-    <h1 v-if="editOrNew === 'edit'">Edit Subwidget</h1>
-    <h1 v-else-if="editOrNew === 'new'">Add Subwidget</h1>
+    <h1 v-if="editOrNew === 'edit'">Edit Document</h1>
+    <h1 v-else-if="editOrNew === 'new'">Add Document</h1>
     <article>
       <form enctype="multipart/form-data">
         <p v-if="editOrNew === 'edit'">id: {{ $route.params.id }}</p>
@@ -4153,13 +4153,13 @@ async fetch() {
         <p class="no-margin">Image: </p>
         <img v-if="!hideImage && editOrNew === 'edit'" :src="image" />    
         <input type="file" ref="inputFile" @change=uploadImage()>
-        <p>Widget: </p>
-        <select v-if="editOrNew === 'new'" name="widget" @change="selectWidget($event)">
+        <p>Car: </p>
+        <select v-if="editOrNew === 'new'" name="car" @change="selectCar($event)">
           <option value=""></option>
-          <option v-for="widget in widgets" :key="widget.id" :value="widget.id">{{ widget.name }} - {{ widget.description }}</option>
+          <option v-for="car in cars" :key="car.id" :value="car.id">{{ car.name }} - {{ car.description }}</option>
         </select>
-        <button v-if="editOrNew !== 'edit'" @click.prevent=createSubwidget>Create Subwidget</button>
-        <button v-else-if="editOrNew == 'edit'" @click.prevent=editSubwidget>Edit Subwidget</button>
+        <button v-if="editOrNew !== 'edit'" @click.prevent=createDocument>Create Document</button>
+        <button v-else-if="editOrNew == 'edit'" @click.prevent=editDocument>Edit Document</button>
       </form>
     </article>
   </section>
@@ -4175,8 +4175,8 @@ export default {
       image: "",
       editOrNew: "",
       hideImage: false,
-      widgets: [],
-      widgetId: ""
+      cars: [],
+      carId: ""
     }
   },
   mounted() {
@@ -4190,13 +4190,13 @@ export default {
     const splitPath = $nuxt.$route.path.split('/')
     this.editOrNew = $nuxt.$route.path.split('/')[$nuxt.$route.path.split('/').length-1]
     if ($nuxt.$route.path.split('/')[$nuxt.$route.path.split('/').length-1]=='edit') {
-      const subwidget = await this.$axios.$get(`subwidgets/${this.$route.params.id}`)
-      this.name = subwidget.name
-      this.description = subwidget.description,
-      this.image = subwidget.image  
+      const document = await this.$axios.$get(`documents/${this.$route.params.id}`)
+      this.name = document.name
+      this.description = document.description,
+      this.image = document.image  
     }
     if (this.editOrNew == 'new') {
-      this.widgets = await this.$axios.$get('/widgets', {
+      this.cars = await this.$axios.$get('/cars', {
         params: { user_id: this.$auth.$state.user.id }
       })
     }
@@ -4206,24 +4206,24 @@ export default {
       this.image = this.$refs.inputFile.files[0]
       this.hideImage = true
     },
-    createSubwidget: function() {
+    createDocument: function() {
       const params = {
         'name': this.name,
         'description': this.description,
         'image': this.image,
-        'widget_id': this.widgetId
+        'car_id': this.carId
       }
       let payload = new FormData()
       Object.entries(params).forEach(
         ([key, value]) => payload.append(key, value)
       )
-      this.$axios.$post('subwidgets', payload)
+      this.$axios.$post('documents', payload)
         .then((res) => {
-          const subwidgetId = res.id
-          this.$router.push(`/subwidgets/${subwidgetId}`)
+          const documentId = res.id
+          this.$router.push(`/documents/${documentId}`)
         })
     },
-    editSubwidget: function() {
+    editDocument: function() {
       let params = {}
       const filePickerFile = this.$refs.inputFile.files[0]
       if (!filePickerFile) {
@@ -4235,26 +4235,26 @@ export default {
       Object.entries(params).forEach(
         ([key, value]) => payload.append(key, value)
       )
-      this.$axios.$patch(`/subwidgets/${this.$route.params.id}`, payload)
+      this.$axios.$patch(`/documents/${this.$route.params.id}`, payload)
         .then(() => {
-          this.$router.push(`/subwidgets/${this.$route.params.id}`)
+          this.$router.push(`/documents/${this.$route.params.id}`)
         })
     },
-    selectWidget: function(event) {
-      this.widgetId = event.target.value
+    selectCar: function(event) {
+      this.carId = event.target.value
     }
   }
 }
 </script>
 ~
 ```
-- `puravida pages/subwidgets/index.vue ~`
+- `puravida pages/documents/index.vue ~`
 ```
 <template>
   <main class="container">
-    <h1>Subwidgets</h1>
-    <NuxtLink to="/subwidgets/new" role="button">Add Subwidget</NuxtLink>
-    <SubwidgetSet />
+    <h1>Documents</h1>
+    <NuxtLink to="/documents/new" role="button">Add Document</NuxtLink>
+    <DocumentSet />
   </main>
 </template>
 <script>
@@ -4262,21 +4262,21 @@ export default { middleware: 'currentOrAdmin-index' }
 </script>
 ~
 ```
-- `puravida pages/subwidgets/new.vue ~`
+- `puravida pages/documents/new.vue ~`
 ```
 <template>
   <main class="container">
-    <SubwidgetForm />
+    <DocumentForm />
   </main>
 </template>
 ~
 ```
-- `puravida pages/subwidgets/_id/index.vue ~`
+- `puravida pages/documents/_id/index.vue ~`
 ```
 <template>
   <main class="container">
     <section>
-      <SubwidgetCard :subwidget="subwidget" />
+      <DocumentCard :document="document" />
     </section>
   </main>
 </template>
@@ -4284,24 +4284,24 @@ export default { middleware: 'currentOrAdmin-index' }
 <script>
 export default {
   middleware: 'currentOrAdmin-showEdit',
-  data: () => ({ subwidget: {} }),
-  async fetch() { this.subwidget = await this.$axios.$get(`subwidgets/${this.$route.params.id}`) },
+  data: () => ({ document: {} }),
+  async fetch() { this.document = await this.$axios.$get(`documents/${this.$route.params.id}`) },
   methods: {
     uploadImage: function() { this.image = this.$refs.inputFile.files[0] },
-    deleteSubwidget: function(id) {
-      this.$axios.$delete(`subwidgets/${this.$route.params.id}`)
-      this.$router.push('/subwidgets')
+    deleteDocument: function(id) {
+      this.$axios.$delete(`documents/${this.$route.params.id}`)
+      this.$router.push('/documents')
     }
   }
 }
 </script>
 ~
 ```
-- `puravida pages/subwidgets/_id/edit.vue ~`
+- `puravida pages/documents/_id/edit.vue ~`
 ```
 <template>
   <main class="container">
-    <SubwidgetForm />
+    <DocumentForm />
   </main>
 </template>
 
@@ -4335,8 +4335,8 @@ export default { middleware: 'currentOrAdmin-showEdit' }
     <ul class="menu">
       <li v-if="!isAuthenticated"><strong><NuxtLink to="/log-in">Log In</NuxtLink></strong></li>
       <li v-if="!isAuthenticated"><strong><NuxtLink to="/sign-up">Sign Up</NuxtLink></strong></li>
-      <li v-if="isAuthenticated"><strong><NuxtLink :to="`/widgets?user_id=${loggedInUser.id}`">Widgets</NuxtLink></strong></li>
-      <li v-if="isAuthenticated"><strong><NuxtLink :to="`/subwidgets?user_id=${loggedInUser.id}`">Subwidgets</NuxtLink></strong></li>
+      <li v-if="isAuthenticated"><strong><NuxtLink :to="`/cars?user_id=${loggedInUser.id}`">Cars</NuxtLink></strong></li>
+      <li v-if="isAuthenticated"><strong><NuxtLink :to="`/documents?user_id=${loggedInUser.id}`">Documents</NuxtLink></strong></li>
       <li v-if="isAdmin"><strong><NuxtLink to="/admin">Admin</NuxtLink></strong></li>
       <li v-if="isAuthenticated" class='dropdown'>
         <details role="list" dir="rtl">
@@ -4543,7 +4543,7 @@ html, body
     <ul class="features">
       <li>Admin dashboard</li>
       <li>Placeholder users</li>
-      <li>Placeholder user item ("widget")</li>
+      <li>Placeholder user item ("car")</li>
     </ul>
 
     <h3 class="small-bottom-margin stack">Stack</h3>
@@ -4718,7 +4718,7 @@ export const getters = {
     <p>Number of users: {{ this.users.length }}</p>
     <p>Number of admins: {{ (this.users.filter((obj) => obj.admin === true)).length }}</p>
     <p><NuxtLink to="/users">Users</NuxtLink></p>
-    <p><NuxtLink to="/widgets?admin=true">Widgets</NuxtLink></p>
+    <p><NuxtLink to="/cars?admin=true">Cars</NuxtLink></p>
   </main>
 </template>
 
@@ -4733,13 +4733,13 @@ export default {
 ~
 ```
 
-- `puravida pages/admin/widgets.vue ~`
+- `puravida pages/admin/cars.vue ~`
 ```
 <template>
   <main class="container">
-    <h1>Widgets</h1>
-    <NuxtLink to="/users/new" role="button">Add Widgets</NuxtLink>
-    <WidgetSet />
+    <h1>Cars</h1>
+    <NuxtLink to="/users/new" role="button">Add Cars</NuxtLink>
+    <CarSet />
   </main>
 </template>
 
@@ -4824,7 +4824,7 @@ context('Logged Out', () => {
         .within(() => {
           cy.get('li').eq(0).contains('Admin dashboard')
           cy.get('li').eq(1).contains('Placeholder users')
-          cy.get('li').eq(2).contains('Placeholder user item ("widget")')
+          cy.get('li').eq(2).contains('Placeholder user item ("car")')
         })
       cy.get('h3.stack')
         .next('div.aligned-columns')
@@ -4996,7 +4996,7 @@ describe('Admin page', () => {
     cy.get('p').eq(0).invoke('text').should('match', /Number of users: \d+/)
     cy.get('p').eq(1).invoke('text').should('match', /Number of admins: \d+/)
     cy.get('p').eq(2).contains('Users')
-    cy.get('p').eq(3).contains('Widgets')
+    cy.get('p').eq(3).contains('Cars')
     cy.logoutAdmin()
   })
   it('Should have correct links', () => {
@@ -5063,14 +5063,14 @@ describe('Admin /users page', () => {
   })
 })
 
-describe('Admin visiting /widgets', () => {
+describe('Admin visiting /cars', () => {
 
   context('No query string', () => {
-    it("Should show admin's two widgets", () => {
+    it("Should show admin's two cars", () => {
       cy.loginAdmin()
       cy.url().should('match', /http:\/\/localhost:3001\/users\/1/)
-      cy.visit('http://localhost:3001/widgets')
-      cy.url().should('match', /http:\/\/localhost:3001\/widgets/)
+      cy.visit('http://localhost:3001/cars')
+      cy.url().should('match', /http:\/\/localhost:3001\/cars/)
       cy.get('section').children('div').should('have.length', 2)
       cy.get('article').eq(0).find('h2').should('contain', 'Wrenches')
       cy.get('article').eq(0).should('contain', "Michael's wrench")
@@ -5082,22 +5082,22 @@ describe('Admin visiting /widgets', () => {
 
 
   context('?admin=true query string', () => {
-    it("Should show all widgets", () => {
+    it("Should show all cars", () => {
       cy.loginAdmin()
       cy.url().should('match', /http:\/\/localhost:3001\/users\/1/)
-      cy.visit('http://localhost:3001/widgets?admin=true')
-      cy.url().should('match', /http:\/\/localhost:3001\/widgets\?admin=true/)
+      cy.visit('http://localhost:3001/cars?admin=true')
+      cy.url().should('match', /http:\/\/localhost:3001\/cars\?admin=true/)
       cy.get('section').children('div').should('have.length', 7)
       cy.logoutAdmin()
     })
   })
 
   context('user_id=1 query string', () => {
-    it("Should show user one's two widgets", () => {
+    it("Should show user one's two cars", () => {
       cy.loginAdmin()
       cy.url().should('match', /http:\/\/localhost:3001\/users\/1/)
-      cy.visit('http://localhost:3001/widgets?user_id=1')
-      cy.url().should('match', /http:\/\/localhost:3001\/widgets\?user_id=1/)
+      cy.visit('http://localhost:3001/cars?user_id=1')
+      cy.url().should('match', /http:\/\/localhost:3001\/cars\?user_id=1/)
       cy.get('section').children('div').should('have.length', 2)
       cy.get('article').eq(0).should('contain', "Michael's wrench")
       cy.get('article').eq(1).should('contain', "Michael's bolt")
@@ -5106,11 +5106,11 @@ describe('Admin visiting /widgets', () => {
   })
 
   context('user_id=2 query string', () => {
-    it("Should show user two's three widgets", () => {
+    it("Should show user two's three cars", () => {
       cy.loginAdmin()
       cy.url().should('match', /http:\/\/localhost:3001\/users\/1/)
-      cy.visit('http://localhost:3001/widgets?user_id=2')
-      cy.url().should('match', /http:\/\/localhost:3001\/widgets\?user_id=2/)
+      cy.visit('http://localhost:3001/cars?user_id=2')
+      cy.url().should('match', /http:\/\/localhost:3001\/cars\?user_id=2/)
       cy.get('section').children('div').should('have.length', 3)
       cy.get('article').eq(0).should('contain', "Jim's bracket")
       cy.get('article').eq(1).should('contain', "Jim's nut")
@@ -5242,12 +5242,12 @@ describe('Edit self as non-admin', () => {
   })
 })
 
-describe('Non-admin visiting /widgets', () => {
+describe('Non-admin visiting /cars', () => {
   context('No query string', () => {
     it("Should redirect to home", () => {
       cy.loginNonAdmin()
       cy.url().should('match', /http:\/\/localhost:3001\/users\/2/)
-      cy.visit('http://localhost:3001/widgets')
+      cy.visit('http://localhost:3001/cars')
       cy.url().should('match', /http:\/\/localhost:3001\//)
       cy.logoutNonAdmin()
     })
@@ -5256,7 +5256,7 @@ describe('Non-admin visiting /widgets', () => {
     it("Should redirect to home", () => {
       cy.loginNonAdmin()
       cy.url().should('match', /http:\/\/localhost:3001\/users\/2/)
-      cy.visit('http://localhost:3001/widgets?admin=true')
+      cy.visit('http://localhost:3001/cars?admin=true')
       cy.url().should('match', /http:\/\/localhost:3001\//)
       cy.logoutNonAdmin()
     })
@@ -5265,8 +5265,8 @@ describe('Non-admin visiting /widgets', () => {
     it("Should redirect to to ?user_id=2", () => {
       cy.loginNonAdmin()
       cy.url().should('match', /http:\/\/localhost:3001\/users\/2/)
-      cy.visit('http://localhost:3001/widgets?user_id=1')
-      cy.url().should('match', /http:\/\/localhost:3001\/widgets\?user_id=2/)
+      cy.visit('http://localhost:3001/cars?user_id=1')
+      cy.url().should('match', /http:\/\/localhost:3001\/cars\?user_id=2/)
       cy.get('article').should('have.length', 3)
       cy.get('article').eq(0).should('contain', "Jim's bracket")
       cy.get('article').eq(1).should('contain', "Jim's nut")
@@ -5275,11 +5275,11 @@ describe('Non-admin visiting /widgets', () => {
     })
   })
   context('?user_id=2 query string', () => {
-    it("Should show user's three widgets", () => {
+    it("Should show user's three cars", () => {
       cy.loginNonAdmin()
       cy.url().should('match', /http:\/\/localhost:3001\/users\/2/)
-      cy.visit('http://localhost:3001/widgets?user_id=2')
-      cy.url().should('match', /http:\/\/localhost:3001\/widgets\?user_id=2/)
+      cy.visit('http://localhost:3001/cars?user_id=2')
+      cy.url().should('match', /http:\/\/localhost:3001\/cars\?user_id=2/)
       cy.get('article').should('have.length', 3)
       cy.get('article').eq(0).should('contain', "Jim's bracket")
       cy.get('article').eq(1).should('contain', "Jim's nut")
@@ -5291,8 +5291,8 @@ describe('Non-admin visiting /widgets', () => {
     it("Should redirect to to ?user_id=2", () => {
       cy.loginNonAdmin()
       cy.url().should('match', /http:\/\/localhost:3001\/users\/2/)
-      cy.visit('http://localhost:3001/widgets?user_id=3')
-      cy.url().should('match', /http:\/\/localhost:3001\/widgets\?user_id=2/)
+      cy.visit('http://localhost:3001/cars?user_id=3')
+      cy.url().should('match', /http:\/\/localhost:3001\/cars\?user_id=2/)
       cy.get('article').should('have.length', 3)
       cy.get('article').eq(0).should('contain', "Jim's bracket")
       cy.get('article').eq(1).should('contain', "Jim's nut")
