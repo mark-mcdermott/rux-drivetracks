@@ -1177,8 +1177,8 @@ civic:
   user: michael
 
 elantra:
-  name: Jim's Hynadai Elantra
-  description: Jim's Hynadai Elantra (description)
+  name: Jim's Hyundai Elantra
+  description: Jim's Hyundai Elantra (description)
   user: jim
 
 leaf:
