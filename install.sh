@@ -1264,39 +1264,41 @@ RSpec.describe "/cars", type: :request do
     it "first car has correct properties" do
       get cars_url, headers: valid_headers
       cars = JSON.parse(response.body)
-      wrenches = cars.find { |car| car['name'] == "Wrenches" }
-      expect(wrenches['name']).to eq "Wrenches"
-      expect(wrenches['description']).to eq "Michael's wrench"
-      expect(wrenches['userName']).to eq "Michael Scott"
-      expect(wrenches['image']).to be_kind_of(String)
-      expect(wrenches['image']).to match(/http.*allen-wrenches\.jpg/)
+      fiat = cars.find { |car| car['name'] == "Michael's Fiat 500" }
+      expect(fiat['name']).to eq "Michael's Fiat 500"
+      expect(fiat['description']).to eq "Michael's Fiat 500 (description)"
+      expect(fiat['userName']).to eq "Michael Scott"
+      expect(fiat['image']).to be_kind_of(String)
+      expect(fiat['image']).to match(/http.*fiat-500\.jpg/)
     end
     it "second car has correct properties" do
       get cars_url, headers: valid_headers
       cars = JSON.parse(response.body)
-      brackets = cars.find { |car| car['name'] == "Brackets" }
-      expect(brackets['name']).to eq "Brackets"
-      expect(brackets['description']).to eq "Jim's bracket"
-      expect(brackets['userName']).to eq "Jim Halpert"
-      expect(brackets['image']).to be_kind_of(String)
-      expect(brackets['image']).to match(/http.*brackets\.png/)
+      elantra = cars.find { |car| car['name'] == "Jim's Hynadai Elantra" }
+      expect(elantra['name']).to eq "Jim's Hynadai Elantra"
+      expect(elantra['description']).to eq "Jim's Hynadai Elantra (description)"
+      expect(elantra['userName']).to eq "Jim Halpert"
+      expect(elantra['image']).to be_kind_of(String)
+      expect(elantra['image']).to match(/http.*hyundai-elantra\.jpg/)
     end
 
   end
 
   describe "GET /show" do
     it "renders a successful response" do
-      car = cars(:wrenches)
+      car = cars(:fiat)
       get car_url(car), headers: valid_headers
       expect(response).to be_successful
     end
     it "gets correct car properties" do
-      car = cars(:wrenches)
+      car = cars(:fiat)
       get car_url(car), headers: valid_headers
-      wrenches = JSON.parse(response.body)
-      expect(wrenches['name']).to eq "Wrenches"
-      expect(wrenches['description']).to eq "Michael's wrench"
-      expect(wrenches['userName']).to eq "Michael Scott"
+      fiat = JSON.parse(response.body)
+      expect(fiat['name']).to eq "Michael's Fiat 500"
+      expect(fiat['description']).to eq "Michael's Fiat 500 (description)"
+      expect(fiat['userName']).to eq "Michael Scott"
+      expect(fiat['image']).to be_kind_of(String)
+      expect(fiat['image']).to match(/http.*fiat-500\.jpg/)
     end
   end
 
@@ -1334,34 +1336,34 @@ RSpec.describe "/cars", type: :request do
       let(:new_attributes) {{ name: "UpdatedName"}}
 
       it "updates the requested car" do
-        car = cars(:wrenches)
+        car = cars(:fiat)
         patch car_url(car), params: new_attributes, headers: valid_headers, as: :json
         car.reload
         expect(car.name).to eq("UpdatedName")
       end
 
       it "renders a JSON response with the car" do
-        car = cars(:wrenches)
+        car = cars(:fiat)
         patch car_url(car), params: new_attributes, headers: valid_headers, as: :json
         expect(response).to have_http_status(:ok)
         expect(response.content_type).to match(a_string_including("application/json"))
       end
 
       it "car's other properties are still correct" do
-        car = cars(:wrenches)
+        car = cars(:fiat)
         patch car_url(car), params: new_attributes, headers: valid_headers, as: :json
-        wrench = JSON.parse(response.body)
-        expect(wrench['description']).to eq "Michael's wrench"
-        expect(wrench['userName']).to eq "Michael Scott"
-        expect(wrench['image']).to be_kind_of(String)
-        expect(wrench['image']).to match(/http.*allen-wrenches\.jpg/)
+        fiat = JSON.parse(response.body)
+        expect(fiat['description']).to eq "Michael's Fiat 500 (description)"
+        expect(fiat['userName']).to eq "Michael Scott"
+        expect(fiat['image']).to be_kind_of(String)
+        expect(fiat['image']).to match(/http.*fiat-500\.jpg/)
       end
 
     end
 
     context "with invalid parameters" do
       it "renders a JSON response with errors for the car" do
-        car = cars(:wrenches)
+        car = cars(:fiat)
         patch car_url(car), params: invalid_attributes, headers: valid_headers, as: :json
         expect(response).to have_http_status(:unprocessable_entity)
         expect(response.content_type).to match(a_string_including("application/json"))
