@@ -1762,8 +1762,8 @@ RSpec.describe "/users", type: :request do
         michael = users.find { |user| user['email'] == "michaelscott@dundermifflin.com" }
         car_ids = michael['car_ids']
         cars = michael['cars']
-        wrenches = cars.find { |car| car['name'] == "Wrenches" }
-        bolts = cars.find { |car| car['name'] == "Bolts" }
+        fiat = cars.find { |car| car['name'] == "Michael's Fiat 500" }
+        civic = cars.find { |car| car['name'] == "Michael's Honda Civic" }
         expect(michael['name']).to eq "Michael Scott"
         expect(michael['email']).to eq "michaelscott@dundermifflin.com"
         expect(michael['admin']).to eq true
@@ -1771,14 +1771,16 @@ RSpec.describe "/users", type: :request do
         expect(michael['avatar']).to match(/http.*\michael-scott\.png/)
         expect(michael['password']).to be_nil
         expect(michael['password_digest']).to be_nil
-        expect(wrenches['name']).to eq "Wrenches"
-        expect(wrenches['description']).to eq "Michael's wrench"
-        expect(url_for(wrenches['image'])).to be_kind_of(String)
-        expect(url_for(wrenches['image'])).to match(/http.*allen-wrenches\.jpg/)
-        expect(bolts['name']).to eq "Bolts"
-        expect(bolts['description']).to eq "Michael's bolt"
-        expect(url_for(bolts['image'])).to be_kind_of(String)
-        expect(url_for(bolts['image'])).to match(/http.*bolts\.jpg/)
+        expect(fiat['name']).to eq "Michael's Fiat 500"
+        expect(fiat['description']).to eq "Michael's Fiat 500 (description)"
+        expect(fiat['userName']).to eq "Michael Scott"
+        expect(fiat['image']).to be_kind_of(String)
+        expect(fiat['image']).to match(/http.*fiat-500\.jpg/)
+        expect(civic['name']).to eq "Michael's Honda Civic"
+        expect(civic['description']).to eq "Michael's Honda Civic (description)"
+        expect(civic['userName']).to eq "Michael Scott"
+        expect(civic['image']).to be_kind_of(String)
+        expect(civic['image']).to match(/http.*honda-civic\.jpg/)
       end
 
       it "gets second users' correct details" do
@@ -1787,9 +1789,8 @@ RSpec.describe "/users", type: :request do
         jim = users.find { |user| user['email'] == "jimhalpert@dundermifflin.com" }
         car_ids = jim['car_ids']
         cars = jim['cars']
-        brackets = cars.find { |car| car['name'] == "Brackets" }
-        nuts  = cars.find { |car| car['name'] == "Nuts" }
-        pipes  = cars.find { |car| car['name'] == "Pipes" }
+        elantra = cars.find { |car| car['name'] == "Jim's Nissan Leaf" }
+        leaf = cars.find { |car| car['name'] == "Jims's Nissan Leaf" }
         expect(jim['name']).to eq "Jim Halpert"
         expect(jim['email']).to eq "jimhalpert@dundermifflin.com"
         expect(jim['admin']).to be_nil or eq false
@@ -1797,18 +1798,16 @@ RSpec.describe "/users", type: :request do
         expect(jim['avatar']).to match(/http.*\jim-halpert\.png/)
         expect(jim['password']).to be_nil
         expect(jim['password_digest']).to be_nil
-        expect(brackets['name']).to eq "Brackets"
-        expect(brackets['description']).to eq "Jim's bracket"
-        expect(url_for(brackets['image'])).to be_kind_of(String)
-        expect(url_for(brackets['image'])).to match(/http.*brackets\.png/)
-        expect(nuts['name']).to eq "Nuts"
-        expect(nuts['description']).to eq "Jim's nut"
-        expect(url_for(nuts['image'])).to be_kind_of(String)
-        expect(url_for(nuts['image'])).to match(/http.*nuts\.jpg/)
-        expect(pipes['name']).to eq "Pipes"
-        expect(pipes['description']).to eq "Jim's pipe"
-        expect(url_for(pipes['image'])).to be_kind_of(String)
-        expect(url_for(pipes['image'])).to match(/http.*pipes\.jpg/)
+        expect(elantra['name']).to eq "Jim's Hyundai Elantra"
+        expect(elantra['description']).to eq "Jim's Hyundai Elantra (description)"
+        expect(elantra['userName']).to eq "Jim Halpert"
+        expect(elantra['image']).to be_kind_of(String)
+        expect(elantra['image']).to match(/http.*hyundai-elantra\.jpg/)
+        expect(leaf['name']).to eq "Jim's Nissan Leaf"
+        expect(leaf['description']).to eq "Jim's Nissan Leaf (description)"
+        expect(leaf['userName']).to eq "Jim Halpert"
+        expect(leaf['image']).to be_kind_of(String)
+        expect(leaf['image']).to match(/http.*nissan-leaf\.jpg/)
       end
     end
 
@@ -1832,8 +1831,8 @@ RSpec.describe "/users", type: :request do
         michael = JSON.parse(response.body)
         car_ids = michael['car_ids']
         cars = michael['cars']
-        wrenches = cars.find { |car| car['name'] == "Wrenches" }
-        bolts = cars.find { |car| car['name'] == "Bolts" }
+        fiat = cars.find { |car| car['name'] == "Michael's Fiat 500" }
+        civic = cars.find { |car| car['name'] == "Michael's Honda Civic" }
         expect(michael['name']).to eq "Michael Scott"
         expect(michael['email']).to eq "michaelscott@dundermifflin.com"
         expect(michael['admin']).to eq true
@@ -1841,14 +1840,16 @@ RSpec.describe "/users", type: :request do
         expect(michael['avatar']).to match(/http.*\michael-scott\.png/)
         expect(michael['password']).to be_nil
         expect(michael['password_digest']).to be_nil
-        expect(wrenches['name']).to eq "Wrenches"
-        expect(wrenches['description']).to eq "Michael's wrench"
-        expect(url_for(wrenches['image'])).to be_kind_of(String)
-        expect(url_for(wrenches['image'])).to match(/http.*allen-wrenches\.jpg/)
-        expect(bolts['name']).to eq "Bolts"
-        expect(bolts['description']).to eq "Michael's bolt"
-        expect(url_for(bolts['image'])).to be_kind_of(String)
-        expect(url_for(bolts['image'])).to match(/http.*bolts\.jpg/)
+        expect(fiat['name']).to eq "Michael's Fiat 500"
+        expect(fiat['description']).to eq "Michael's Fiat 500 (description)"
+        expect(fiat['userName']).to eq "Michael Scott"
+        expect(fiat['image']).to be_kind_of(String)
+        expect(fiat['image']).to match(/http.*fiat-500\.jpg/)
+        expect(civic['name']).to eq "Michael's Honda Civic"
+        expect(civic['description']).to eq "Michael's Honda Civic (description)"
+        expect(civic['userName']).to eq "Michael Scott"
+        expect(civic['image']).to be_kind_of(String)
+        expect(civic['image']).to match(/http.*honda-civic\.jpg/)
       end
     end
     context "with invalid headers" do
@@ -1922,21 +1923,23 @@ RSpec.describe "/users", type: :request do
         user = JSON.parse(response.body)
         car_ids = user['car_ids']
         cars = user['cars']
-        wrenches = cars.find { |car| car['name'] == "Wrenches" }
-        bolts = cars.find { |car| car['name'] == "Bolts" }
+        fiat = cars.find { |car| car['name'] == "Michael's Fiat 500" }
+        civic = cars.find { |car| car['name'] == "Michael's Honda Civic" }
         expect(@user1['email']).to eq "michaelscott@dundermifflin.com"
         expect(@user1['admin']).to eq true
         expect(@user1['avatar']).to be_nil
         expect(@user1['password']).to be_nil
         expect(@user1['password_digest']).to be_kind_of(String)
-        expect(wrenches['name']).to eq "Wrenches"
-        expect(wrenches['description']).to eq "Michael's wrench"
-        expect(url_for(wrenches['image'])).to be_kind_of(String)
-        expect(url_for(wrenches['image'])).to match(/http.*allen-wrenches\.jpg/)
-        expect(bolts['name']).to eq "Bolts"
-        expect(bolts['description']).to eq "Michael's bolt"
-        expect(url_for(bolts['image'])).to be_kind_of(String)
-        expect(url_for(bolts['image'])).to match(/http.*bolts\.jpg/)
+        expect(fiat['name']).to eq "Michael's Fiat 500"
+        expect(fiat['description']).to eq "Michael's Fiat 500 (description)"
+        expect(fiat['userName']).to eq "Michael Scott"
+        expect(url_for(fiat['image'])).to be_kind_of(String)
+        expect(url_for(fiat['image'])).to match(/http.*fiat-500\.jpg/)
+        expect(civic['name']).to eq "Michael's Honda Civic"
+        expect(civic['description']).to eq "Michael's Honda Civic (description)"
+        expect(civic['userName']).to eq "Michael Scott"
+        expect(url_for(civic['image'])).to be_kind_of(String)
+        expect(url_for(civic['image'])).to match(/http.*honda-civic\.jpg/)
       end
 
       it "is successful" do
