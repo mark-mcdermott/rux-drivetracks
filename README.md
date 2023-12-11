@@ -1563,20 +1563,18 @@ RSpec.describe "/cars", type: :request do
   end
 
   before :each do
-    @wrenches = cars(:wrenches)
-    @wrenches.image.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'allen-wrenches.jpg'),'image/png'))
-    @bolts = cars(:bolts)
-    @bolts.image.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'bolts.jpg'),'image/png'))
-    @brackets = cars(:brackets)
-    @brackets.image.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'brackets.png'),'image/png'))
-    @nuts = cars(:nuts)
-    @nuts.image.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'nuts.jpg'),'image/png'))
-    @pipes = cars(:pipes)
-    @pipes.image.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'pipes.jpg'),'image/png'))
-    @screws = cars(:screws)
-    @screws.image.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'screws.jpg'),'image/png'))
-    @washers = cars(:washers)
-    @washers.image.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'washers.jpg'),'image/png'))
+    @fiat = cars(:fiat)
+    @fiat.image.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'fiat-500.jpg'),'image/jpeg'))
+    @civic = cars(:civic)
+    @civic.image.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'honda-civic.jpg'),'image/jpeg'))
+    @elantra = cars(:elantra)
+    @elantra.image.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'hyundai-elantra.jpg'),'image/jpeg'))
+    @leaf = cars(:leaf)
+    @leaf.image.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'nissan-leaf.jpg'),'image/jpeg'))
+    @scion = cars(:scion)
+    @scion.image.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'scion.jpg'),'image/jpeg'))
+    @camry = cars(:camry)
+    @camry.image.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'toyota-camry.jpg'),'image/jpeg'))
   end
 
   describe "GET /index" do
