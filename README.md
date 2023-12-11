@@ -1790,7 +1790,7 @@ RSpec.describe "/users", type: :request do
         car_ids = jim['car_ids']
         cars = jim['cars']
         elantra = cars.find { |car| car['name'] == "Jim's Hyundai Elantra" }
-        leaf = cars.find { |car| car['name'] == "Jims's Nissan Leaf" }
+        leaf = cars.find { |car| car['name'] == "Jim's Nissan Leaf" }
         expect(jim['name']).to eq "Jim Halpert"
         expect(jim['email']).to eq "jimhalpert@dundermifflin.com"
         expect(jim['admin']).to be_nil or eq false
