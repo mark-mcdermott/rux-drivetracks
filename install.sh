@@ -1283,15 +1283,43 @@ end
 ~
 EOF
 
-# cat <<'EOF' | puravida spec/requests/cars_spec.rb ~
-# require 'rails_helper'
+cat <<'EOF' | puravida spec/requests/cars_spec.rb ~
+require 'rails_helper'
 
-# RSpec.describe "/cars", type: :request do
-#   fixtures :users
-#   fixtures :cars
-#   let(:valid_attributes) {{ name: "test1", description: "test1", user_id: User.find_by(email: "michaelscott@dundermifflin.com").id }}
-#   let(:invalid_attributes) {{ name: "", description: "invalid_attributes" }}
-#   let(:valid_headers) {{ Authorization: "Bearer " + @michael_token }}
+RSpec.describe "/cars", type: :request do
+  fixtures :users
+  fixtures :cars
+  let(:valid_headers) {{ Authorization: "Bearer " + @michael_token }}
+  let(:valid_attributes) {{ 
+    name: "Jim's Fiat 500",
+    make: "Fiat",
+    model: "500",
+    trim: "Sport",
+    color: "Yellow",
+    body: "Hatchback",
+    plate: "6XYK922",
+    vin: "3C3CFFBR0CT382584",
+    year: 2012,
+    cost: 10235.00,
+    purchase_vendor: "Ted Fleid",
+    initial_mileage: 47361,
+    user_id: User.find_by(email: "michaelscott@dundermifflin.com").id
+  }}
+  let(:invalid_attributes) {{ 
+    name: "",
+    make: "Fiat",
+    model: "500",
+    trim: "Sport",
+    color: "Yellow",
+    body: "Hatchback",
+    plate: "6XYK922",
+    vin: "3C3CFFBR0CT382584",
+    year: 2012,
+    cost: 10235.00,
+    purchase_vendor: "Ted Fleid",
+    initial_mileage: 47361,
+    user_id: User.find_by(email: "michaelscott@dundermifflin.com").id
+  }}
 
 #   before :all do
 #     @michael_token = token_from_email_password("michaelscott@dundermifflin.com", "password")
