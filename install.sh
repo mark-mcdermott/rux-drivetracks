@@ -1599,8 +1599,8 @@ RSpec.describe "/users", type: :request do
         cars = user['cars']
         fiat = cars.find { |car| car['name'] == "Michael's Fiat 500" }
         civic = cars.find { |car| car['name'] == "Michael's Honda Civic" }
-        expect(fiat['userName']).to eq "Michael Scott"
-        expect(civic['userName']).to eq "Michael Scott"
+        expect(fiat['userName']).to eq "UpdatedName"
+        expect(civic['userName']).to eq "UpdatedName"
       end
 
       it "doesn't change the other user attributes" do
