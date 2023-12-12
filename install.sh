@@ -961,14 +961,14 @@ sed -i '' 3,20d $MIGRATION_FILE
 awk 'NR==3 {print "\t\tcreate_table :cars do |t|\n\t\t\tt.string :name, null: false\n\t\t\tt.integer :year\n\t\t\tt.string :make\n\t\t\tt.string :model\n\t\t\tt.string :trim\n\t\t\tt.string :body\n\t\t\tt.string :color\n\t\t\tt.string :plate\n\t\t\tt.string :vin\n\t\t\tt.decimal :cost, precision: 10, scale: 2\n\t\t\tt.integer :initial_mileage\n\t\t\tt.date :purchase_date\n\t\t\tt.string :purchase_vendor\n\t\t\tt.references :user, null: false, foreign_key: {on_delete: :cascade}\n\t\t\tt.timestamps\n\t\tend"} 1' $MIGRATION_FILE > temp.txt
 mv temp.txt $MIGRATION_FILE
 rails db:migrate
-# cat <<'EOF' | puravida app/models/car.rb ~
-# class Car < ApplicationRecord
-#   belongs_to :user
-#   has_one_attached :image
-#   validates :name, presence: true, allow_blank: false, length: { minimum: 4, maximum: 254 }
-# end
-# ~
-# EOF
+cat <<'EOF' | puravida app/models/car.rb ~
+class Car < ApplicationRecord
+  belongs_to :user
+  has_one_attached :image
+  validates :name, presence: true, allow_blank: false, length: { minimum: 4, maximum: 254 }
+end
+~
+EOF
 
 # cat <<'EOF' | puravida app/controllers/application_controller.rb ~
 # class ApplicationController < ActionController::API
