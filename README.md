@@ -1736,10 +1736,22 @@ RSpec.describe "/cars", type: :request do
       expect(fiat['user_id']).to eq User.find_by(email: "michaelscott@dundermifflin.com").id
     end
     it "second car has correct properties" do
-      get cars_url, headers: valid_headers
-      cars = JSON.parse(response.body)
+      get users_url, headers: valid_headers
+      users = JSON.parse(response.body)
+      jim = users.find { |user| user['email'] == "jimhalpert@dundermifflin.com" }
+      car_ids = jim['car_ids']
+      cars = jim['cars']
       elantra = cars.find { |car| car['name'] == "Jim's Hyundai Elantra" }
+      leaf = cars.find { |car| car['name'] == "Jim's Nissan Leaf" }
+      expect(jim['name']).to eq "Jim Halpert"
+      expect(jim['email']).to eq "jimhalpert@dundermifflin.com"
+      expect(jim['admin']).to be_nil or eq false
+      expect(jim['avatar']).to be_kind_of(String)
+      expect(jim['avatar']).to match(/http.*\jim-halpert\.png/)
+      expect(jim['password']).to be_nil
+      expect(jim['password_digest']).to be_nil
       expect(elantra['name']).to eq "Jim's Hyundai Elantra"
+      expect(elantra['description']).to eq "Jim's Hyundai Elantra (description)"
       expect(elantra['userName']).to eq "Jim Halpert"
       expect(elantra['image']).to be_kind_of(String)
       expect(elantra['image']).to match(/http.*hyundai-elantra\.jpg/)
@@ -1753,8 +1765,24 @@ RSpec.describe "/cars", type: :request do
       expect(elantra['year']).to eq 2007
       expect(elantra['cost']).to eq 15000.00
       expect(elantra['purchase_vendor']).to eq "Feit Hyundai"
-      expect(elantra['initial_mileage']).to eq "53032, "
+      expect(elantra['initial_mileage']).to eq 53032
       expect(elantra['user_id']).to eq User.find_by(email: "jimhalpert@dundermifflin.com").id
+      expect(leaf['name']).to eq "Jim's Nissan Leaf"
+      expect(leaf['userName']).to eq "Jim Halpert"
+      expect(leaf['image']).to be_kind_of(String)
+      expect(leaf['image']).to match(/http.*nissan-leaf\.jpg/)
+      expect(leaf['make']).to eq "Nissan"
+      expect(leaf['model']).to eq "Leaf"
+      expect(leaf['trim']).to eq "SV"
+      expect(leaf['color']).to eq "Silver"
+      expect(leaf['body']).to eq "Hatchback"
+      expect(leaf['plate']).to eq "ABC123"
+      expect(leaf['vin']).to eq "1N4AZ1CP8LC310110"
+      expect(leaf['year']).to eq 2020
+      expect(leaf['cost']).to eq 22590.00
+      expect(leaf['purchase_vendor']).to eq "Carvana"
+      expect(leaf['initial_mileage']).to eq 21440
+      expect(leaf['user_id']).to eq User.find_by(email: "jimhalpert@dundermifflin.com").id
     end
 
   end
@@ -1945,15 +1973,41 @@ RSpec.describe "/users", type: :request do
         expect(michael['password']).to be_nil
         expect(michael['password_digest']).to be_nil
         expect(fiat['name']).to eq "Michael's Fiat 500"
-        expect(fiat['description']).to eq "Michael's Fiat 500 (description)"
         expect(fiat['userName']).to eq "Michael Scott"
         expect(fiat['image']).to be_kind_of(String)
         expect(fiat['image']).to match(/http.*fiat-500\.jpg/)
+        expect(fiat['userName']).to eq "Michael Scott"
+        expect(fiat['image']).to be_kind_of(String)
+        expect(fiat['image']).to match(/http.*fiat-500\.jpg/)
+        expect(fiat['make']).to eq "Fiat",
+        expect(fiat['model']).to eq 500,
+        expect(fiat['trim']).to eq "Sport",
+        expect(fiat['color']).to eq "Yellow",
+        expect(fiat['body']).to eq "Hatchback",
+        expect(fiat['plate']).to eq "6XYK922",
+        expect(fiat['vin']).to eq "3C3CFFBR0CT382584",
+        expect(fiat['year']).to eq 2012,
+        expect(fiat['cost']).to eq 10235.00,
+        expect(fiat['purchase_vendor']).to eq "Ted Fleid",
+        expect(fiat['initial_mileage']).to eq 47361,
+        expect(fiat['user_id']).to eq User.find_by(email: "michaelscott@dundermifflin.com").id
         expect(civic['name']).to eq "Michael's Honda Civic"
         expect(civic['description']).to eq "Michael's Honda Civic (description)"
         expect(civic['userName']).to eq "Michael Scott"
         expect(civic['image']).to be_kind_of(String)
         expect(civic['image']).to match(/http.*honda-civic\.jpg/)
+        expect(civic['make']).to eq "Honda"
+        expect(civic['model']).to eq "Civic"
+        expect(civic['trim']).to eq "Vp"
+        expect(civic['color']).to eq "Blue"
+        expect(civic['body']).to eq "Sedan"
+        expect(civic['plate']).to eq "4HGJ708"
+        expect(civic['vin']).to eq "2HGEJ6618XH589506"
+        expect(civic['year']).to eq 1999
+        expect(civic['cost']).to eq 10352
+        expect(civic['purchase_vendor']).to eq "Howdy Honda"
+        expect(civic['initial_mileage']).to eq 78032
+        expect(civic['user_id']).to eq User.find_by(email: "michaelscott@dundermifflin.com").id
       end
 
       it "gets second users' correct details" do
@@ -1976,11 +2030,34 @@ RSpec.describe "/users", type: :request do
         expect(elantra['userName']).to eq "Jim Halpert"
         expect(elantra['image']).to be_kind_of(String)
         expect(elantra['image']).to match(/http.*hyundai-elantra\.jpg/)
+        expect(elantra['make']).to eq "Hyundai"
+        expect(elantra['model']).to eq "Elantra"
+        expect(elantra['trim']).to eq "GLS"
+        expect(elantra['color']).to eq "Black"
+        expect(elantra['body']).to eq "Sedan"
+        expect(elantra['plate']).to eq "8CEU662"
+        expect(elantra['vin']).to eq "KMHDU46D17U090264"
+        expect(elantra['year']).to eq 2007
+        expect(elantra['cost']).to eq 15000.00
+        expect(elantra['purchase_vendor']).to eq "Feit Hyundai"
+        expect(elantra['initial_mileage']).to eq 53032
+        expect(elantra['user_id']).to eq User.find_by(email: "jimhalpert@dundermifflin.com").id
         expect(leaf['name']).to eq "Jim's Nissan Leaf"
-        expect(leaf['description']).to eq "Jim's Nissan Leaf (description)"
         expect(leaf['userName']).to eq "Jim Halpert"
         expect(leaf['image']).to be_kind_of(String)
         expect(leaf['image']).to match(/http.*nissan-leaf\.jpg/)
+        expect(leaf['make']).to eq "Nissan"
+        expect(leaf['model']).to eq "Leaf"
+        expect(leaf['trim']).to eq "SV"
+        expect(leaf['color']).to eq "Silver"
+        expect(leaf['body']).to eq "Hatchback"
+        expect(leaf['plate']).to eq "ABC123"
+        expect(leaf['vin']).to eq "1N4AZ1CP8LC310110"
+        expect(leaf['year']).to eq 2020
+        expect(leaf['cost']).to eq 22590.00
+        expect(leaf['purchase_vendor']).to eq "Carvana"
+        expect(leaf['initial_mileage']).to eq 21440
+        expect(leaf['user_id']).to eq User.find_by(email: "jimhalpert@dundermifflin.com").id
       end
     end
 
@@ -2014,15 +2091,40 @@ RSpec.describe "/users", type: :request do
         expect(michael['password']).to be_nil
         expect(michael['password_digest']).to be_nil
         expect(fiat['name']).to eq "Michael's Fiat 500"
-        expect(fiat['description']).to eq "Michael's Fiat 500 (description)"
         expect(fiat['userName']).to eq "Michael Scott"
         expect(fiat['image']).to be_kind_of(String)
         expect(fiat['image']).to match(/http.*fiat-500\.jpg/)
+        expect(fiat['userName']).to eq "Michael Scott"
+        expect(fiat['image']).to be_kind_of(String)
+        expect(fiat['image']).to match(/http.*fiat-500\.jpg/)
+        expect(fiat['make']).to eq "Fiat",
+        expect(fiat['model']).to eq 500,
+        expect(fiat['trim']).to eq "Sport",
+        expect(fiat['color']).to eq "Yellow",
+        expect(fiat['body']).to eq "Hatchback",
+        expect(fiat['plate']).to eq "6XYK922",
+        expect(fiat['vin']).to eq "3C3CFFBR0CT382584",
+        expect(fiat['year']).to eq 2012,
+        expect(fiat['cost']).to eq 10235.00,
+        expect(fiat['purchase_vendor']).to eq "Ted Fleid",
+        expect(fiat['initial_mileage']).to eq 47361,
+        expect(fiat['user_id']).to eq User.find_by(email: "michaelscott@dundermifflin.com").id
         expect(civic['name']).to eq "Michael's Honda Civic"
-        expect(civic['description']).to eq "Michael's Honda Civic (description)"
         expect(civic['userName']).to eq "Michael Scott"
         expect(civic['image']).to be_kind_of(String)
         expect(civic['image']).to match(/http.*honda-civic\.jpg/)
+        expect(civic['make']).to eq "Honda"
+        expect(civic['model']).to eq "Civic"
+        expect(civic['trim']).to eq "Vp"
+        expect(civic['color']).to eq "Blue"
+        expect(civic['body']).to eq "Sedan"
+        expect(civic['plate']).to eq "4HGJ708"
+        expect(civic['vin']).to eq "2HGEJ6618XH589506"
+        expect(civic['year']).to eq 1999
+        expect(civic['cost']).to eq 10352
+        expect(civic['purchase_vendor']).to eq "Howdy Honda"
+        expect(civic['initial_mileage']).to eq 78032
+        expect(civic['user_id']).to eq User.find_by(email: "michaelscott@dundermifflin.com").id
       end
     end
     context "with invalid headers" do
@@ -2117,13 +2219,38 @@ RSpec.describe "/users", type: :request do
         expect(@user1['password']).to be_nil
         expect(@user1['password_digest']).to be_kind_of(String)
         expect(fiat['name']).to eq "Michael's Fiat 500"
-        expect(fiat['description']).to eq "Michael's Fiat 500 (description)"
         expect(url_for(fiat['image'])).to be_kind_of(String)
         expect(url_for(fiat['image'])).to match(/http.*fiat-500\.jpg/)
+        expect(fiat['name']).to eq "Michael's Fiat 500"
+        expect(fiat['image']).to be_kind_of(String)
+        expect(fiat['image']).to match(/http.*fiat-500\.jpg/)
+        expect(fiat['make']).to eq "Fiat",
+        expect(fiat['model']).to eq 500,
+        expect(fiat['trim']).to eq "Sport",
+        expect(fiat['color']).to eq "Yellow",
+        expect(fiat['body']).to eq "Hatchback",
+        expect(fiat['plate']).to eq "6XYK922",
+        expect(fiat['vin']).to eq "3C3CFFBR0CT382584",
+        expect(fiat['year']).to eq 2012,
+        expect(fiat['cost']).to eq 10235.00,
+        expect(fiat['purchase_vendor']).to eq "Ted Fleid",
+        expect(fiat['initial_mileage']).to eq 47361,
+        expect(fiat['user_id']).to eq User.find_by(email: "michaelscott@dundermifflin.com").id
         expect(civic['name']).to eq "Michael's Honda Civic"
-        expect(civic['description']).to eq "Michael's Honda Civic (description)"
         expect(url_for(civic['image'])).to be_kind_of(String)
         expect(url_for(civic['image'])).to match(/http.*honda-civic\.jpg/)
+        expect(civic['make']).to eq "Honda"
+        expect(civic['model']).to eq "Civic"
+        expect(civic['trim']).to eq "Vp"
+        expect(civic['color']).to eq "Blue"
+        expect(civic['body']).to eq "Sedan"
+        expect(civic['plate']).to eq "4HGJ708"
+        expect(civic['vin']).to eq "2HGEJ6618XH589506"
+        expect(civic['year']).to eq 1999
+        expect(civic['cost']).to eq 10352
+        expect(civic['purchase_vendor']).to eq "Howdy Honda"
+        expect(civic['initial_mileage']).to eq 78032
+        expect(civic['user_id']).to eq User.find_by(email: "michaelscott@dundermifflin.com").id
       end
 
       it "is successful" do
