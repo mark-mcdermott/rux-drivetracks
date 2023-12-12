@@ -1134,7 +1134,7 @@ end
 EOF
 cat <<'EOF' | puravida spec/fixtures/cars.yml ~
 fiat:
-  name: Jim's Fiat 500
+  name: Michael's Fiat 500
   make: Fiat
   model: 500
   trim: Sport
@@ -1150,7 +1150,7 @@ fiat:
   user: michael
 
 civic:
-  name: Pam's Honda Civic
+  name: Michael's Honda Civic
   make: Honda
   model: Civic
   trim: Vp
