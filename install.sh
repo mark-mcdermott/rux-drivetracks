@@ -1074,96 +1074,162 @@ end
 ~
 EOF
 
-# cat <<'EOF' | puravida app/controllers/cars_controller.rb ~
-# class CarsController < ApplicationController
-#   before_action :set_car, only: %i[ show update destroy ]
+cat <<'EOF' | puravida app/controllers/cars_controller.rb ~
+class CarsController < ApplicationController
+  before_action :set_car, only: %i[ show update destroy ]
 
-#   # GET /cars
-#   def index
-#     if params['user_id'].present?
-#       @cars = Car.where(user_id: params['user_id']).map { |car| prep_raw_car(car) }
-#     else
-#       @cars = Car.all.map { |car| prep_raw_car(car) }
-#     end
-#     render json: @cars
-#   end
+  # GET /cars
+  def index
+    if params['user_id'].present?
+      @cars = Car.where(user_id: params['user_id']).map { |car| prep_raw_car(car) }
+    else
+      @cars = Car.all.map { |car| prep_raw_car(car) }
+    end
+    render json: @cars
+  end
 
-#   # GET /cars/1
-#   def show
-#     render json: prep_raw_car(@car)
-#   end
+  # GET /cars/1
+  def show
+    render json: prep_raw_car(@car)
+  end
 
-#   # POST /cars
-#   def create
-#     create_params = car_params
-#     create_params['image'] = params['image'].blank? ? nil : params['image'] # if no image is chosen on new car page, params['image'] comes in as a blank string, which throws a 500 error at User.new(user_params). This changes any params['avatar'] blank string to nil, which is fine in User.new(user_params).
-#     @car = Car.new(create_params)
-#     if @car.save
-#       render json: prep_raw_car(@car), status: :created, location: @car
-#     else
-#       render json: @car.errors, status: :unprocessable_entity
-#     end
-#   end
+  # POST /cars
+  def create
+    create_params = car_params
+    create_params['image'] = params['image'].blank? ? nil : params['image'] # if no image is chosen on new car page, params['image'] comes in as a blank string, which throws a 500 error at User.new(user_params). This changes any params['avatar'] blank string to nil, which is fine in User.new(user_params).
+    @car = Car.new(create_params)
+    if @car.save
+      render json: prep_raw_car(@car), status: :created, location: @car
+    else
+      render json: @car.errors, status: :unprocessable_entity
+    end
+  end
 
-#   # PATCH/PUT /cars/1
-#   def update
-#     if @car.update(car_params)
-#       render json: prep_raw_car(@car)
-#     else
-#       render json: @car.errors, status: :unprocessable_entity
-#     end
-#   end
+  # PATCH/PUT /cars/1
+  def update
+    if @car.update(car_params)
+      render json: prep_raw_car(@car)
+    else
+      render json: @car.errors, status: :unprocessable_entity
+    end
+  end
 
-#   # DELETE /cars/1
-#   def destroy
-#     @car.destroy
-#   end
+  # DELETE /cars/1
+  def destroy
+    @car.destroy
+  end
 
-#   private
-#     # Use callbacks to share common setup or constraints between actions.
-#     def set_car
-#       @car = Car.find(params[:id])
-#     end
+  private
+    # Use callbacks to share common setup or constraints between actions.
+    def set_car
+      @car = Car.find(params[:id])
+    end
 
-#     # Only allow a list of trusted parameters through.
-#     def car_params
-#       params.permit(:id, :name, :description, :image, :user_id)
-#     end
-# end
-# ~
-# EOF
-# cat <<'EOF' | puravida spec/fixtures/cars.yml ~
-# fiat:
-#   name: Michael's Fiat 500
-#   description: Michael's Fiat 500 (description)
-#   user: michael
+    # Only allow a list of trusted parameters through.
+    def car_params
+      params.permit(:id, :name, :description, :image, :user_id)
+    end
+end
+~
+EOF
+cat <<'EOF' | puravida spec/fixtures/cars.yml ~
+fiat:
+  name: Jim's Fiat 500
+  make: Fiat
+  model: 500
+  trim: Sport
+  color: Yellow
+  body: Hatchback
+  plate: 6XYK922
+  vin: 3C3CFFBR0CT382584
+  year: 2012, 
+  cost: 10235.00
+  purchase_vendor: Ted Fleid
+  initial_mileage: 47361
+  purchase_date: Date.parse(20180606)
+  user: michael
 
-# civic:
-#   name: Michael's Honda Civic
-#   description: Michael's Honda Civic (description)
-#   user: michael
+civic:
+  name: Pam's Honda Civic
+  make: Honda
+  model: Civic
+  trim: Vp
+  color: Blue
+  body: Sedan
+  plate: 4HGJ708
+  vin: 2HGEJ6618XH589506
+  year: 1999
+  cost: 10352
+  purchase_vendor: Howdy Honda
+  initial_mileage: 78032
+  purchase_date: Date.parse(20160713)
+  user: michael
 
-# elantra:
-#   name: Jim's Hyundai Elantra
-#   description: Jim's Hyundai Elantra (description)
-#   user: jim
+elantra:
+  name: Jim's Hyundai Elantra
+  make: Hyundai
+  model: Elantra
+  trim: GLS
+  color: Black
+  body: Sedan
+  plate: 8CEU662
+  vin: KMHDU46D17U090264
+  year: 2007
+  cost: 15000.00
+  purchase_vendor: Feit Hyundai
+  initial_mileage: 53032, 
+  purchase_date: Date.parse(20200115)
+  user: jim
 
-# leaf:
-#   name: Jim's Nissan Leaf
-#   description: Jim's Nissan Leaf (description)
-#   user: jim
+leaf:
+  name: Jim's Nissan Leaf
+  make: Nissan
+  model: Leaf
+  trim: SV
+  color: Silver
+  body: Hatchback
+  plate: ABC123
+  vin: 1N4AZ1CP8LC310110
+  year: 2020
+  cost: 22590.00
+  purchase_vendor: Carvana
+  initial_mileage: 21440
+  purchase_date: Date.parse(20230429)
+  user: jim
 
-# scion:
-#   name: Pam's Scion
-#   description: Pam's Scion (description)
-#   user: jim
+scion:
+  name: Pam's Scion Xb
+  make: Scion
+  model: Xb
+  trim: Base / Parklan Edition
+  color: Gray
+  body: Wagon
+  plate: 7MBE060
+  vin: JTLZE4FE0FJ074884
+  year: 2015
+  cost: 25867.00
+  purchase_vendor: Craigslist
+  initial_mileage: 35631
+  purchase_date: Date.parse(20201109)
+  user: pam
 
-# camry:
-#   name: Pam's Toyota Camry
-#   description: Pam's Toyota Camry (description)
-#   user: pam
-# ~
-# EOF
+camry:
+  name: Pam's Toyota Camry
+  make: Toyota
+  model: Camry
+  trim: LE
+  color: Black
+  body: Sedan
+  plate: HDH1439
+  vin: 4T1BE46K49U358097
+  year: 2009
+  cost: 7300
+  purchase_vendor: Tanne Toyota
+  initial_mileage: 134087
+  purchase_date: Date.parse(20100513)
+  user: pam
+~
+EOF
 # cat <<'EOF' | puravida spec/models/car_spec.rb ~
 # require 'rails_helper'
 
