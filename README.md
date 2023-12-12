@@ -1300,20 +1300,26 @@ end
 
 
 ### Cars (Backend)
-- `rails g scaffold car name description image:attachment user:references`
-- change the migration file (`db/migrate/<timestamp>_create_cars.rb`) to:
+- `rails g scaffold Car name image:attachment year:integer make model trim body color plate vin cost:decimal initial_mileage:integer purchase_date:date purchase_vendor user:references`
+- in `db/migrate/<timestamp>_create_cars` change the `create_table` section to:
 ```
-class CreateCars < ActiveRecord::Migration[7.0]
-  def change
-    create_table :cars do |t|
-      t.string :name
-      t.string :description
-      t.references :user, null: false, foreign_key: {on_delete: :cascade}
-      t.timestamps
-    end
-  end
+create_table :cars do |t|
+  t.string :name, null: false
+  t.integer :year
+  t.string :make
+  t.string :model
+  t.string :trim
+  t.string :body
+  t.string :color
+  t.string :plate
+  t.string :vin
+  t.decimal :cost, precision: 10, scale: 2
+  t.integer :initial_mileage
+  t.date :purchase_date
+  t.string :purchase_vendor
+  t.references :user, null: false, foreign_key: {on_delete: :cascade}
+  t.timestamps
 end
-~
 ```
 - `rails db:migrate`
 - `puravida app/models/car.rb ~`

@@ -991,697 +991,698 @@ EOF
 rspec
 
 echo -e "\n\n🦄  Cars (Backend)\n\n"
-rails g scaffold car name description image:attachment user:references
-find /Users/mmcdermott/Desktop/backtest/db/migrate/ -name "*_create_cars.rb" -exec sed -i '' "s/foreign_key: true/foreign_key: {on_delete: :cascade}/g" {} +
-rails db:migrate
-cat <<'EOF' | puravida app/models/car.rb ~
-class Car < ApplicationRecord
-  belongs_to :user
-  has_one_attached :image
-  validates :name, presence: true, allow_blank: false, length: { minimum: 4, maximum: 254 }
-end
-~
-EOF
+# MIGRATION_FILE=$(find /Users/mmcdermott/Desktop/backtest/db/migrate -name "*_create_cars.rb")
+# sed -i -e 3,20d $MIGRATION_FILE
+# awk 'NR==3 {print "\t\tcreate_table :cars do |t|\n\t\t\tt.string :name, null: false\n\t\t\tt.integer :year\n\t\t\tt.string :make\n\t\t\tt.string :model\n\t\t\tt.string :trim\n\t\t\tt.string :body\n\t\t\tt.string :color\n\t\t\tt.string :plate\n\t\t\tt.string :vin\n\t\t\tt.decimal :cost, precision: 10, scale: 2\n\t\t\tt.integer :initial_mileage\n\t\t\tt.date :purchase_date\n\t\t\tt.string :purchase_vendor\n\t\t\tt.references :user, null: false, foreign_key: true\n\t\t\tt.timestamps\n\t\tend"} 1' $MIGRATION_FILE > temp.txt && mv temp.txt $MIGRATION_FILE
+# rails db:migrate
+# cat <<'EOF' | puravida app/models/car.rb ~
+# class Car < ApplicationRecord
+#   belongs_to :user
+#   has_one_attached :image
+#   validates :name, presence: true, allow_blank: false, length: { minimum: 4, maximum: 254 }
+# end
+# ~
+# EOF
 
-cat <<'EOF' | puravida app/controllers/application_controller.rb ~
-class ApplicationController < ActionController::API
-  SECRET_KEY_BASE = Rails.application.credentials.secret_key_base
-  before_action :require_login
-  rescue_from Exception, with: :response_internal_server_error
+# cat <<'EOF' | puravida app/controllers/application_controller.rb ~
+# class ApplicationController < ActionController::API
+#   SECRET_KEY_BASE = Rails.application.credentials.secret_key_base
+#   before_action :require_login
+#   rescue_from Exception, with: :response_internal_server_error
 
-  def require_login
-    response_unauthorized if current_user_raw.blank?
-  end
+#   def require_login
+#     response_unauthorized if current_user_raw.blank?
+#   end
 
-  # this is safe to send to the frontend, excludes password_digest, created_at, updated_at
-  def user_from_token
-    user = prep_raw_user(current_user_raw)
-    render json: { data: user, status: 200 }
-  end
+#   # this is safe to send to the frontend, excludes password_digest, created_at, updated_at
+#   def user_from_token
+#     user = prep_raw_user(current_user_raw)
+#     render json: { data: user, status: 200 }
+#   end
 
-  # unsafe/internal: includes password_digest, created_at, updated_at - we don't want those going to the frontend
-  def current_user_raw
-    if decoded_token.present?
-      user_id = decoded_token[0]['user_id']
-      @user = User.find_by(id: user_id)
-    else
-      nil
-    end
-  end
+#   # unsafe/internal: includes password_digest, created_at, updated_at - we don't want those going to the frontend
+#   def current_user_raw
+#     if decoded_token.present?
+#       user_id = decoded_token[0]['user_id']
+#       @user = User.find_by(id: user_id)
+#     else
+#       nil
+#     end
+#   end
 
-  def encode_token(payload)
-    JWT.encode payload, SECRET_KEY_BASE, 'HS256'
-  end
+#   def encode_token(payload)
+#     JWT.encode payload, SECRET_KEY_BASE, 'HS256'
+#   end
 
-  def decoded_token
-    if auth_header and auth_header.split(' ')[0] == "Bearer"
-      token = auth_header.split(' ')[1]
-      begin
-        JWT.decode token, SECRET_KEY_BASE, true, { algorithm: 'HS256' }
-      rescue JWT::DecodeError
-        []
-      end
-    end
-  end
+#   def decoded_token
+#     if auth_header and auth_header.split(' ')[0] == "Bearer"
+#       token = auth_header.split(' ')[1]
+#       begin
+#         JWT.decode token, SECRET_KEY_BASE, true, { algorithm: 'HS256' }
+#       rescue JWT::DecodeError
+#         []
+#       end
+#     end
+#   end
 
-  def response_unauthorized
-    render status: 401, json: { status: 401, message: 'Unauthorized' }
-  end
+#   def response_unauthorized
+#     render status: 401, json: { status: 401, message: 'Unauthorized' }
+#   end
   
-  def response_internal_server_error
-    render status: 500, json: { status: 500, message: 'Internal Server Error' }
-  end
+#   def response_internal_server_error
+#     render status: 500, json: { status: 500, message: 'Internal Server Error' }
+#   end
 
-  # We don't want to send the whole user record from the database to the frontend, so we only send what we need.
-  # The db user row has password_digest (unsafe) and created_at and updated_at (extraneous).
-  # We also change avatar from a weird active_storage object to just the avatar url before it gets to the frontend.
-  def prep_raw_user(user)
-    avatar = user.avatar.present? ? url_for(user.avatar) : nil
-    car_ids = Car.where(user_id: user.id).map { |car| car.id }
-    cars = Car.where(user_id: user.id).map { |car| prep_raw_car(car) }
-    # documents = Document.where(car_id: cars).map { |document| document.id }
-    user = user.admin ? user.slice(:id,:email,:name,:admin) : user.slice(:id,:email,:name)
-    user['avatar'] = avatar
-    user['car_ids'] = car_ids
-    user['cars'] = cars
-    # user['document_ids'] = documents
-    user
-  end
+#   # We don't want to send the whole user record from the database to the frontend, so we only send what we need.
+#   # The db user row has password_digest (unsafe) and created_at and updated_at (extraneous).
+#   # We also change avatar from a weird active_storage object to just the avatar url before it gets to the frontend.
+#   def prep_raw_user(user)
+#     avatar = user.avatar.present? ? url_for(user.avatar) : nil
+#     car_ids = Car.where(user_id: user.id).map { |car| car.id }
+#     cars = Car.where(user_id: user.id).map { |car| prep_raw_car(car) }
+#     # documents = Document.where(car_id: cars).map { |document| document.id }
+#     user = user.admin ? user.slice(:id,:email,:name,:admin) : user.slice(:id,:email,:name)
+#     user['avatar'] = avatar
+#     user['car_ids'] = car_ids
+#     user['cars'] = cars
+#     # user['document_ids'] = documents
+#     user
+#   end
 
-  def prep_raw_car(car)
-    user_id = car.user_id
-    user_name = User.find(car.user_id).name
-    # documents = Document.where(car_id: car.id)
-    # documents = documents.map { |document| document.slice(:id,:name,:description,:car_id) }
-    image = car.image.present? ? url_for(car.image) : nil
-    car = car.slice(:id,:name,:description)
-    car['userId'] = user_id
-    car['userName'] = user_name
-    car['image'] = image
-    # car['documents'] = documents
-    car
-  end
+#   def prep_raw_car(car)
+#     user_id = car.user_id
+#     user_name = User.find(car.user_id).name
+#     # documents = Document.where(car_id: car.id)
+#     # documents = documents.map { |document| document.slice(:id,:name,:description,:car_id) }
+#     image = car.image.present? ? url_for(car.image) : nil
+#     car = car.slice(:id,:name,:description)
+#     car['userId'] = user_id
+#     car['userName'] = user_name
+#     car['image'] = image
+#     # car['documents'] = documents
+#     car
+#   end
 
-  def prep_raw_document(document)
-    car_id = document.car_id
-    car = Car.find(car_id)
-    user = User.find(car.user_id)
-    image = document.image.present? ? url_for(document.image) : nil
-    document = document.slice(:id,:name,:description)
-    document['carId'] = car_id
-    document['carName'] = car.name
-    document['carDescription'] = car.description
-    document['userId'] = user.id
-    document['userName'] = user.name
-    document['image'] = image
-    document
-  end
+#   def prep_raw_document(document)
+#     car_id = document.car_id
+#     car = Car.find(car_id)
+#     user = User.find(car.user_id)
+#     image = document.image.present? ? url_for(document.image) : nil
+#     document = document.slice(:id,:name,:description)
+#     document['carId'] = car_id
+#     document['carName'] = car.name
+#     document['carDescription'] = car.description
+#     document['userId'] = user.id
+#     document['userName'] = user.name
+#     document['image'] = image
+#     document
+#   end
   
-  private 
+#   private 
   
-    def auth_header
-      request.headers['Authorization']
-    end
+#     def auth_header
+#       request.headers['Authorization']
+#     end
 
-end
-~
-EOF
+# end
+# ~
+# EOF
 
-cat <<'EOF' | puravida app/controllers/cars_controller.rb ~
-class CarsController < ApplicationController
-  before_action :set_car, only: %i[ show update destroy ]
+# cat <<'EOF' | puravida app/controllers/cars_controller.rb ~
+# class CarsController < ApplicationController
+#   before_action :set_car, only: %i[ show update destroy ]
 
-  # GET /cars
-  def index
-    if params['user_id'].present?
-      @cars = Car.where(user_id: params['user_id']).map { |car| prep_raw_car(car) }
-    else
-      @cars = Car.all.map { |car| prep_raw_car(car) }
-    end
-    render json: @cars
-  end
+#   # GET /cars
+#   def index
+#     if params['user_id'].present?
+#       @cars = Car.where(user_id: params['user_id']).map { |car| prep_raw_car(car) }
+#     else
+#       @cars = Car.all.map { |car| prep_raw_car(car) }
+#     end
+#     render json: @cars
+#   end
 
-  # GET /cars/1
-  def show
-    render json: prep_raw_car(@car)
-  end
+#   # GET /cars/1
+#   def show
+#     render json: prep_raw_car(@car)
+#   end
 
-  # POST /cars
-  def create
-    create_params = car_params
-    create_params['image'] = params['image'].blank? ? nil : params['image'] # if no image is chosen on new car page, params['image'] comes in as a blank string, which throws a 500 error at User.new(user_params). This changes any params['avatar'] blank string to nil, which is fine in User.new(user_params).
-    @car = Car.new(create_params)
-    if @car.save
-      render json: prep_raw_car(@car), status: :created, location: @car
-    else
-      render json: @car.errors, status: :unprocessable_entity
-    end
-  end
+#   # POST /cars
+#   def create
+#     create_params = car_params
+#     create_params['image'] = params['image'].blank? ? nil : params['image'] # if no image is chosen on new car page, params['image'] comes in as a blank string, which throws a 500 error at User.new(user_params). This changes any params['avatar'] blank string to nil, which is fine in User.new(user_params).
+#     @car = Car.new(create_params)
+#     if @car.save
+#       render json: prep_raw_car(@car), status: :created, location: @car
+#     else
+#       render json: @car.errors, status: :unprocessable_entity
+#     end
+#   end
 
-  # PATCH/PUT /cars/1
-  def update
-    if @car.update(car_params)
-      render json: prep_raw_car(@car)
-    else
-      render json: @car.errors, status: :unprocessable_entity
-    end
-  end
+#   # PATCH/PUT /cars/1
+#   def update
+#     if @car.update(car_params)
+#       render json: prep_raw_car(@car)
+#     else
+#       render json: @car.errors, status: :unprocessable_entity
+#     end
+#   end
 
-  # DELETE /cars/1
-  def destroy
-    @car.destroy
-  end
+#   # DELETE /cars/1
+#   def destroy
+#     @car.destroy
+#   end
 
-  private
-    # Use callbacks to share common setup or constraints between actions.
-    def set_car
-      @car = Car.find(params[:id])
-    end
+#   private
+#     # Use callbacks to share common setup or constraints between actions.
+#     def set_car
+#       @car = Car.find(params[:id])
+#     end
 
-    # Only allow a list of trusted parameters through.
-    def car_params
-      params.permit(:id, :name, :description, :image, :user_id)
-    end
-end
-~
-EOF
-cat <<'EOF' | puravida spec/fixtures/cars.yml ~
-fiat:
-  name: Michael's Fiat 500
-  description: Michael's Fiat 500 (description)
-  user: michael
+#     # Only allow a list of trusted parameters through.
+#     def car_params
+#       params.permit(:id, :name, :description, :image, :user_id)
+#     end
+# end
+# ~
+# EOF
+# cat <<'EOF' | puravida spec/fixtures/cars.yml ~
+# fiat:
+#   name: Michael's Fiat 500
+#   description: Michael's Fiat 500 (description)
+#   user: michael
 
-civic:
-  name: Michael's Honda Civic
-  description: Michael's Honda Civic (description)
-  user: michael
+# civic:
+#   name: Michael's Honda Civic
+#   description: Michael's Honda Civic (description)
+#   user: michael
 
-elantra:
-  name: Jim's Hyundai Elantra
-  description: Jim's Hyundai Elantra (description)
-  user: jim
+# elantra:
+#   name: Jim's Hyundai Elantra
+#   description: Jim's Hyundai Elantra (description)
+#   user: jim
 
-leaf:
-  name: Jim's Nissan Leaf
-  description: Jim's Nissan Leaf (description)
-  user: jim
+# leaf:
+#   name: Jim's Nissan Leaf
+#   description: Jim's Nissan Leaf (description)
+#   user: jim
 
-scion:
-  name: Pam's Scion
-  description: Pam's Scion (description)
-  user: jim
+# scion:
+#   name: Pam's Scion
+#   description: Pam's Scion (description)
+#   user: jim
 
-camry:
-  name: Pam's Toyota Camry
-  description: Pam's Toyota Camry (description)
-  user: pam
-~
-EOF
-cat <<'EOF' | puravida spec/models/car_spec.rb ~
-require 'rails_helper'
+# camry:
+#   name: Pam's Toyota Camry
+#   description: Pam's Toyota Camry (description)
+#   user: pam
+# ~
+# EOF
+# cat <<'EOF' | puravida spec/models/car_spec.rb ~
+# require 'rails_helper'
 
-RSpec.describe "/cars", type: :request do
-  fixtures :users
-  fixtures :cars
-  let(:valid_attributes) {{ name: "test1", description: "test1", user_id: User.find_by(email: "michaelscott@dundermifflin.com").id }}
-  let(:invalid_attributes) {{ name: "", description: "invalid_attributes" }}
-  let(:valid_headers) {{ Authorization: "Bearer " + @michael_token }}
+# RSpec.describe "/cars", type: :request do
+#   fixtures :users
+#   fixtures :cars
+#   let(:valid_attributes) {{ name: "test1", description: "test1", user_id: User.find_by(email: "michaelscott@dundermifflin.com").id }}
+#   let(:invalid_attributes) {{ name: "", description: "invalid_attributes" }}
+#   let(:valid_headers) {{ Authorization: "Bearer " + @michael_token }}
 
-  before :all do
-    @michael_token = token_from_email_password("michaelscott@dundermifflin.com", "password")
-  end
+#   before :all do
+#     @michael_token = token_from_email_password("michaelscott@dundermifflin.com", "password")
+#   end
 
-  it "is valid with valid attributes" do
-    expect(Car.new(valid_attributes)).to be_valid
-  end
-  it "is not valid width poorly formed email" do
-    expect(Car.new(invalid_attributes)).to_not be_valid
-  end
+#   it "is valid with valid attributes" do
+#     expect(Car.new(valid_attributes)).to be_valid
+#   end
+#   it "is not valid width poorly formed email" do
+#     expect(Car.new(invalid_attributes)).to_not be_valid
+#   end
 
-end
-~
-EOF
+# end
+# ~
+# EOF
 
-cat <<'EOF' | puravida spec/requests/cars_spec.rb ~
-require 'rails_helper'
+# cat <<'EOF' | puravida spec/requests/cars_spec.rb ~
+# require 'rails_helper'
 
-RSpec.describe "/cars", type: :request do
-  fixtures :users
-  fixtures :cars
-  let(:valid_attributes) {{ name: "test1", description: "test1", user_id: User.find_by(email: "michaelscott@dundermifflin.com").id }}
-  let(:invalid_attributes) {{ name: "", description: "invalid_attributes" }}
-  let(:valid_headers) {{ Authorization: "Bearer " + @michael_token }}
+# RSpec.describe "/cars", type: :request do
+#   fixtures :users
+#   fixtures :cars
+#   let(:valid_attributes) {{ name: "test1", description: "test1", user_id: User.find_by(email: "michaelscott@dundermifflin.com").id }}
+#   let(:invalid_attributes) {{ name: "", description: "invalid_attributes" }}
+#   let(:valid_headers) {{ Authorization: "Bearer " + @michael_token }}
 
-  before :all do
-    @michael_token = token_from_email_password("michaelscott@dundermifflin.com", "password")
-    @ryan_token = token_from_email_password("ryanhoward@dundermifflin.com", "password")
-  end
+#   before :all do
+#     @michael_token = token_from_email_password("michaelscott@dundermifflin.com", "password")
+#     @ryan_token = token_from_email_password("ryanhoward@dundermifflin.com", "password")
+#   end
 
-  before :each do
-    @fiat = cars(:fiat)
-    @fiat.image.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'fiat-500.jpg'),'image/jpeg'))
-    @civic = cars(:civic)
-    @civic.image.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'honda-civic.jpg'),'image/jpeg'))
-    @elantra = cars(:elantra)
-    @elantra.image.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'hyundai-elantra.jpg'),'image/jpeg'))
-    @leaf = cars(:leaf)
-    @leaf.image.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'nissan-leaf.jpg'),'image/jpeg'))
-    @scion = cars(:scion)
-    @scion.image.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'scion.jpg'),'image/jpeg'))
-    @camry = cars(:camry)
-    @camry.image.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'toyota-camry.jpg'),'image/jpeg'))
-  end
+#   before :each do
+#     @fiat = cars(:fiat)
+#     @fiat.image.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'fiat-500.jpg'),'image/jpeg'))
+#     @civic = cars(:civic)
+#     @civic.image.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'honda-civic.jpg'),'image/jpeg'))
+#     @elantra = cars(:elantra)
+#     @elantra.image.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'hyundai-elantra.jpg'),'image/jpeg'))
+#     @leaf = cars(:leaf)
+#     @leaf.image.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'nissan-leaf.jpg'),'image/jpeg'))
+#     @scion = cars(:scion)
+#     @scion.image.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'scion.jpg'),'image/jpeg'))
+#     @camry = cars(:camry)
+#     @camry.image.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'toyota-camry.jpg'),'image/jpeg'))
+#   end
 
-  describe "GET /index" do
-    it "renders a successful response" do
-      get cars_url, headers: valid_headers
-      expect(response).to be_successful
-    end
-    it "gets two cars a successful response" do
-      get cars_url, headers: valid_headers
-      expect(JSON.parse(response.body).length).to eq 6
-    end
-    it "first car has correct properties" do
-      get cars_url, headers: valid_headers
-      cars = JSON.parse(response.body)
-      fiat = cars.find { |car| car['name'] == "Michael's Fiat 500" }
-      expect(fiat['name']).to eq "Michael's Fiat 500"
-      expect(fiat['description']).to eq "Michael's Fiat 500 (description)"
-      expect(fiat['userName']).to eq "Michael Scott"
-      expect(fiat['image']).to be_kind_of(String)
-      expect(fiat['image']).to match(/http.*fiat-500\.jpg/)
-    end
-    it "second car has correct properties" do
-      get cars_url, headers: valid_headers
-      cars = JSON.parse(response.body)
-      elantra = cars.find { |car| car['name'] == "Jim's Hyundai Elantra" }
-      expect(elantra['name']).to eq "Jim's Hyundai Elantra"
-      expect(elantra['description']).to eq "Jim's Hyundai Elantra (description)"
-      expect(elantra['userName']).to eq "Jim Halpert"
-      expect(elantra['image']).to be_kind_of(String)
-      expect(elantra['image']).to match(/http.*hyundai-elantra\.jpg/)
-    end
+#   describe "GET /index" do
+#     it "renders a successful response" do
+#       get cars_url, headers: valid_headers
+#       expect(response).to be_successful
+#     end
+#     it "gets two cars a successful response" do
+#       get cars_url, headers: valid_headers
+#       expect(JSON.parse(response.body).length).to eq 6
+#     end
+#     it "first car has correct properties" do
+#       get cars_url, headers: valid_headers
+#       cars = JSON.parse(response.body)
+#       fiat = cars.find { |car| car['name'] == "Michael's Fiat 500" }
+#       expect(fiat['name']).to eq "Michael's Fiat 500"
+#       expect(fiat['description']).to eq "Michael's Fiat 500 (description)"
+#       expect(fiat['userName']).to eq "Michael Scott"
+#       expect(fiat['image']).to be_kind_of(String)
+#       expect(fiat['image']).to match(/http.*fiat-500\.jpg/)
+#     end
+#     it "second car has correct properties" do
+#       get cars_url, headers: valid_headers
+#       cars = JSON.parse(response.body)
+#       elantra = cars.find { |car| car['name'] == "Jim's Hyundai Elantra" }
+#       expect(elantra['name']).to eq "Jim's Hyundai Elantra"
+#       expect(elantra['description']).to eq "Jim's Hyundai Elantra (description)"
+#       expect(elantra['userName']).to eq "Jim Halpert"
+#       expect(elantra['image']).to be_kind_of(String)
+#       expect(elantra['image']).to match(/http.*hyundai-elantra\.jpg/)
+#     end
 
-  end
+#   end
 
-  describe "GET /show" do
-    it "renders a successful response" do
-      car = cars(:fiat)
-      get car_url(car), headers: valid_headers
-      expect(response).to be_successful
-    end
-    it "gets correct car properties" do
-      car = cars(:fiat)
-      get car_url(car), headers: valid_headers
-      fiat = JSON.parse(response.body)
-      expect(fiat['name']).to eq "Michael's Fiat 500"
-      expect(fiat['description']).to eq "Michael's Fiat 500 (description)"
-      expect(fiat['userName']).to eq "Michael Scott"
-      expect(fiat['image']).to be_kind_of(String)
-      expect(fiat['image']).to match(/http.*fiat-500\.jpg/)
-    end
-  end
+#   describe "GET /show" do
+#     it "renders a successful response" do
+#       car = cars(:fiat)
+#       get car_url(car), headers: valid_headers
+#       expect(response).to be_successful
+#     end
+#     it "gets correct car properties" do
+#       car = cars(:fiat)
+#       get car_url(car), headers: valid_headers
+#       fiat = JSON.parse(response.body)
+#       expect(fiat['name']).to eq "Michael's Fiat 500"
+#       expect(fiat['description']).to eq "Michael's Fiat 500 (description)"
+#       expect(fiat['userName']).to eq "Michael Scott"
+#       expect(fiat['image']).to be_kind_of(String)
+#       expect(fiat['image']).to match(/http.*fiat-500\.jpg/)
+#     end
+#   end
 
-  describe "POST /create" do
-    context "with valid parameters" do
-      it "creates a new Car" do
-        expect { post cars_url, params: valid_attributes, headers: valid_headers, as: :json
-        }.to change(Car, :count).by(1)
-      end
+#   describe "POST /create" do
+#     context "with valid parameters" do
+#       it "creates a new Car" do
+#         expect { post cars_url, params: valid_attributes, headers: valid_headers, as: :json
+#         }.to change(Car, :count).by(1)
+#       end
 
-      it "renders a JSON response with the new car" do
-        post cars_url, params: valid_attributes, headers: valid_headers, as: :json
-        expect(response).to have_http_status(:created)
-        expect(response.content_type).to match(a_string_including("application/json"))
-      end
-    end
+#       it "renders a JSON response with the new car" do
+#         post cars_url, params: valid_attributes, headers: valid_headers, as: :json
+#         expect(response).to have_http_status(:created)
+#         expect(response.content_type).to match(a_string_including("application/json"))
+#       end
+#     end
 
-    context "with invalid parameters" do
-      it "does not create a new Car" do
-        expect {
-          post cars_url, params: invalid_attributes, headers: valid_headers, as: :json
-        }.to change(Car, :count).by(0)
-      end
+#     context "with invalid parameters" do
+#       it "does not create a new Car" do
+#         expect {
+#           post cars_url, params: invalid_attributes, headers: valid_headers, as: :json
+#         }.to change(Car, :count).by(0)
+#       end
 
-      it "renders a JSON response with errors for the new car" do
-        post cars_url, params: invalid_attributes, headers: valid_headers, as: :json
-        expect(response).to have_http_status(:unprocessable_entity)
-        expect(response.content_type).to match(a_string_including("application/json"))
-      end
-    end
-  end
+#       it "renders a JSON response with errors for the new car" do
+#         post cars_url, params: invalid_attributes, headers: valid_headers, as: :json
+#         expect(response).to have_http_status(:unprocessable_entity)
+#         expect(response.content_type).to match(a_string_including("application/json"))
+#       end
+#     end
+#   end
 
-  describe "PATCH /update" do
-    context "with valid parameters" do
-      let(:new_attributes) {{ name: "UpdatedName"}}
+#   describe "PATCH /update" do
+#     context "with valid parameters" do
+#       let(:new_attributes) {{ name: "UpdatedName"}}
 
-      it "updates the requested car" do
-        car = cars(:fiat)
-        patch car_url(car), params: new_attributes, headers: valid_headers, as: :json
-        car.reload
-        expect(car.name).to eq("UpdatedName")
-      end
+#       it "updates the requested car" do
+#         car = cars(:fiat)
+#         patch car_url(car), params: new_attributes, headers: valid_headers, as: :json
+#         car.reload
+#         expect(car.name).to eq("UpdatedName")
+#       end
 
-      it "renders a JSON response with the car" do
-        car = cars(:fiat)
-        patch car_url(car), params: new_attributes, headers: valid_headers, as: :json
-        expect(response).to have_http_status(:ok)
-        expect(response.content_type).to match(a_string_including("application/json"))
-      end
+#       it "renders a JSON response with the car" do
+#         car = cars(:fiat)
+#         patch car_url(car), params: new_attributes, headers: valid_headers, as: :json
+#         expect(response).to have_http_status(:ok)
+#         expect(response.content_type).to match(a_string_including("application/json"))
+#       end
 
-      it "car's other properties are still correct" do
-        car = cars(:fiat)
-        patch car_url(car), params: new_attributes, headers: valid_headers, as: :json
-        fiat = JSON.parse(response.body)
-        expect(fiat['description']).to eq "Michael's Fiat 500 (description)"
-        expect(fiat['userName']).to eq "Michael Scott"
-        expect(fiat['image']).to be_kind_of(String)
-        expect(fiat['image']).to match(/http.*fiat-500\.jpg/)
-      end
+#       it "car's other properties are still correct" do
+#         car = cars(:fiat)
+#         patch car_url(car), params: new_attributes, headers: valid_headers, as: :json
+#         fiat = JSON.parse(response.body)
+#         expect(fiat['description']).to eq "Michael's Fiat 500 (description)"
+#         expect(fiat['userName']).to eq "Michael Scott"
+#         expect(fiat['image']).to be_kind_of(String)
+#         expect(fiat['image']).to match(/http.*fiat-500\.jpg/)
+#       end
 
-    end
+#     end
 
-    context "with invalid parameters" do
-      it "renders a JSON response with errors for the car" do
-        car = cars(:fiat)
-        patch car_url(car), params: invalid_attributes, headers: valid_headers, as: :json
-        expect(response).to have_http_status(:unprocessable_entity)
-        expect(response.content_type).to match(a_string_including("application/json"))
-      end
-    end
-  end
+#     context "with invalid parameters" do
+#       it "renders a JSON response with errors for the car" do
+#         car = cars(:fiat)
+#         patch car_url(car), params: invalid_attributes, headers: valid_headers, as: :json
+#         expect(response).to have_http_status(:unprocessable_entity)
+#         expect(response.content_type).to match(a_string_including("application/json"))
+#       end
+#     end
+#   end
 
-  describe "DELETE /destroy" do
-    it "destroys the requested car" do
-      car = Car.create! valid_attributes
-      expect { delete car_url(car), headers: valid_headers, as: :json
-      }.to change(Car, :count).by(-1)
-    end
-  end
-end
-~
-EOF
-cat <<'EOF' | puravida spec/requests/users_spec.rb ~
-# frozen_string_literal: true
-require 'rails_helper'
-require 'spec_helper'
+#   describe "DELETE /destroy" do
+#     it "destroys the requested car" do
+#       car = Car.create! valid_attributes
+#       expect { delete car_url(car), headers: valid_headers, as: :json
+#       }.to change(Car, :count).by(-1)
+#     end
+#   end
+# end
+# ~
+# EOF
+# cat <<'EOF' | puravida spec/requests/users_spec.rb ~
+# # frozen_string_literal: true
+# require 'rails_helper'
+# require 'spec_helper'
 
-RSpec.describe "/users", type: :request do
-  fixtures :users
-  fixtures :cars
-  let(:valid_headers) {{ Authorization: "Bearer " + @michael_token }}
-  let(:admin_2_headers) {{ Authorization: "Bearer " + @ryan_token }}
-  let(:invalid_token_header) {{ Authorization: "Bearer xyz" }}
-  let(:poorly_formed_header) {{ Authorization: "Bear " + @michael_token }}
-  let(:user_valid_create_params_mock_1) {{ name: "First1 Last1", email: "one@mail.com", admin: "false", password: "password", avatar: fixture_file_upload("spec/fixtures/files/michael-scott.png", "image/png") }}
-  let(:user_invalid_create_params_email_poorly_formed_mock_1) {{ name: "", email: "not_an_email", admin: "false", password: "password", avatar: fixture_file_upload("spec/fixtures/files/michael-scott.png", "image/png") }}
-  let(:valid_user_update_attributes) {{ name: "UpdatedName" }}
-  let(:invalid_user_update_attributes) {{ email: "not_an_email" }}
+# RSpec.describe "/users", type: :request do
+#   fixtures :users
+#   fixtures :cars
+#   let(:valid_headers) {{ Authorization: "Bearer " + @michael_token }}
+#   let(:admin_2_headers) {{ Authorization: "Bearer " + @ryan_token }}
+#   let(:invalid_token_header) {{ Authorization: "Bearer xyz" }}
+#   let(:poorly_formed_header) {{ Authorization: "Bear " + @michael_token }}
+#   let(:user_valid_create_params_mock_1) {{ name: "First1 Last1", email: "one@mail.com", admin: "false", password: "password", avatar: fixture_file_upload("spec/fixtures/files/michael-scott.png", "image/png") }}
+#   let(:user_invalid_create_params_email_poorly_formed_mock_1) {{ name: "", email: "not_an_email", admin: "false", password: "password", avatar: fixture_file_upload("spec/fixtures/files/michael-scott.png", "image/png") }}
+#   let(:valid_user_update_attributes) {{ name: "UpdatedName" }}
+#   let(:invalid_user_update_attributes) {{ email: "not_an_email" }}
   
-  before :all do
-    @michael_token = token_from_email_password("michaelscott@dundermifflin.com", "password")
-    @ryan_token = token_from_email_password("ryanhoward@dundermifflin.com", "password")
-  end
+#   before :all do
+#     @michael_token = token_from_email_password("michaelscott@dundermifflin.com", "password")
+#     @ryan_token = token_from_email_password("ryanhoward@dundermifflin.com", "password")
+#   end
 
-  before :each do
-    @user1 = users(:michael)
-    avatar1 = fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'michael-scott.png'),'image/png')
-    @user1.avatar.attach(avatar1)
-    @user2 = users(:jim)
-    avatar2 = fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'jim-halpert.png'),'image/png')
-    @user2.avatar.attach(avatar2)
-    cars(:fiat).image.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'fiat-500.jpg'),'image/jpeg'))
-    cars(:civic).image.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'honda-civic.jpg'),'image/jpeg'))
-    cars(:elantra).image.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'hyundai-elantra.jpg'),'image/jpeg'))
-    cars(:leaf).image.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'nissan-leaf.jpg'),'image/jpeg'))
-    cars(:scion).image.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'scion.jpg'),'image/jpeg'))
-    cars(:camry).image.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'toyota-camry.jpg'),'image/jpeg'))
-  end
+#   before :each do
+#     @user1 = users(:michael)
+#     avatar1 = fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'michael-scott.png'),'image/png')
+#     @user1.avatar.attach(avatar1)
+#     @user2 = users(:jim)
+#     avatar2 = fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'jim-halpert.png'),'image/png')
+#     @user2.avatar.attach(avatar2)
+#     cars(:fiat).image.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'fiat-500.jpg'),'image/jpeg'))
+#     cars(:civic).image.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'honda-civic.jpg'),'image/jpeg'))
+#     cars(:elantra).image.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'hyundai-elantra.jpg'),'image/jpeg'))
+#     cars(:leaf).image.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'nissan-leaf.jpg'),'image/jpeg'))
+#     cars(:scion).image.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'scion.jpg'),'image/jpeg'))
+#     cars(:camry).image.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'toyota-camry.jpg'),'image/jpeg'))
+#   end
 
-  describe "GET /index" do
-    context "with valid headers" do
-      it "renders a successful response" do
-        get users_url, headers: valid_headers
-        expect(response).to be_successful
-      end
+#   describe "GET /index" do
+#     context "with valid headers" do
+#       it "renders a successful response" do
+#         get users_url, headers: valid_headers
+#         expect(response).to be_successful
+#       end
 
-      it "gets four users" do
-        get users_url, headers: valid_headers
-        expect(JSON.parse(response.body).length).to eq 4
-      end
+#       it "gets four users" do
+#         get users_url, headers: valid_headers
+#         expect(JSON.parse(response.body).length).to eq 4
+#       end
 
-      it "gets first users' correct details" do
-        get users_url, headers: valid_headers
-        users = JSON.parse(response.body)
-        michael = users.find { |user| user['email'] == "michaelscott@dundermifflin.com" }
-        car_ids = michael['car_ids']
-        cars = michael['cars']
-        fiat = cars.find { |car| car['name'] == "Michael's Fiat 500" }
-        civic = cars.find { |car| car['name'] == "Michael's Honda Civic" }
-        expect(michael['name']).to eq "Michael Scott"
-        expect(michael['email']).to eq "michaelscott@dundermifflin.com"
-        expect(michael['admin']).to eq true
-        expect(michael['avatar']).to be_kind_of(String)
-        expect(michael['avatar']).to match(/http.*\michael-scott\.png/)
-        expect(michael['password']).to be_nil
-        expect(michael['password_digest']).to be_nil
-        expect(fiat['name']).to eq "Michael's Fiat 500"
-        expect(fiat['description']).to eq "Michael's Fiat 500 (description)"
-        expect(fiat['userName']).to eq "Michael Scott"
-        expect(fiat['image']).to be_kind_of(String)
-        expect(fiat['image']).to match(/http.*fiat-500\.jpg/)
-        expect(civic['name']).to eq "Michael's Honda Civic"
-        expect(civic['description']).to eq "Michael's Honda Civic (description)"
-        expect(civic['userName']).to eq "Michael Scott"
-        expect(civic['image']).to be_kind_of(String)
-        expect(civic['image']).to match(/http.*honda-civic\.jpg/)
-      end
+#       it "gets first users' correct details" do
+#         get users_url, headers: valid_headers
+#         users = JSON.parse(response.body)
+#         michael = users.find { |user| user['email'] == "michaelscott@dundermifflin.com" }
+#         car_ids = michael['car_ids']
+#         cars = michael['cars']
+#         fiat = cars.find { |car| car['name'] == "Michael's Fiat 500" }
+#         civic = cars.find { |car| car['name'] == "Michael's Honda Civic" }
+#         expect(michael['name']).to eq "Michael Scott"
+#         expect(michael['email']).to eq "michaelscott@dundermifflin.com"
+#         expect(michael['admin']).to eq true
+#         expect(michael['avatar']).to be_kind_of(String)
+#         expect(michael['avatar']).to match(/http.*\michael-scott\.png/)
+#         expect(michael['password']).to be_nil
+#         expect(michael['password_digest']).to be_nil
+#         expect(fiat['name']).to eq "Michael's Fiat 500"
+#         expect(fiat['description']).to eq "Michael's Fiat 500 (description)"
+#         expect(fiat['userName']).to eq "Michael Scott"
+#         expect(fiat['image']).to be_kind_of(String)
+#         expect(fiat['image']).to match(/http.*fiat-500\.jpg/)
+#         expect(civic['name']).to eq "Michael's Honda Civic"
+#         expect(civic['description']).to eq "Michael's Honda Civic (description)"
+#         expect(civic['userName']).to eq "Michael Scott"
+#         expect(civic['image']).to be_kind_of(String)
+#         expect(civic['image']).to match(/http.*honda-civic\.jpg/)
+#       end
 
-      it "gets second users' correct details" do
-        get users_url, headers: valid_headers
-        users = JSON.parse(response.body)
-        jim = users.find { |user| user['email'] == "jimhalpert@dundermifflin.com" }
-        car_ids = jim['car_ids']
-        cars = jim['cars']
-        elantra = cars.find { |car| car['name'] == "Jim's Hyundai Elantra" }
-        leaf = cars.find { |car| car['name'] == "Jim's Nissan Leaf" }
-        expect(jim['name']).to eq "Jim Halpert"
-        expect(jim['email']).to eq "jimhalpert@dundermifflin.com"
-        expect(jim['admin']).to be_nil or eq false
-        expect(jim['avatar']).to be_kind_of(String)
-        expect(jim['avatar']).to match(/http.*\jim-halpert\.png/)
-        expect(jim['password']).to be_nil
-        expect(jim['password_digest']).to be_nil
-        expect(elantra['name']).to eq "Jim's Hyundai Elantra"
-        expect(elantra['description']).to eq "Jim's Hyundai Elantra (description)"
-        expect(elantra['userName']).to eq "Jim Halpert"
-        expect(elantra['image']).to be_kind_of(String)
-        expect(elantra['image']).to match(/http.*hyundai-elantra\.jpg/)
-        expect(leaf['name']).to eq "Jim's Nissan Leaf"
-        expect(leaf['description']).to eq "Jim's Nissan Leaf (description)"
-        expect(leaf['userName']).to eq "Jim Halpert"
-        expect(leaf['image']).to be_kind_of(String)
-        expect(leaf['image']).to match(/http.*nissan-leaf\.jpg/)
-      end
-    end
+#       it "gets second users' correct details" do
+#         get users_url, headers: valid_headers
+#         users = JSON.parse(response.body)
+#         jim = users.find { |user| user['email'] == "jimhalpert@dundermifflin.com" }
+#         car_ids = jim['car_ids']
+#         cars = jim['cars']
+#         elantra = cars.find { |car| car['name'] == "Jim's Hyundai Elantra" }
+#         leaf = cars.find { |car| car['name'] == "Jim's Nissan Leaf" }
+#         expect(jim['name']).to eq "Jim Halpert"
+#         expect(jim['email']).to eq "jimhalpert@dundermifflin.com"
+#         expect(jim['admin']).to be_nil or eq false
+#         expect(jim['avatar']).to be_kind_of(String)
+#         expect(jim['avatar']).to match(/http.*\jim-halpert\.png/)
+#         expect(jim['password']).to be_nil
+#         expect(jim['password_digest']).to be_nil
+#         expect(elantra['name']).to eq "Jim's Hyundai Elantra"
+#         expect(elantra['description']).to eq "Jim's Hyundai Elantra (description)"
+#         expect(elantra['userName']).to eq "Jim Halpert"
+#         expect(elantra['image']).to be_kind_of(String)
+#         expect(elantra['image']).to match(/http.*hyundai-elantra\.jpg/)
+#         expect(leaf['name']).to eq "Jim's Nissan Leaf"
+#         expect(leaf['description']).to eq "Jim's Nissan Leaf (description)"
+#         expect(leaf['userName']).to eq "Jim Halpert"
+#         expect(leaf['image']).to be_kind_of(String)
+#         expect(leaf['image']).to match(/http.*nissan-leaf\.jpg/)
+#       end
+#     end
 
-    context "with invalid headers" do
-      it "renders an unsuccessful response" do
-        get users_url, headers: invalid_token_header
-        expect(response).to_not be_successful
-      end
-    end
+#     context "with invalid headers" do
+#       it "renders an unsuccessful response" do
+#         get users_url, headers: invalid_token_header
+#         expect(response).to_not be_successful
+#       end
+#     end
 
-  end
+#   end
 
-  describe "GET /show" do
-    context "with valid headers" do
-      it "renders a successful response" do
-        get user_url(@user1), headers: valid_headers
-        expect(response).to be_successful
-      end
-      it "gets users' correct details" do
-        get user_url(@user1), headers: valid_headers
-        michael = JSON.parse(response.body)
-        car_ids = michael['car_ids']
-        cars = michael['cars']
-        fiat = cars.find { |car| car['name'] == "Michael's Fiat 500" }
-        civic = cars.find { |car| car['name'] == "Michael's Honda Civic" }
-        expect(michael['name']).to eq "Michael Scott"
-        expect(michael['email']).to eq "michaelscott@dundermifflin.com"
-        expect(michael['admin']).to eq true
-        expect(michael['avatar']).to be_kind_of(String)
-        expect(michael['avatar']).to match(/http.*\michael-scott\.png/)
-        expect(michael['password']).to be_nil
-        expect(michael['password_digest']).to be_nil
-        expect(fiat['name']).to eq "Michael's Fiat 500"
-        expect(fiat['description']).to eq "Michael's Fiat 500 (description)"
-        expect(fiat['userName']).to eq "Michael Scott"
-        expect(fiat['image']).to be_kind_of(String)
-        expect(fiat['image']).to match(/http.*fiat-500\.jpg/)
-        expect(civic['name']).to eq "Michael's Honda Civic"
-        expect(civic['description']).to eq "Michael's Honda Civic (description)"
-        expect(civic['userName']).to eq "Michael Scott"
-        expect(civic['image']).to be_kind_of(String)
-        expect(civic['image']).to match(/http.*honda-civic\.jpg/)
-      end
-    end
-    context "with invalid headers" do
-      it "renders an unsuccessful response" do
-        get user_url(@user1), headers: invalid_token_header
-        expect(response).to_not be_successful
-      end
-    end
-  end
+#   describe "GET /show" do
+#     context "with valid headers" do
+#       it "renders a successful response" do
+#         get user_url(@user1), headers: valid_headers
+#         expect(response).to be_successful
+#       end
+#       it "gets users' correct details" do
+#         get user_url(@user1), headers: valid_headers
+#         michael = JSON.parse(response.body)
+#         car_ids = michael['car_ids']
+#         cars = michael['cars']
+#         fiat = cars.find { |car| car['name'] == "Michael's Fiat 500" }
+#         civic = cars.find { |car| car['name'] == "Michael's Honda Civic" }
+#         expect(michael['name']).to eq "Michael Scott"
+#         expect(michael['email']).to eq "michaelscott@dundermifflin.com"
+#         expect(michael['admin']).to eq true
+#         expect(michael['avatar']).to be_kind_of(String)
+#         expect(michael['avatar']).to match(/http.*\michael-scott\.png/)
+#         expect(michael['password']).to be_nil
+#         expect(michael['password_digest']).to be_nil
+#         expect(fiat['name']).to eq "Michael's Fiat 500"
+#         expect(fiat['description']).to eq "Michael's Fiat 500 (description)"
+#         expect(fiat['userName']).to eq "Michael Scott"
+#         expect(fiat['image']).to be_kind_of(String)
+#         expect(fiat['image']).to match(/http.*fiat-500\.jpg/)
+#         expect(civic['name']).to eq "Michael's Honda Civic"
+#         expect(civic['description']).to eq "Michael's Honda Civic (description)"
+#         expect(civic['userName']).to eq "Michael Scott"
+#         expect(civic['image']).to be_kind_of(String)
+#         expect(civic['image']).to match(/http.*honda-civic\.jpg/)
+#       end
+#     end
+#     context "with invalid headers" do
+#       it "renders an unsuccessful response" do
+#         get user_url(@user1), headers: invalid_token_header
+#         expect(response).to_not be_successful
+#       end
+#     end
+#   end
 
-  describe "POST /users" do
-    context "with valid parameters" do
-      it "creates a new User" do
-        expect {
-          post users_url, params: user_valid_create_params_mock_1
-        }.to change(User, :count).by(1)
-      end
+#   describe "POST /users" do
+#     context "with valid parameters" do
+#       it "creates a new User" do
+#         expect {
+#           post users_url, params: user_valid_create_params_mock_1
+#         }.to change(User, :count).by(1)
+#       end
 
-      it "renders a successful response" do
-        post users_url, params: user_valid_create_params_mock_1
-        expect(response).to be_successful
-      end
+#       it "renders a successful response" do
+#         post users_url, params: user_valid_create_params_mock_1
+#         expect(response).to be_successful
+#       end
 
-      it "sets correct user details" do
-        post users_url, params: user_valid_create_params_mock_1
-        user = User.order(:created_at).last
-        expect(user['name']).to eq "First1 Last1"
-        expect(user['email']).to eq "one@mail.com"
-        expect(user['admin']).to eq(false).or(be_nil)
-        expect(user['avatar']).to be_nil
-        expect(user['password']).to be_nil
-        expect(user['password_digest']).to be_kind_of(String)
-      end
+#       it "sets correct user details" do
+#         post users_url, params: user_valid_create_params_mock_1
+#         user = User.order(:created_at).last
+#         expect(user['name']).to eq "First1 Last1"
+#         expect(user['email']).to eq "one@mail.com"
+#         expect(user['admin']).to eq(false).or(be_nil)
+#         expect(user['avatar']).to be_nil
+#         expect(user['password']).to be_nil
+#         expect(user['password_digest']).to be_kind_of(String)
+#       end
 
-      it "attaches user avatar" do
-        post users_url, params: user_valid_create_params_mock_1
-        user = User.order(:created_at).last
-        expect(user.avatar.attached?).to eq(true)
-        expect(url_for(user.avatar)).to be_kind_of(String)
-        expect(url_for(user.avatar)).to match(/http.*michael-scott\.png/)
-      end
-    end
+#       it "attaches user avatar" do
+#         post users_url, params: user_valid_create_params_mock_1
+#         user = User.order(:created_at).last
+#         expect(user.avatar.attached?).to eq(true)
+#         expect(url_for(user.avatar)).to be_kind_of(String)
+#         expect(url_for(user.avatar)).to match(/http.*michael-scott\.png/)
+#       end
+#     end
 
-    context "with invalid parameters (email poorly formed)" do
-      it "does not create a new User" do
-        expect {
-          post users_url, params: user_invalid_create_params_email_poorly_formed_mock_1
-        }.to change(User, :count).by(0)
-      end
+#     context "with invalid parameters (email poorly formed)" do
+#       it "does not create a new User" do
+#         expect {
+#           post users_url, params: user_invalid_create_params_email_poorly_formed_mock_1
+#         }.to change(User, :count).by(0)
+#       end
     
-      it "renders a 422 response" do
-        post users_url, params: user_invalid_create_params_email_poorly_formed_mock_1
-        expect(response).to have_http_status(:unprocessable_entity)
-      end  
-    end
-  end
+#       it "renders a 422 response" do
+#         post users_url, params: user_invalid_create_params_email_poorly_formed_mock_1
+#         expect(response).to have_http_status(:unprocessable_entity)
+#       end  
+#     end
+#   end
 
-  describe "PATCH /update" do
-    context "with valid parameters and headers" do
+#   describe "PATCH /update" do
+#     context "with valid parameters and headers" do
 
-      it "updates user's name" do
-        patch user_url(@user1), params: valid_user_update_attributes, headers: valid_headers
-        @user1.reload
-        expect(@user1.name).to eq("UpdatedName")
-      end
+#       it "updates user's name" do
+#         patch user_url(@user1), params: valid_user_update_attributes, headers: valid_headers
+#         @user1.reload
+#         expect(@user1.name).to eq("UpdatedName")
+#       end
 
-      it "updates user's name in their cars" do
-        patch user_url(@user1), params: valid_user_update_attributes, headers: valid_headers
-        @user1.reload
-        get user_url(@user1), headers: valid_headers
-        user = JSON.parse(response.body)
-        car_ids = user['car_ids']
-        cars = user['cars']
-        fiat = cars.find { |car| car['name'] == "Michael's Fiat 500" }
-        civic = cars.find { |car| car['name'] == "Michael's Honda Civic" }
-        expect(fiat['userName']).to eq "UpdatedName"
-        expect(civic['userName']).to eq "UpdatedName"
-      end
+#       it "updates user's name in their cars" do
+#         patch user_url(@user1), params: valid_user_update_attributes, headers: valid_headers
+#         @user1.reload
+#         get user_url(@user1), headers: valid_headers
+#         user = JSON.parse(response.body)
+#         car_ids = user['car_ids']
+#         cars = user['cars']
+#         fiat = cars.find { |car| car['name'] == "Michael's Fiat 500" }
+#         civic = cars.find { |car| car['name'] == "Michael's Honda Civic" }
+#         expect(fiat['userName']).to eq "UpdatedName"
+#         expect(civic['userName']).to eq "UpdatedName"
+#       end
 
-      it "doesn't change the other user attributes" do
-        patch user_url(@user1), params: valid_user_update_attributes, headers: valid_headers
-        @user1.reload
-        get user_url(@user1), headers: valid_headers
-        user = JSON.parse(response.body)
-        car_ids = user['car_ids']
-        cars = user['cars']
-        fiat = cars.find { |car| car['name'] == "Michael's Fiat 500" }
-        civic = cars.find { |car| car['name'] == "Michael's Honda Civic" }
-        expect(@user1['email']).to eq "michaelscott@dundermifflin.com"
-        expect(@user1['admin']).to eq true
-        expect(@user1['avatar']).to be_nil
-        expect(@user1['password']).to be_nil
-        expect(@user1['password_digest']).to be_kind_of(String)
-        expect(fiat['name']).to eq "Michael's Fiat 500"
-        expect(fiat['description']).to eq "Michael's Fiat 500 (description)"
-        expect(url_for(fiat['image'])).to be_kind_of(String)
-        expect(url_for(fiat['image'])).to match(/http.*fiat-500\.jpg/)
-        expect(civic['name']).to eq "Michael's Honda Civic"
-        expect(civic['description']).to eq "Michael's Honda Civic (description)"
-        expect(url_for(civic['image'])).to be_kind_of(String)
-        expect(url_for(civic['image'])).to match(/http.*honda-civic\.jpg/)
-      end
+#       it "doesn't change the other user attributes" do
+#         patch user_url(@user1), params: valid_user_update_attributes, headers: valid_headers
+#         @user1.reload
+#         get user_url(@user1), headers: valid_headers
+#         user = JSON.parse(response.body)
+#         car_ids = user['car_ids']
+#         cars = user['cars']
+#         fiat = cars.find { |car| car['name'] == "Michael's Fiat 500" }
+#         civic = cars.find { |car| car['name'] == "Michael's Honda Civic" }
+#         expect(@user1['email']).to eq "michaelscott@dundermifflin.com"
+#         expect(@user1['admin']).to eq true
+#         expect(@user1['avatar']).to be_nil
+#         expect(@user1['password']).to be_nil
+#         expect(@user1['password_digest']).to be_kind_of(String)
+#         expect(fiat['name']).to eq "Michael's Fiat 500"
+#         expect(fiat['description']).to eq "Michael's Fiat 500 (description)"
+#         expect(url_for(fiat['image'])).to be_kind_of(String)
+#         expect(url_for(fiat['image'])).to match(/http.*fiat-500\.jpg/)
+#         expect(civic['name']).to eq "Michael's Honda Civic"
+#         expect(civic['description']).to eq "Michael's Honda Civic (description)"
+#         expect(url_for(civic['image'])).to be_kind_of(String)
+#         expect(url_for(civic['image'])).to match(/http.*honda-civic\.jpg/)
+#       end
 
-      it "is successful" do
-        patch user_url(@user1), params: valid_user_update_attributes, headers: valid_headers
-        @user1.reload
-        expect(response).to be_successful
-      end
-    end
+#       it "is successful" do
+#         patch user_url(@user1), params: valid_user_update_attributes, headers: valid_headers
+#         @user1.reload
+#         expect(response).to be_successful
+#       end
+#     end
 
-    context "with invalid parameters but valid headers" do
-       it "renders a 422 response" do
-         patch user_url(@user1), params: invalid_user_update_attributes, headers: valid_headers
-         expect(response).to have_http_status(:unprocessable_entity)
-       end
-    end
+#     context "with invalid parameters but valid headers" do
+#        it "renders a 422 response" do
+#          patch user_url(@user1), params: invalid_user_update_attributes, headers: valid_headers
+#          expect(response).to have_http_status(:unprocessable_entity)
+#        end
+#     end
 
-    context "with valid parameters but invalid headers" do
-       it "renders a 401 response" do
-         patch user_url(@user1), params: valid_user_update_attributes, headers: invalid_token_header
-         expect(response).to have_http_status(:unauthorized)
-       end
-    end
+#     context "with valid parameters but invalid headers" do
+#        it "renders a 401 response" do
+#          patch user_url(@user1), params: valid_user_update_attributes, headers: invalid_token_header
+#          expect(response).to have_http_status(:unauthorized)
+#        end
+#     end
 
-  end
+#   end
 
-  describe "DELETE /destroy" do
-    context "with valid headers" do
-      it "destroys the requested user" do
-        expect {
-          delete user_url(@user1), headers: valid_headers
-        }.to change(User, :count).by(-1)
-      end
+#   describe "DELETE /destroy" do
+#     context "with valid headers" do
+#       it "destroys the requested user" do
+#         expect {
+#           delete user_url(@user1), headers: valid_headers
+#         }.to change(User, :count).by(-1)
+#       end
 
-      it "renders a successful response" do
-        delete user_url(@user1), headers: valid_headers
-        expect(response).to be_successful
-      end
-    end
+#       it "renders a successful response" do
+#         delete user_url(@user1), headers: valid_headers
+#         expect(response).to be_successful
+#       end
+#     end
 
-    context "with invalid headers" do
-      it "doesn't destroy user" do
-        expect {
-          delete user_url(@user1), headers: invalid_token_header
-        }.to change(User, :count).by(0)
-      end
+#     context "with invalid headers" do
+#       it "doesn't destroy user" do
+#         expect {
+#           delete user_url(@user1), headers: invalid_token_header
+#         }.to change(User, :count).by(0)
+#       end
 
-      it "renders a unsuccessful response" do
-        delete user_url(@user1), headers: invalid_token_header
-        expect(response).to_not be_successful
-      end
-    end
-  end
+#       it "renders a unsuccessful response" do
+#         delete user_url(@user1), headers: invalid_token_header
+#         expect(response).to_not be_successful
+#       end
+#     end
+#   end
 
-end
-~
-EOF
-rspec
+# end
+# ~
+# EOF
+# rspec
 
 
 # echo -e "\n\n🦄  Documents (Backend)\n\n"
