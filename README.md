@@ -1403,7 +1403,7 @@ class ApplicationController < ActionController::API
     # documents = Document.where(car_id: car.id)
     # documents = documents.map { |document| document.slice(:id,:name,:description,:car_id) }
     image = car.image.present? ? url_for(car.image) : nil
-    car = car.slice(:id,:name,:description)
+    car = car.slice(:id,:name,:year,:make,:model,:trim,:body,:color,:plate,:vin,:cost,:initial_mileage,:purchase_date,:purchase_vendor)
     car['userId'] = user_id
     car['userName'] = user_name
     car['image'] = image
