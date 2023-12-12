@@ -1497,7 +1497,7 @@ end
 - `puravida spec/fixtures/cars.yml ~`
 ```
 fiat:
-  name: Jim's Fiat 500
+  name: Michael's Fiat 500
   make: Fiat
   model: 500
   trim: Sport
@@ -1513,7 +1513,7 @@ fiat:
   user: michael
 
 civic:
-  name: Pam's Honda Civic
+  name: Michael's Honda Civic
   make: Honda
   model: Civic
   trim: Vp
@@ -1719,20 +1719,42 @@ RSpec.describe "/cars", type: :request do
       cars = JSON.parse(response.body)
       fiat = cars.find { |car| car['name'] == "Michael's Fiat 500" }
       expect(fiat['name']).to eq "Michael's Fiat 500"
-      expect(fiat['description']).to eq "Michael's Fiat 500 (description)"
       expect(fiat['userName']).to eq "Michael Scott"
       expect(fiat['image']).to be_kind_of(String)
       expect(fiat['image']).to match(/http.*fiat-500\.jpg/)
+      expect(fiat['make']).to eq "Fiat",
+      expect(fiat['model']).to eq 500,
+      expect(fiat['trim']).to eq "Sport",
+      expect(fiat['color']).to eq "Yellow",
+      expect(fiat['body']).to eq "Hatchback",
+      expect(fiat['plate']).to eq "6XYK922",
+      expect(fiat['vin']).to eq "3C3CFFBR0CT382584",
+      expect(fiat['year']).to eq 2012,
+      expect(fiat['cost']).to eq 10235.00,
+      expect(fiat['purchase_vendor']).to eq "Ted Fleid",
+      expect(fiat['initial_mileage']).to eq 47361,
+      expect(fiat['user_id']).to eq User.find_by(email: "michaelscott@dundermifflin.com").id
     end
     it "second car has correct properties" do
       get cars_url, headers: valid_headers
       cars = JSON.parse(response.body)
       elantra = cars.find { |car| car['name'] == "Jim's Hyundai Elantra" }
       expect(elantra['name']).to eq "Jim's Hyundai Elantra"
-      expect(elantra['description']).to eq "Jim's Hyundai Elantra (description)"
       expect(elantra['userName']).to eq "Jim Halpert"
       expect(elantra['image']).to be_kind_of(String)
       expect(elantra['image']).to match(/http.*hyundai-elantra\.jpg/)
+      expect(elantra['make']).to eq "Hyundai"
+      expect(elantra['model']).to eq "Elantra"
+      expect(elantra['trim']).to eq "GLS"
+      expect(elantra['color']).to eq "Black"
+      expect(elantra['body']).to eq "Sedan"
+      expect(elantra['plate']).to eq "8CEU662"
+      expect(elantra['vin']).to eq "KMHDU46D17U090264"
+      expect(elantra['year']).to eq 2007
+      expect(elantra['cost']).to eq 15000.00
+      expect(elantra['purchase_vendor']).to eq "Feit Hyundai"
+      expect(elantra['initial_mileage']).to eq "53032, "
+      expect(elantra['user_id']).to eq User.find_by(email: "jimhalpert@dundermifflin.com").id
     end
 
   end
@@ -1752,6 +1774,18 @@ RSpec.describe "/cars", type: :request do
       expect(fiat['userName']).to eq "Michael Scott"
       expect(fiat['image']).to be_kind_of(String)
       expect(fiat['image']).to match(/http.*fiat-500\.jpg/)
+      expect(fiat['make']).to eq "Fiat",
+      expect(fiat['model']).to eq 500,
+      expect(fiat['trim']).to eq "Sport",
+      expect(fiat['color']).to eq "Yellow",
+      expect(fiat['body']).to eq "Hatchback",
+      expect(fiat['plate']).to eq "6XYK922",
+      expect(fiat['vin']).to eq "3C3CFFBR0CT382584",
+      expect(fiat['year']).to eq 2012,
+      expect(fiat['cost']).to eq 10235.00,
+      expect(fiat['purchase_vendor']).to eq "Ted Fleid",
+      expect(fiat['initial_mileage']).to eq 47361,
+      expect(fiat['user_id']).to eq User.find_by(email: "michaelscott@dundermifflin.com").id
     end
   end
 
@@ -1788,7 +1822,7 @@ RSpec.describe "/cars", type: :request do
     context "with valid parameters" do
       let(:new_attributes) {{ name: "UpdatedName"}}
 
-      it "updates the requested car" do
+      it "updates car's name" do
         car = cars(:fiat)
         patch car_url(car), params: new_attributes, headers: valid_headers, as: :json
         car.reload
@@ -1806,10 +1840,21 @@ RSpec.describe "/cars", type: :request do
         car = cars(:fiat)
         patch car_url(car), params: new_attributes, headers: valid_headers, as: :json
         fiat = JSON.parse(response.body)
-        expect(fiat['description']).to eq "Michael's Fiat 500 (description)"
         expect(fiat['userName']).to eq "Michael Scott"
         expect(fiat['image']).to be_kind_of(String)
         expect(fiat['image']).to match(/http.*fiat-500\.jpg/)
+        expect(fiat['make']).to eq "Fiat",
+        expect(fiat['model']).to eq 500,
+        expect(fiat['trim']).to eq "Sport",
+        expect(fiat['color']).to eq "Yellow",
+        expect(fiat['body']).to eq "Hatchback",
+        expect(fiat['plate']).to eq "6XYK922",
+        expect(fiat['vin']).to eq "3C3CFFBR0CT382584",
+        expect(fiat['year']).to eq 2012,
+        expect(fiat['cost']).to eq 10235.00,
+        expect(fiat['purchase_vendor']).to eq "Ted Fleid",
+        expect(fiat['initial_mileage']).to eq 47361,
+        expect(fiat['user_id']).to eq User.find_by(email: "michaelscott@dundermifflin.com").id
       end
 
     end
