@@ -955,10 +955,12 @@ EOF
 rspec
 
 echo -e "\n\n🦄  Cars (Backend)\n\n"
-# MIGRATION_FILE=$(find /Users/mmcdermott/Desktop/backtest/db/migrate -name "*_create_cars.rb")
-# sed -i -e 3,20d $MIGRATION_FILE
-# awk 'NR==3 {print "\t\tcreate_table :cars do |t|\n\t\t\tt.string :name, null: false\n\t\t\tt.integer :year\n\t\t\tt.string :make\n\t\t\tt.string :model\n\t\t\tt.string :trim\n\t\t\tt.string :body\n\t\t\tt.string :color\n\t\t\tt.string :plate\n\t\t\tt.string :vin\n\t\t\tt.decimal :cost, precision: 10, scale: 2\n\t\t\tt.integer :initial_mileage\n\t\t\tt.date :purchase_date\n\t\t\tt.string :purchase_vendor\n\t\t\tt.references :user, null: false, foreign_key: true\n\t\t\tt.timestamps\n\t\tend"} 1' $MIGRATION_FILE > temp.txt && mv temp.txt $MIGRATION_FILE
-# rails db:migrate
+rails g scaffold Car name image:attachment year:integer make model trim body color plate vin cost:decimal initial_mileage:integer purchase_date:date purchase_vendor user:references
+MIGRATION_FILE=$(find /Users/mmcdermott/Desktop/backtest/db/migrate -name "*_create_cars.rb")
+sed -i '' 3,20d $MIGRATION_FILE
+awk 'NR==3 {print "\t\tcreate_table :cars do |t|\n\t\t\tt.string :name, null: false\n\t\t\tt.integer :year\n\t\t\tt.string :make\n\t\t\tt.string :model\n\t\t\tt.string :trim\n\t\t\tt.string :body\n\t\t\tt.string :color\n\t\t\tt.string :plate\n\t\t\tt.string :vin\n\t\t\tt.decimal :cost, precision: 10, scale: 2\n\t\t\tt.integer :initial_mileage\n\t\t\tt.date :purchase_date\n\t\t\tt.string :purchase_vendor\n\t\t\tt.references :user, null: false, foreign_key: {on_delete: :cascade}\n\t\t\tt.timestamps\n\t\tend"} 1' $MIGRATION_FILE > temp.txt
+mv temp.txt $MIGRATION_FILE
+rails db:migrate
 # cat <<'EOF' | puravida app/models/car.rb ~
 # class Car < ApplicationRecord
 #   belongs_to :user
