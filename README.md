@@ -2279,8 +2279,8 @@ end
 - `rspec`
 
 ### Maintenances (Backend)
-- `# rails g scaffold maintenance name description image:attachment car:references`
-- `rails g scaffold maintenance name description image:attachment ref_id:integer ref_type`
+- `rails g scaffold maintenance date:date description vendor cost:decimal image:attachment car:references`
+- `# rails g scaffold maintenance name description image:attachment ref_id:integer ref_type`
 - `rails db:migrate`
 - `puravida app/controllers/maintenances_controller.rb ~`
 ```
@@ -2342,265 +2342,190 @@ class MaintenancesController < ApplicationController
 end
 ~
 ```
+- `puravida spec/fixtures/maintenances.rb ~`
+```
+fiat:
+  name: Michael's Fiat 500
+  make: Fiat
+  model: 500
+  trim: Sport
+  color: Yellow
+  body: Hatchback
+  plate: 6XYK922
+  vin: 3C3CFFBR0CT382584
+  year: 2012, 
+  cost: 10235.00
+  purchase_vendor: Ted Fleid
+  initial_mileage: 47361
+  purchase_date: Date.parse(20180606)
+  user: michael
+~
+```
 - `puravida spec/requests/maintenances_spec.rb ~`
 ```
-# frozen_string_literal: true
-require 'open-uri'
 require 'rails_helper'
+
 RSpec.describe "/cars", type: :request do
-  let(:valid_create_user_1_params) { { name: "Michael Scott", email: "michaelscott@dundermifflin.com", admin: "true", password: "password" } }
-  let(:user_1_attachment) { "/spec/fixtures/files/images/office-avatars/michael-scott.png" }
-  let(:user_1_image) { "michael-scott.png" }
-  let(:valid_create_user_2_params) { { name: "Jim Halpert", email: "jimhalpert@dundermifflin.com", admin: "false", password: "password" } }
-  let(:user_2_attachment) { "/spec/fixtures/files/images/office-avatars/jim-halpert.png" }
-  let(:user_2_image) { "jim-halpert.png" }
-  let(:invalid_create_user_1_params) { { name: "Michael Scott", email: "test", admin: "true", password: "password" } }
-  let(:invalid_create_user_2_params) { { name: "Jim Halpert", email: "test2", admin: "false", password: "password" } }
-  let(:valid_user_1_login_params) { { email: "michaelscott@dundermifflin.com",  password: "password" } }
-  let(:valid_user_2_login_params) { { email: "jimhalpert@dundermifflin.com",  password: "password" } }
-  let(:invalid_patch_params) { { email: "test" } }
-  let(:uploaded_image_path) { Rails.root.join '/spec/fixtures/files/images/office-avatars/michael-scott.png' }
-  let(:uploaded_image) { Rack::Test::UploadedFile.new uploaded_image_path, 'image/png' }
+  fixtures :users
+  fixtures :cars
+  let(:valid_headers) {{ Authorization: "Bearer " + @michael_token }}
+  let(:valid_attributes) {{ 
+    name: "Jim's Fiat 500",
+    make: "Fiat",
+    model: "500",
+    trim: "Sport",
+    color: "Yellow",
+    body: "Hatchback",
+    plate: "6XYK922",
+    vin: "3C3CFFBR0CT382584",
+    year: 2012,
+    cost: 10235.00,
+    purchase_vendor: "Ted Fleid",
+    initial_mileage: 47361,
+    user_id: User.find_by(email: "michaelscott@dundermifflin.com").id
+  }}
+  let(:invalid_attributes) {{ 
+    name: "",
+    make: "Fiat",
+    model: "500",
+    trim: "Sport",
+    color: "Yellow",
+    body: "Hatchback",
+    plate: "6XYK922",
+    vin: "3C3CFFBR0CT382584",
+    year: 2012,
+    cost: 10235.00,
+    purchase_vendor: "Ted Fleid",
+    initial_mileage: 47361,
+    user_id: User.find_by(email: "michaelscott@dundermifflin.com").id
+  }}
+
+  before :all do
+    @michael_token = token_from_email_password("michaelscott@dundermifflin.com", "password")
+    @ryan_token = token_from_email_password("ryanhoward@dundermifflin.com", "password")
+  end
+
+  before :each do
+    @fiat = cars(:fiat)
+    @fiat.image.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'fiat-500.jpg'),'image/jpeg'))
+    @civic = cars(:civic)
+    @civic.image.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'honda-civic.jpg'),'image/jpeg'))
+    @elantra = cars(:elantra)
+    @elantra.image.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'hyundai-elantra.jpg'),'image/jpeg'))
+    @leaf = cars(:leaf)
+    @leaf.image.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'nissan-leaf.jpg'),'image/jpeg'))
+    @scion = cars(:scion)
+    @scion.image.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'scion.jpg'),'image/jpeg'))
+    @camry = cars(:camry)
+    @camry.image.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'toyota-camry.jpg'),'image/jpeg'))
+  end
 
   describe "GET /index" do
-    context "with valid auth header (non-admin user)" do
-      it "renders a successful response" do
-        user1 = User.create! valid_create_user_1_params
-        user1.avatar.attach(io: URI.open("#{Rails.root}" + user_1_attachment), filename: user_1_image)
-        user1.save!
-        user2 = User.create! valid_create_user_2_params
-        header = header_from_user(user2,valid_user_2_login_params)
-        car1 = Car.create(name: "Wrenches", description: "Michael's wrenches", user_id: user1.id)
-        image_filename = "allen-wrenches.jpg"
-        image_path = "#{Rails.root}/app/assets/images/cars/allen-wrenches.jpg"
-        open_image = URI.open(image_path)
-        car1.image.attach(io: open_image, filename: image_filename)
-        car1.save!
-        car2 = Car.create(name: "Bolts", description: "Michael's bolts", user_id: user1.id)
-        car2.save!
-        get cars_url, headers: header, as: :json
-        expect(response).to be_successful
-      end
-      
-      it "gets two cars (one with image, one without)" do
-        user1 = User.create! valid_create_user_1_params
-        user1.avatar.attach(io: URI.open("#{Rails.root}" + user_1_attachment), filename: user_1_image)
-        user1.save!
-        user2 = User.create! valid_create_user_2_params
-        car1 = Car.create(name: "Wrenches", description: "Michael's wrenches", user_id: user1.id)
-        car1.image.attach(io: URI.open("#{Rails.root}/app/assets/images/cars/allen-wrenches.jpg"), filename: "allen-wrenches.jpg")
-        car1.save!
-        car2 = Car.create(name: "Bolts", description: "Michael's bolts", user_id: user1.id)
-        car2.save!
-        header = header_from_user(user2,valid_user_2_login_params)
-        get cars_url, headers: header, as: :json
-        expect(response).to be_successful
-        expect(JSON.parse(response.body).length).to eq 2
-        expect(JSON.parse(response.body)[0]).to include("id","name","description","image","userId")
-        expect(JSON.parse(response.body)[0]['name']).to eq("Wrenches")
-        expect(JSON.parse(response.body)[0]['description']).to eq("Michael's wrenches")
-        expect(JSON.parse(response.body)[0]['image']).to match(/http.*\/allen-wrenches\.jpg/)
-        expect(JSON.parse(response.body)[0]['userId']).to eq(user1.id)
-        expect(JSON.parse(response.body)[1]).to include("id","name","description","image","userId")
-        expect(JSON.parse(response.body)[1]['name']).to eq("Bolts")
-        expect(JSON.parse(response.body)[1]['description']).to eq("Michael's bolts")
-        expect(JSON.parse(response.body)[1]['image']).to eq(nil)
-        expect(JSON.parse(response.body)[1]['userId']).to eq(user1.id)
-      end
-
-      it "gets user one's cars" do
-        user1 = User.create! valid_create_user_1_params
-        user1.avatar.attach(io: URI.open("#{Rails.root}" + user_1_attachment), filename: user_1_image)
-        user1.save!
-        user2 = User.create! valid_create_user_2_params
-        car1 = Car.create(name: "Wrenches", description: "Michael's wrenches", user_id: user1.id)
-        car1.image.attach(io: URI.open("#{Rails.root}/app/assets/images/cars/allen-wrenches.jpg"), filename: "allen-wrenches.jpg")
-        car1.save!
-        car2 = Car.create(name: "Bolts", description: "Michael's bolts", user_id: user1.id)
-        car3 = Car.create(name: "test3", description: "test3", user_id: user2.id)
-        car3 = Car.create(name: "test4", description: "test4", user_id: user2.id)
-        header = header_from_user(user2,valid_user_2_login_params)
-        get cars_url, params: { user_id: user1.id }, headers: header
-        expect(response).to be_successful
-        expect(JSON.parse(response.body).length).to eq 2
-        expect(JSON.parse(response.body)[0]).to include("id","name","description","image","userId")
-        expect(JSON.parse(response.body)[0]['name']).to eq("Wrenches")
-        expect(JSON.parse(response.body)[0]['description']).to eq("Michael's wrenches")
-        expect(JSON.parse(response.body)[0]['image']).to match(/http.*\/allen-wrenches\.jpg/)
-        expect(JSON.parse(response.body)[0]['userId']).to eq(user1.id)
-        expect(JSON.parse(response.body)[1]).to include("id","name","description","image","userId")
-        expect(JSON.parse(response.body)[1]['name']).to eq("Bolts")
-        expect(JSON.parse(response.body)[1]['description']).to eq("Michael's bolts")
-        expect(JSON.parse(response.body)[1]['image']).to eq(nil)
-        expect(JSON.parse(response.body)[1]['userId']).to eq(user1.id)
-      end
-
-      it "gets user two's cars" do
-        user1 = User.create! valid_create_user_1_params
-        user1.avatar.attach(io: URI.open("#{Rails.root}" + user_1_attachment), filename: user_1_image)
-        user1.save!
-        user2 = User.create! valid_create_user_2_params
-        car1 = Car.create(name: "Wrenches", description: "Michael's wrenches", user_id: user1.id)
-        car1.image.attach(io: URI.open("#{Rails.root}/app/assets/images/cars/allen-wrenches.jpg"), filename: "allen-wrenches.jpg")
-        car1.save!
-        car2 = Car.create(name: "Bolts", description: "Michael's bolts", user_id: user1.id)
-        car3 = Car.create(name: "test3", description: "test3", user_id: user2.id)
-        car3 = Car.create(name: "test4", description: "test4", user_id: user2.id)
-        header = header_from_user(user2,valid_user_2_login_params)
-        get cars_url, params: { user_id: user2.id }, headers: header
-        expect(response).to be_successful
-        expect(JSON.parse(response.body).length).to eq 2
-        expect(JSON.parse(response.body)[0]).to include("id","name","description","image","userId")
-        expect(JSON.parse(response.body)[0]['name']).to eq("test3")
-        expect(JSON.parse(response.body)[0]['description']).to eq("test3")
-        expect(JSON.parse(response.body)[0]['userId']).to eq(user2.id)
-        expect(JSON.parse(response.body)[0]['image']).to eq(nil)
-        expect(JSON.parse(response.body)[1]).to include("id","name","description","image","userId")
-        expect(JSON.parse(response.body)[1]['name']).to eq("test4")
-        expect(JSON.parse(response.body)[1]['description']).to eq("test4")
-        expect(JSON.parse(response.body)[1]['image']).to eq(nil)
-        expect(JSON.parse(response.body)[1]['userId']).to eq(user2.id)
-      end
-
+    it "renders a successful response" do
+      get cars_url, headers: valid_headers
+      expect(response).to be_successful
+    end
+    it "gets two cars a successful response" do
+      get cars_url, headers: valid_headers
+      expect(JSON.parse(response.body).length).to eq 6
+    end
+    it "first car has correct properties" do
+      get cars_url, headers: valid_headers
+      cars = JSON.parse(response.body)
+      fiat = cars.find { |car| car['name'] == "Michael's Fiat 500" }
+      expect(fiat['name']).to eq "Michael's Fiat 500"
+      expect(fiat['userName']).to eq "Michael Scott"
+      expect(fiat['image']).to be_kind_of(String)
+      expect(fiat['image']).to match(/http.*fiat-500\.jpg/)
+      expect(fiat['make']).to eq "Fiat"
+      expect(fiat['model']).to eq "500"
+      expect(fiat['trim']).to eq "Sport"
+      expect(fiat['color']).to eq "Yellow"
+      expect(fiat['body']).to eq "Hatchback"
+      expect(fiat['plate']).to eq "6XYK922"
+      expect(fiat['vin']).to eq "3C3CFFBR0CT382584"
+      expect(fiat['year']).to eq 2012
+      expect(fiat['cost']).to eq "10235.0"
+      expect(fiat['purchase_vendor']).to eq "Ted Fleid"
+      expect(fiat['initial_mileage']).to eq 47361
+      expect(fiat['userId']).to eq User.find_by(email: "michaelscott@dundermifflin.com").id
+    end
+    it "second car has correct properties" do
+      get cars_url, headers: valid_headers
+      cars = JSON.parse(response.body)
+      elantra = cars.find { |car| car['name'] == "Jim's Hyundai Elantra" }
+      expect(elantra['name']).to eq "Jim's Hyundai Elantra"
+      expect(elantra['userName']).to eq "Jim Halpert"
+      expect(elantra['image']).to be_kind_of(String)
+      expect(elantra['image']).to match(/http.*hyundai-elantra\.jpg/)
+      expect(elantra['make']).to eq "Hyundai"
+      expect(elantra['model']).to eq "Elantra"
+      expect(elantra['trim']).to eq "GLS"
+      expect(elantra['color']).to eq "Black"
+      expect(elantra['body']).to eq "Sedan"
+      expect(elantra['plate']).to eq "8CEU662"
+      expect(elantra['vin']).to eq "KMHDU46D17U090264"
+      expect(elantra['year']).to eq 2007
+      expect(elantra['cost']).to eq "15000.0"
+      expect(elantra['purchase_vendor']).to eq "Feit Hyundai"
+      expect(elantra['initial_mileage']).to eq 53032
+      expect(elantra['userId']).to eq User.find_by(email: "jimhalpert@dundermifflin.com").id
     end
 
-    context "with invalid auth header" do
-      it "renders a 401 response" do
-        User.create! valid_create_user_1_params
-        get cars_url, headers: invalid_auth_header, as: :json
-        expect(response).to have_http_status(401)
-      end
-      it "renders a 401 response" do
-        User.create! valid_create_user_1_params
-        get cars_url, headers: poorly_formed_header(valid_create_user_2_params), as: :json
-        expect(response).to have_http_status(401)
-      end
-    end
   end
 
   describe "GET /show" do
-    context "with valid auth header" do
-      it "renders a successful response" do
-        user1 = User.create! valid_create_user_1_params
-        user1.avatar.attach(io: URI.open("#{Rails.root}" + user_1_attachment), filename: user_1_image)
-        user1.save!
-        user2 = User.create! valid_create_user_2_params
-        header = header_from_user(user2,valid_user_2_login_params)
-        car1 = Car.create(name: "Wrenches", description: "Michael's wrenches", user_id: user1.id)
-        car1.image.attach(io: URI.open("#{Rails.root}/app/assets/images/cars/allen-wrenches.jpg"), filename: "allen-wrenches.jpg")
-        car1.save!
-        get car_url(car1), headers: header, as: :json
-        expect(response).to be_successful
-      end
-      it "gets one car (with image)" do
-        user1 = User.create! valid_create_user_1_params
-        user1.avatar.attach(io: URI.open("#{Rails.root}" + user_1_attachment), filename: user_1_image)
-        user1.save!
-        user2 = User.create! valid_create_user_2_params
-        header = header_from_user(user2,valid_user_2_login_params)
-        car1 = Car.create(name: "Wrenches", description: "Michael's wrenches", user_id: user1.id)
-        car1.image.attach(io: URI.open("#{Rails.root}/app/assets/images/cars/allen-wrenches.jpg"), filename: "allen-wrenches.jpg")
-        car1.save!
-        get car_url(car1), headers: header, as: :json
-        expect(JSON.parse(response.body)).to include("id","name","description","image","userId")
-        expect(JSON.parse(response.body)['name']).to eq("Wrenches")
-        expect(JSON.parse(response.body)['description']).to eq("Michael's wrenches")
-        expect(JSON.parse(response.body)['image']).to match(/http.*\/allen-wrenches\.jpg/)
-        expect(JSON.parse(response.body)['userId']).to eq(user1.id)
-      end
-      it "gets one car (without avatar)" do
-        user1 = User.create! valid_create_user_1_params
-        user1.avatar.attach(io: URI.open("#{Rails.root}" + user_1_attachment), filename: user_1_image)
-        user1.save!
-        user2 = User.create! valid_create_user_2_params
-        header = header_from_user(user2,valid_user_2_login_params)
-        car2 = Car.create(name: "Bolts", description: "Michael's bolts", user_id: user1.id)
-        car2.save!
-        get car_url(car2), headers: header, as: :json
-        expect(JSON.parse(response.body)).to include("id","name","description","image","userId")
-        expect(JSON.parse(response.body)['name']).to eq("Bolts")
-        expect(JSON.parse(response.body)['description']).to eq("Michael's bolts")
-        expect(JSON.parse(response.body)['image']).to eq(nil)
-        expect(JSON.parse(response.body)['userId']).to eq(user1.id)
-      end
+    it "renders a successful response" do
+      car = cars(:fiat)
+      get car_url(car), headers: valid_headers
+      expect(response).to be_successful
     end
-    context "with invalid auth header" do
-      it "renders a 401 response" do
-        user1 = User.create! valid_create_user_1_params
-        car1 = Car.create(name: "Wrenches", description: "Michael's wrenches", user_id: user1.id)
-        car1.image.attach(io: URI.open("#{Rails.root}/app/assets/images/cars/allen-wrenches.jpg"), filename: "allen-wrenches.jpg")
-        car1.save!
-        get car_url(car1), headers: invalid_auth_header, as: :json
-        expect(response).to have_http_status(401)
-      end
-      it "renders a 401 response" do
-        user1 = User.create! valid_create_user_1_params
-        user2 = User.create! valid_create_user_2_params
-        car1 = Car.create(name: "Wrenches", description: "Michael's wrenches", user_id: user1.id)
-        car1.image.attach(io: URI.open("#{Rails.root}/app/assets/images/cars/allen-wrenches.jpg"), filename: "allen-wrenches.jpg")
-        car1.save!
-        get car_url(car1), headers: poorly_formed_header(valid_create_user_2_params), as: :json
-        expect(response).to have_http_status(401)
-      end
+    it "gets correct car properties" do
+      car = cars(:fiat)
+      get car_url(car), headers: valid_headers
+      fiat = JSON.parse(response.body)
+      expect(fiat['name']).to eq "Michael's Fiat 500"
+      expect(fiat['userName']).to eq "Michael Scott"
+      expect(fiat['image']).to be_kind_of(String)
+      expect(fiat['image']).to match(/http.*fiat-500\.jpg/)
+      expect(fiat['make']).to eq "Fiat"
+      expect(fiat['model']).to eq "500"
+      expect(fiat['trim']).to eq "Sport"
+      expect(fiat['color']).to eq "Yellow"
+      expect(fiat['body']).to eq "Hatchback"
+      expect(fiat['plate']).to eq "6XYK922"
+      expect(fiat['vin']).to eq "3C3CFFBR0CT382584"
+      expect(fiat['year']).to eq 2012
+      expect(fiat['cost']).to eq "10235.0"
+      expect(fiat['purchase_vendor']).to eq "Ted Fleid"
+      expect(fiat['initial_mileage']).to eq 47361
+      expect(fiat['userId']).to eq User.find_by(email: "michaelscott@dundermifflin.com").id
     end
   end
 
   describe "POST /create" do
-    context "without auth header" do
-      it "returns 401" do
-        user1 = User.create! valid_create_user_1_params
-        post cars_url, params: { name: "Wrenches", description: "Michael's wrenches", user_id: user1.id }
-        expect(response).to have_http_status(401)
+    context "with valid parameters" do
+      it "creates a new Car" do
+        expect { post cars_url, params: valid_attributes, headers: valid_headers, as: :json
+        }.to change(Car, :count).by(1)
+      end
+
+      it "renders a JSON response with the new car" do
+        post cars_url, params: valid_attributes, headers: valid_headers, as: :json
+        expect(response).to have_http_status(:created)
+        expect(response.content_type).to match(a_string_including("application/json"))
       end
     end
-    context "with valid params (without image)" do
-      it "creates car" do
-        user1 = User.create! valid_create_user_1_params
-        user2 = User.create! valid_create_user_2_params
-        header = header_from_user(user2,valid_user_2_login_params)
-        post cars_url, headers: header, params: { name: "Wrenches", description: "Michael's wrenches", user_id: user1.id }
-        expect(response).to have_http_status(201)
-        expect(JSON.parse(response.body)).to include("id","name","description","image","userId")
-        expect(JSON.parse(response.body)['name']).to eq("Wrenches")
-        expect(JSON.parse(response.body)['description']).to eq("Michael's wrenches")
-        expect(JSON.parse(response.body)['image']).to be_nil
-        expect(JSON.parse(response.body)['userId']).to eq(user1.id)
+
+    context "with invalid parameters" do
+      it "does not create a new Car" do
+        expect {
+          post cars_url, params: invalid_attributes, headers: valid_headers, as: :json
+        }.to change(Car, :count).by(0)
       end
-    end
-    context "with valid params (with image)" do
-      it "creates car" do
-        user1 = User.create! valid_create_user_1_params
-        user2 = User.create! valid_create_user_2_params
-        header = header_from_user(user2,valid_user_2_login_params)
-        image = Rack::Test::UploadedFile.new(Rails.root.join("app/assets/images/cars/allen-wrenches.jpg"))
-        post cars_url, headers: header, params: { name: "Wrenches", description: "Michael's wrenches", image: image, user_id: user1.id }
-        expect(response).to have_http_status(201)
-        expect(JSON.parse(response.body)).to include("id","name","description","image","userId")
-        expect(JSON.parse(response.body)['name']).to eq("Wrenches")
-        expect(JSON.parse(response.body)['description']).to eq("Michael's wrenches")
-        expect(JSON.parse(response.body)['image']).to match(/http.*\/allen-wrenches\.jpg/)
-        expect(JSON.parse(response.body)['userId']).to eq(user1.id)
-      end
-      it "creates car" do
-        user1 = User.create! valid_create_user_1_params
-        user2 = User.create! valid_create_user_2_params
-        header = header_from_user(user2,valid_user_2_login_params)
-        image = Rack::Test::UploadedFile.new(Rails.root.join("app/assets/images/cars/allen-wrenches.jpg"))
-        expect { post cars_url, headers: header, params: { name: "Wrenches", description: "Michael's wrenches", image: image, user_id: user1.id } }
-          .to change(Car, :count).by(1)
-      end
-    end
-    context "with invalid parameters (missing user id)" do
-      it "does not create a new User" do
-        user2 = User.create! valid_create_user_2_params
-        header = header_from_user(user2,valid_user_2_login_params)
-        expect { post cars_url, headers: header, params: { name: "Wrenches", description: "Michael's wrenches" }, as: :json}
-          .to change(User, :count).by(0)
-      end
-      it "renders a JSON error response" do
-        user2 = User.create! valid_create_user_2_params
-        header = header_from_user(user2,valid_user_2_login_params)
-        post cars_url, headers: header, params: { name: "Wrenches", description: "Michael's wrenches" }, as: :json
+
+      it "renders a JSON response with errors for the new car" do
+        post cars_url, params: invalid_attributes, headers: valid_headers, as: :json
         expect(response).to have_http_status(:unprocessable_entity)
         expect(response.content_type).to match(a_string_including("application/json"))
       end
@@ -2609,110 +2534,62 @@ RSpec.describe "/cars", type: :request do
 
   describe "PATCH /update" do
     context "with valid parameters" do
-      it "updates the requested car's name" do
-        user1 = User.create! valid_create_user_1_params
-        user2 = User.create! valid_create_user_2_params
-        header = header_from_user(user2,valid_user_2_login_params)
-        car1 = Car.create(name: "Wrenches", description: "Michael's wrenches", user_id: user1.id)
-        car1.image.attach(io: URI.open("#{Rails.root}/app/assets/images/cars/allen-wrenches.jpg"), filename: "allen-wrenches.jpg")
-        car1.save!        
-        patch car_url(car1), params: { name: "Updated Name!!"}, headers: header, as: :json
-        car1.reload
-        expect(JSON.parse(response.body)['name']).to eq "Updated Name!!"
+      let(:new_attributes) {{ name: "UpdatedName"}}
+
+      it "updates car's name" do
+        car = cars(:fiat)
+        patch car_url(car), params: new_attributes, headers: valid_headers, as: :json
+        car.reload
+        expect(car.name).to eq("UpdatedName")
+      end
+
+      it "renders a JSON response with the car" do
+        car = cars(:fiat)
+        patch car_url(car), params: new_attributes, headers: valid_headers, as: :json
         expect(response).to have_http_status(:ok)
         expect(response.content_type).to match(a_string_including("application/json"))
       end
-      it "updates the requested cars's image" do
-        user1 = User.create! valid_create_user_1_params   
-        user2 = User.create! valid_create_user_2_params
-        header = header_from_user(user2,valid_user_2_login_params)
-        car1 = Car.create(name: "Wrenches", description: "Michael's wrenches", user_id: user1.id)
-        car1.image.attach(io: URI.open("#{Rails.root}/app/assets/images/cars/allen-wrenches.jpg"), filename: "allen-wrenches.jpg")
-        car1.save!
-        updated_image = Rack::Test::UploadedFile.new(Rails.root.join('spec/fixtures/files/images/office-avatars/erin-hannon.png'))
-        patch car_url(car1), params: { name: "test", image: updated_image }, headers: header
-        expect(response).to have_http_status(:ok)
+
+      it "car's other properties are still correct" do
+        car = cars(:fiat)
+        patch car_url(car), params: new_attributes, headers: valid_headers, as: :json
+        fiat = JSON.parse(response.body)
+        expect(fiat['userName']).to eq "Michael Scott"
+        expect(fiat['image']).to be_kind_of(String)
+        expect(fiat['image']).to match(/http.*fiat-500\.jpg/)
+        expect(fiat['make']).to eq "Fiat"
+        expect(fiat['model']).to eq "500"
+        expect(fiat['trim']).to eq "Sport"
+        expect(fiat['color']).to eq "Yellow"
+        expect(fiat['body']).to eq "Hatchback"
+        expect(fiat['plate']).to eq "6XYK922"
+        expect(fiat['vin']).to eq "3C3CFFBR0CT382584"
+        expect(fiat['year']).to eq 2012
+        expect(fiat['cost']).to eq "10235.0"
+        expect(fiat['purchase_vendor']).to eq "Ted Fleid"
+        expect(fiat['initial_mileage']).to eq 47361
+        expect(fiat['userId']).to eq User.find_by(email: "michaelscott@dundermifflin.com").id
+      end
+
+    end
+
+    context "with invalid parameters" do
+      it "renders a JSON response with errors for the car" do
+        car = cars(:fiat)
+        patch car_url(car), params: invalid_attributes, headers: valid_headers, as: :json
+        expect(response).to have_http_status(:unprocessable_entity)
         expect(response.content_type).to match(a_string_including("application/json"))
-        expect(JSON.parse(response.body)['name']).to eq("test")
-        expect(JSON.parse(response.body)['image']).to be_kind_of(String)
-        expect(JSON.parse(response.body)['image']).to match(/http.*\/erin-hannon\.png/)
       end
     end
   end
 
   describe "DELETE /destroy" do
-    it "destroys the requested car (without avatar)" do
-      user1 = User.create! valid_create_user_1_params
-      user2 = User.create! valid_create_user_2_params      
-      header = header_from_user(user2,valid_user_2_login_params)
-      car1 = Car.create(name: "Wrenches", description: "Michael's wrenches", user_id: user1.id)
-      expect {
-        delete car_url(car1), headers: header, as: :json
-      }.to change(Car, :count).by(-1)
-    end
-    it "destroys the requested car (with avatar)" do
-      file = Rack::Test::UploadedFile.new(Rails.root.join("spec/fixtures/files/images/office-avatars/michael-scott.png"))
-      valid_create_user_1_params['avatar'] = file
-      user1 = User.create! valid_create_user_1_params
-      user2 = User.create! valid_create_user_2_params
-      header = header_from_user(user2,valid_user_2_login_params)
-      car1 = Car.create(name: "Wrenches", description: "Michael's wrenches", user_id: user1.id)
-      car1.image.attach(io: URI.open("#{Rails.root}/app/assets/images/cars/allen-wrenches.jpg"), filename: "allen-wrenches.jpg")
-      car1.save!
-      expect {
-        delete car_url(car1), headers: header, as: :json
+    it "destroys the requested car" do
+      car = Car.create! valid_attributes
+      expect { delete car_url(car), headers: valid_headers, as: :json
       }.to change(Car, :count).by(-1)
     end
   end
-end
-
-private 
-
-def token_from_user(user,login_params)
-  post "/login", params: login_params
-  token = JSON.parse(response.body)['data']
-end
-
-def valid_token(create_user_params)
-  user = User.create(create_user_params)
-  post "/login", params: valid_user_1_login_params
-  token = JSON.parse(response.body)['data']
-end
-
-def valid_auth_header_from_token(token)
-  auth_value = "Bearer " + token
-  { Authorization: auth_value }
-end
-
-def valid_auth_header_from_user_params(create_user_params)
-  token = valid_token(create_user_params)
-  auth_value = "Bearer " + token
-  { Authorization: auth_value }
-end
-
-def header_from_user(user,login_params)
-  token = token_from_user(user,login_params)
-  auth_value = "Bearer " + token
-  { Authorization: auth_value }
-end
-
-def invalid_auth_header
-  auth_value = "Bearer " + "xyz"
-  { Authorization: auth_value }
-end
-
-def poorly_formed_header(create_user_params)
-  token = valid_token(create_user_params)
-  auth_value = "Bears " + token
-  { Authorization: auth_value }
-end
-
-def blob_for(name)
-  ActiveStorage::Blob.create_and_upload!(
-    io: File.open(Rails.root.join(file_fixture(name)), 'rb'),
-    filename: name,
-    content_type: 'image/png' # Or figure it out from `name` if you have non-JPEGs
-  )
 end
 ~
 ```
