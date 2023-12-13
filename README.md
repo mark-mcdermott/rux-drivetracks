@@ -2282,6 +2282,17 @@ end
 - `rails g scaffold maintenance date:date description vendor cost:decimal image:attachment car:references`
 - `# rails g scaffold maintenance name description image:attachment ref_id:integer ref_type`
 - `rails db:migrate`
+- in `db/migrate/<timestamp>_create_maintenances` change the `create_table` section to:
+```
+create_table :maintenances do |t|
+  t.date :date
+  t.string :description
+  t.string :vendor
+  t.decimal :cost, precision: 10, scale: 2
+  t.references :car, null: false, foreign_key: {on_delete: :cascade}
+  t.timestamps
+end
+```
 - `puravida app/controllers/maintenances_controller.rb ~`
 ```
 class MaintenancesController < ApplicationController
@@ -2433,24 +2444,17 @@ camry_replaced_radiator
 ```
 require 'rails_helper'
 
-RSpec.describe "/cars", type: :request do
+RSpec.describe "/maintenances", type: :request do
   fixtures :users
   fixtures :cars
+  fixtures :maintenances
   let(:valid_headers) {{ Authorization: "Bearer " + @michael_token }}
   let(:valid_attributes) {{ 
-    name: "Jim's Fiat 500",
-    make: "Fiat",
-    model: "500",
-    trim: "Sport",
-    color: "Yellow",
-    body: "Hatchback",
-    plate: "6XYK922",
-    vin: "3C3CFFBR0CT382584",
-    year: 2012,
-    cost: 10235.00,
-    purchase_vendor: "Ted Fleid",
-    initial_mileage: 47361,
-    user_id: User.find_by(email: "michaelscott@dundermifflin.com").id
+    date: Date.parse("20200713"),
+    description: "Alignment",
+    vendor: "Pep Boys",
+    cost: 350.00,
+    car_id: Car.find_by(name: "Michael's Fiat 500").id
   }}
   let(:invalid_attributes) {{ 
     name: "",
