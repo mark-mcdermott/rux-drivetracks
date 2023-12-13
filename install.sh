@@ -623,41 +623,41 @@ class ApplicationController < ActionController::API
   def prep_raw_user(user)
     avatar = user.avatar.present? ? url_for(user.avatar) : nil
     # cars = Car.where(user_id: user.id).map { |car| car.id }
-    # documents = Document.where(car_id: cars).map { |document| document.id }
+    # maintenances = Maintenance.where(car_id: cars).map { |maintenance| maintenance.id }
     user = user.admin ? user.slice(:id,:email,:name,:admin) : user.slice(:id,:email,:name)
     user['avatar'] = avatar
     # user['car_ids'] = cars
-    # user['document_ids'] = documents
+    # user['maintenance_ids'] = maintenances
     user
   end
 
   def prep_raw_car(car)
     user_id = car.user_id
     user_name = User.find(car.user_id).name
-    # documents = Document.where(car_id: car.id)
-    # documents = documents.map { |document| document.slice(:id,:name,:description,:car_id) }
+    # maintenances = Maintenance.where(car_id: car.id)
+    # maintenances = maintenances.map { |maintenance| maintenance.slice(:id,:name,:description,:car_id) }
     image = car.image.present? ? url_for(car.image) : nil
     car = car.slice(:id,:name,:description)
     car['userId'] = user_id
     car['userName'] = user_name
     car['image'] = image
-    # car['documents'] = documents
+    # car['maintenances'] = maintenances
     car
   end
 
-  def prep_raw_document(document)
-    car_id = document.car_id
+  def prep_raw_maintenance(maintenance)
+    car_id = maintenance.car_id
     car = Car.find(car_id)
     user = User.find(car.user_id)
-    image = document.image.present? ? url_for(document.image) : nil
-    document = document.slice(:id,:name,:description)
-    document['carId'] = car_id
-    document['carName'] = car.name
-    document['carDescription'] = car.description
-    document['userId'] = user.id
-    document['userName'] = user.name
-    document['image'] = image
-    document
+    image = maintenance.image.present? ? url_for(maintenance.image) : nil
+    maintenance = maintenance.slice(:id,:name,:description)
+    maintenance['carId'] = car_id
+    maintenance['carName'] = car.name
+    maintenance['carDescription'] = car.description
+    maintenance['userId'] = user.id
+    maintenance['userName'] = user.name
+    maintenance['image'] = image
+    maintenance
   end
   
   private 
@@ -1026,42 +1026,42 @@ class ApplicationController < ActionController::API
     avatar = user.avatar.present? ? url_for(user.avatar) : nil
     car_ids = Car.where(user_id: user.id).map { |car| car.id }
     cars = Car.where(user_id: user.id).map { |car| prep_raw_car(car) }
-    # documents = Document.where(car_id: cars).map { |document| document.id }
+    # maintenances = Maintenance.where(car_id: cars).map { |maintenance| maintenance.id }
     user = user.admin ? user.slice(:id,:email,:name,:admin) : user.slice(:id,:email,:name)
     user['avatar'] = avatar
     user['car_ids'] = car_ids
     user['cars'] = cars
-    # user['document_ids'] = documents
+    # user['maintenance_ids'] = maintenances
     user
   end
 
   def prep_raw_car(car)
     user_id = car.user_id
     user_name = User.find(car.user_id).name
-    # documents = Document.where(car_id: car.id)
-    # documents = documents.map { |document| document.slice(:id,:name,:description,:car_id) }
+    # maintenances = Maintenance.where(car_id: car.id)
+    # maintenances = maintenances.map { |maintenance| maintenance.slice(:id,:name,:description,:car_id) }
     image = car.image.present? ? url_for(car.image) : nil
     car = car.slice(:id,:name,:year,:make,:model,:trim,:body,:color,:plate,:vin,:cost,:initial_mileage,:purchase_date,:purchase_vendor)
     car['userId'] = user_id
     car['userName'] = user_name
     car['image'] = image
-    # car['documents'] = documents
+    # car['maintenances'] = maintenances
     car
   end
 
-  def prep_raw_document(document)
-    car_id = document.car_id
+  def prep_raw_maintenance(maintenance)
+    car_id = maintenance.car_id
     car = Car.find(car_id)
     user = User.find(car.user_id)
-    image = document.image.present? ? url_for(document.image) : nil
-    document = document.slice(:id,:name,:description)
-    document['carId'] = car_id
-    document['carName'] = car.name
-    document['carDescription'] = car.description
-    document['userId'] = user.id
-    document['userName'] = user.name
-    document['image'] = image
-    document
+    image = maintenance.image.present? ? url_for(maintenance.image) : nil
+    maintenance = maintenance.slice(:id,:name,:description)
+    maintenance['carId'] = car_id
+    maintenance['carName'] = car.name
+    maintenance['carDescription'] = car.description
+    maintenance['userId'] = user.id
+    maintenance['userName'] = user.name
+    maintenance['image'] = image
+    maintenance
   end
   
   private 
@@ -1914,70 +1914,70 @@ EOF
 rspec
 
 
-# echo -e "\n\n🦄  Documents (Backend)\n\n"
-# # rails g scaffold document name description image:attachment car:references
-# rails g scaffold document name description image:attachment ref_id:integer ref_type
+# echo -e "\n\n🦄  Maintenances (Backend)\n\n"
+# # rails g scaffold maintenance name description image:attachment car:references
+# rails g scaffold maintenance name description image:attachment ref_id:integer ref_type
 # rails db:migrate
-# cat <<'EOF' | puravida app/controllers/documents_controller.rb ~
-# class DocumentsController < ApplicationController
-#   before_action :set_document, only: %i[ show update destroy ]
+# cat <<'EOF' | puravida app/controllers/maintenances_controller.rb ~
+# class MaintenancesController < ApplicationController
+#   before_action :set_maintenance, only: %i[ show update destroy ]
 
-#   # GET /documents
+#   # GET /maintenances
 #   def index
 #     if params['user_id'].present?
-#       @documents = Document.joins(car: [:user]).where(users: {id: params['user_id']}).map { |document| prep_raw_document(document) }
+#       @maintenances = Maintenance.joins(car: [:user]).where(users: {id: params['user_id']}).map { |maintenance| prep_raw_maintenance(maintenance) }
 #     else
-#       @documents = Document.all.map { |document| prep_raw_document(document) }
+#       @maintenances = Maintenance.all.map { |maintenance| prep_raw_maintenance(maintenance) }
 #     end
-#     render json: @documents
+#     render json: @maintenances
 #   end
 
-#   # GET /documents/1
+#   # GET /maintenances/1
 #   def show
-#     render json: prep_raw_document(@document)
+#     render json: prep_raw_maintenance(@maintenance)
 #   end
 
-#   # POST /documents
+#   # POST /maintenances
 #   def create
-#     create_params = document_params
-#     create_params['image'] = params['image'].blank? ? nil : params['image'] # if no image is chosen on new document page, params['image'] comes in as a blank string, which throws a 500 error at Document.new(create_params). This changes any params['avatar'] blank string to nil, which is fine in Document.new(create_params).
+#     create_params = maintenance_params
+#     create_params['image'] = params['image'].blank? ? nil : params['image'] # if no image is chosen on new maintenance page, params['image'] comes in as a blank string, which throws a 500 error at Maintenance.new(create_params). This changes any params['avatar'] blank string to nil, which is fine in Maintenance.new(create_params).
 #     create_params['car_id'] = create_params['car_id'].to_i
-#     @document = Document.new(create_params)
-#     if @document.save
-#       render json: prep_raw_document(@document), status: :created, location: @document
+#     @maintenance = Maintenance.new(create_params)
+#     if @maintenance.save
+#       render json: prep_raw_maintenance(@maintenance), status: :created, location: @maintenance
 #     else
-#       render json: @document.errors, status: :unprocessable_entity
+#       render json: @maintenance.errors, status: :unprocessable_entity
 #     end
 #   end
 
-#   # PATCH/PUT /documents/1
+#   # PATCH/PUT /maintenances/1
 #   def update
-#     if @document.update(document_params)
-#       render json: prep_raw_document(@document)
+#     if @maintenance.update(maintenance_params)
+#       render json: prep_raw_maintenance(@maintenance)
 #     else
-#       render json: @document.errors, status: :unprocessable_entity
+#       render json: @maintenance.errors, status: :unprocessable_entity
 #     end
 #   end
 
-#   # DELETE /documents/1
+#   # DELETE /maintenances/1
 #   def destroy
-#     @document.destroy
+#     @maintenance.destroy
 #   end
 
 #   private
 #     # Use callbacks to share common setup or constraints between actions.
-#     def set_document
-#       @document = Document.find(params[:id])
+#     def set_maintenance
+#       @maintenance = Maintenance.find(params[:id])
 #     end
 
 #     # Only allow a list of trusted parameters through.
-#     def document_params
+#     def maintenance_params
 #       params.permit(:id, :name, :description, :image, :car_id)
 #     end
 # end
 # ~
 # EOF
-# cat <<'EOF' | puravida spec/requests/documents_spec.rb ~
+# cat <<'EOF' | puravida spec/requests/maintenances_spec.rb ~
 # # frozen_string_literal: true
 # require 'open-uri'
 # require 'rails_helper'
@@ -2357,7 +2357,7 @@ rspec
 # Rails.application.routes.draw do
 #   resources :users
 #   resources :cars
-#   resources :documents
+#   resources :maintenances
 #   get "health", to: "health#index"
 #   post "login", to: "authentications#create"
 #   get "me", to: "application#user_from_token"
@@ -2397,36 +2397,36 @@ rspec
 # car = Car.create(name: "Washers", description: "Pam's washer", user_id: 3)
 # car.image.attach(io: URI.open("#{Rails.root}/app/assets/images/cars/washers.jpg"), filename: "washers.jpg")
 # car.save!
-# document = Document.create(name: "Sub-Button", description: "Michael's wrench's button", car_id: 1)
-# document.image.attach(io: URI.open("#{Rails.root}/app/assets/images/documents/button.jpg"), filename: "button.jpg")
-# document.save!
-# document = Document.create(name: "Sub-Buzzer", description: "Michael's bolt's buzzer", car_id: 2)
-# document.image.attach(io: URI.open("#{Rails.root}/app/assets/images/documents/buzzer.jpg"), filename: "buzzer.jpg")
-# document.save!
-# document = Document.create(name: "Sub-Capacitor", description: "Jim's bracket's capacitor", car_id: 3)
-# document.image.attach(io: URI.open("#{Rails.root}/app/assets/images/documents/capacitor.jpg"), filename: "capacitor.jpg")
-# document.save!
-# document = Document.create(name: "Sub-Dipswitch", description: "Jim's nut's dipswitch", car_id: 4)
-# document.image.attach(io: URI.open("#{Rails.root}/app/assets/images/documents/dip.jpg"), filename: "dip.jpg")
-# document.save!
-# document = Document.create(name: "Sub-Led", description: "Jim's pipe's led", car_id: 5)
-# document.image.attach(io: URI.open("#{Rails.root}/app/assets/images/documents/led.jpg"), filename: "led.jpg")
-# document.save!
-# document = Document.create(name: "Sub-Relay", description: "Pam's screw's relay", car_id: 6)
-# document.image.attach(io: URI.open("#{Rails.root}/app/assets/images/documents/relay.png"), filename: "relay.png")
-# document.save!
-# document = Document.create(name: "Sub-Resistor", description: "Pam's washer's resistor", car_id: 7)
-# document.image.attach(io: URI.open("#{Rails.root}/app/assets/images/documents/resistor.jpg"), filename: "resistor.jpg")
-# document.save!
-# document = Document.create(name: "Sub-Semiconductor", description: "Pam's washer's semiconductor", car_id: 7)
-# document.image.attach(io: URI.open("#{Rails.root}/app/assets/images/documents/semiconductor.jpg"), filename: "semiconductor.jpg")
-# document.save!
-# document = Document.create(name: "Sub-Toggle", description: "Michel's wrench's toggle", car_id: 1)
-# document.image.attach(io: URI.open("#{Rails.root}/app/assets/images/documents/toggle.jpg"), filename: "toggle.jpg")
-# document.save!
-# document = Document.create(name: "Sub-Tube", description: "Jim's bracket's tube", car_id: 3)
-# document.image.attach(io: URI.open("#{Rails.root}/app/assets/images/documents/tube.jpg"), filename: "tube.jpg")
-# document.save!
+# maintenance = Maintenance.create(name: "Sub-Button", description: "Michael's wrench's button", car_id: 1)
+# maintenance.image.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/button.jpg"), filename: "button.jpg")
+# maintenance.save!
+# maintenance = Maintenance.create(name: "Sub-Buzzer", description: "Michael's bolt's buzzer", car_id: 2)
+# maintenance.image.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/buzzer.jpg"), filename: "buzzer.jpg")
+# maintenance.save!
+# maintenance = Maintenance.create(name: "Sub-Capacitor", description: "Jim's bracket's capacitor", car_id: 3)
+# maintenance.image.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/capacitor.jpg"), filename: "capacitor.jpg")
+# maintenance.save!
+# maintenance = Maintenance.create(name: "Sub-Dipswitch", description: "Jim's nut's dipswitch", car_id: 4)
+# maintenance.image.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/dip.jpg"), filename: "dip.jpg")
+# maintenance.save!
+# maintenance = Maintenance.create(name: "Sub-Led", description: "Jim's pipe's led", car_id: 5)
+# maintenance.image.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/led.jpg"), filename: "led.jpg")
+# maintenance.save!
+# maintenance = Maintenance.create(name: "Sub-Relay", description: "Pam's screw's relay", car_id: 6)
+# maintenance.image.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/relay.png"), filename: "relay.png")
+# maintenance.save!
+# maintenance = Maintenance.create(name: "Sub-Resistor", description: "Pam's washer's resistor", car_id: 7)
+# maintenance.image.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/resistor.jpg"), filename: "resistor.jpg")
+# maintenance.save!
+# maintenance = Maintenance.create(name: "Sub-Semiconductor", description: "Pam's washer's semiconductor", car_id: 7)
+# maintenance.image.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/semiconductor.jpg"), filename: "semiconductor.jpg")
+# maintenance.save!
+# maintenance = Maintenance.create(name: "Sub-Toggle", description: "Michel's wrench's toggle", car_id: 1)
+# maintenance.image.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/toggle.jpg"), filename: "toggle.jpg")
+# maintenance.save!
+# maintenance = Maintenance.create(name: "Sub-Tube", description: "Jim's bracket's tube", car_id: 3)
+# maintenance.image.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/tube.jpg"), filename: "tube.jpg")
+# maintenance.save!
 # ~
 # EOF
 # rails db:seed
@@ -2559,13 +2559,13 @@ rspec
 #   let elemId = null
 #   let isElemUsers = false
 #   let isCar = false;
-#   let isDocument = false;
+#   let isMaintenance = false;
 #   let isUser = false;
 #   const userCars = loggedInUser.car_ids
-#   const userDocuments = loggedInUser.document_ids
+#   const userMaintenances = loggedInUser.maintenance_ids
 
-#   if (url.includes("document")) {
-#     isDocument = true
+#   if (url.includes("maintenance")) {
+#     isMaintenance = true
 #   } else if (url.includes("car")) {
 #     isCar = true
 #   } else if (url.includes("users")) {
@@ -2580,8 +2580,8 @@ rspec
   
 #   if (isCar) {
 #     isElemUsers = userCars.includes(elemId) ? true : false
-#   } else if (isDocument) {
-#     isElemUsers = userDocuments.includes(elemId) ? true : false
+#   } else if (isMaintenance) {
+#     isElemUsers = userMaintenances.includes(elemId) ? true : false
 #   } else if (isUser) {
 #     isElemUsers = loggedInUser.id === elemId ? true : false
 #   }
@@ -2886,10 +2886,10 @@ rspec
 #     <p>description: {{ car.description }}</p>
 #     <p v-if="car.image !== null" class="no-margin">image:</p>
 #     <img v-if="car.image !== null" :src="car.image" />
-#     <h4 v-if="car.documents !== null">Documents</h4>
-#     <ul v-if="car.documents !== null">
-#       <li v-for="document in car.documents" :key="document.id">
-#         <NuxtLink :to="`/documents/${document.id}`">{{ document.name }} - {{ document.description }}</NuxtLink>
+#     <h4 v-if="car.maintenances !== null">Maintenances</h4>
+#     <ul v-if="car.maintenances !== null">
+#       <li v-for="maintenance in car.maintenances" :key="maintenance.id">
+#         <NuxtLink :to="`/maintenances/${maintenance.id}`">{{ maintenance.name }} - {{ maintenance.description }}</NuxtLink>
 #       </li>
 #     </ul>
 #   </article>
@@ -3121,34 +3121,34 @@ rspec
 # ~
 # EOF
 
-# echo -e "\n\n🦄 Documents (frontend)\n\n"
-# cat <<'EOF' | puravida components/document/Card.vue ~
+# echo -e "\n\n🦄 Maintenances (frontend)\n\n"
+# cat <<'EOF' | puravida components/maintenance/Card.vue ~
 # <template>
 #   <article>
 #     <h2>
-#       <NuxtLink :to="`/documents/${document.id}`">{{ document.name }}</NuxtLink> 
-#       <NuxtLink :to="`/documents/${document.id}/edit`"><font-awesome-icon icon="pencil" /></NuxtLink>
-#       <a @click.prevent=deleteCar(document.id) href="#"><font-awesome-icon icon="trash" /></a>
+#       <NuxtLink :to="`/maintenances/${maintenance.id}`">{{ maintenance.name }}</NuxtLink> 
+#       <NuxtLink :to="`/maintenances/${maintenance.id}/edit`"><font-awesome-icon icon="pencil" /></NuxtLink>
+#       <a @click.prevent=deleteCar(maintenance.id) href="#"><font-awesome-icon icon="trash" /></a>
 #     </h2>
-#     <p>id: {{ document.id }}</p>
-#     <p>description: {{ document.description }}</p>
-#     <p v-if="document.image !== null" class="no-margin">image:</p>
-#     <img v-if="document.image !== null" :src="document.image" />
-#     <p>car: <NuxtLink :to="`/cars/${document.carId}`">{{ document.carName }} - {{ document.carDescription }}</NuxtLink></p>
+#     <p>id: {{ maintenance.id }}</p>
+#     <p>description: {{ maintenance.description }}</p>
+#     <p v-if="maintenance.image !== null" class="no-margin">image:</p>
+#     <img v-if="maintenance.image !== null" :src="maintenance.image" />
+#     <p>car: <NuxtLink :to="`/cars/${maintenance.carId}`">{{ maintenance.carName }} - {{ maintenance.carDescription }}</NuxtLink></p>
 #   </article>
 # </template>
 
 # <script>
 # import { mapGetters } from 'vuex'
 # export default {
-#   name: 'DocumentCard',
+#   name: 'MaintenanceCard',
 #   computed: { ...mapGetters(['isAdmin']) },
 #   props: {
-#     document: {
+#     maintenance: {
 #       type: Object,
 #       default: () => ({}),
 #     },
-#     documents: {
+#     maintenances: {
 #       type: Array,
 #       default: () => ([]),
 #     },
@@ -3157,21 +3157,21 @@ rspec
 #     uploadImage: function() {
 #       this.image = this.$refs.inputFile.files[0];
 #     },
-#     deleteDocument: function(id) {
-#       this.$axios.$delete(`documents/${id}`)
-#       const index = this.documents.findIndex((i) => { return i.id === id })
-#       this.documents.splice(index, 1);
+#     deleteMaintenance: function(id) {
+#       this.$axios.$delete(`maintenances/${id}`)
+#       const index = this.maintenances.findIndex((i) => { return i.id === id })
+#       this.maintenances.splice(index, 1);
 #     }
 #   }
 # }
 # </script>
 # ~
 # EOF
-# cat <<'EOF' | puravida components/document/Set.vue ~
+# cat <<'EOF' | puravida components/maintenance/Set.vue ~
 # <template>
 #   <section>
-#     <div v-for="document in documents" :key="document.id">
-#       <DocumentCard :document="document" :documents= "documents" />
+#     <div v-for="maintenance in maintenances" :key="maintenance.id">
+#       <MaintenanceCard :maintenance="maintenance" :maintenances= "maintenances" />
 #     </div>
 #   </section>
 # </template>
@@ -3181,7 +3181,7 @@ rspec
 # export default {
 #   computed: { ...mapGetters(['isAuthenticated', 'isAdmin', 'loggedInUser']) }, 
 #   data: () => ({
-#     documents: []
+#     maintenances: []
 #   }),
 #   async fetch() {
 #     const query = this.$store.$auth.ctx.query
@@ -3189,13 +3189,13 @@ rspec
 #     const idQuery = query.user_id
     
 #     if (this.isAdmin && adminQuery) {
-#       this.documents = await this.$axios.$get('documents')
+#       this.maintenances = await this.$axios.$get('maintenances')
 #     } else if (idQuery) {
-#       this.documents = await this.$axios.$get('documents', {
+#       this.maintenances = await this.$axios.$get('maintenances', {
 #         params: { user_id: idQuery }
 #       })
 #     } else {
-#       this.documents = await this.$axios.$get('documents', {
+#       this.maintenances = await this.$axios.$get('maintenances', {
 #         params: { user_id: this.loggedInUser.id }
 #       })
 #     }
@@ -3204,11 +3204,11 @@ rspec
 # </script>
 # ~
 # EOF
-# cat <<'EOF' | puravida components/document/Form.vue ~
+# cat <<'EOF' | puravida components/maintenance/Form.vue ~
 # <template>
 #   <section>
-#     <h1 v-if="editOrNew === 'edit'">Edit Document</h1>
-#     <h1 v-else-if="editOrNew === 'new'">Add Document</h1>
+#     <h1 v-if="editOrNew === 'edit'">Edit Maintenance</h1>
+#     <h1 v-else-if="editOrNew === 'new'">Add Maintenance</h1>
 #     <article>
 #       <form enctype="multipart/form-data">
 #         <p v-if="editOrNew === 'edit'">id: {{ $route.params.id }}</p>
@@ -3222,8 +3222,8 @@ rspec
 #           <option value=""></option>
 #           <option v-for="car in cars" :key="car.id" :value="car.id">{{ car.name }} - {{ car.description }}</option>
 #         </select>
-#         <button v-if="editOrNew !== 'edit'" @click.prevent=createDocument>Create Document</button>
-#         <button v-else-if="editOrNew == 'edit'" @click.prevent=editDocument>Edit Document</button>
+#         <button v-if="editOrNew !== 'edit'" @click.prevent=createMaintenance>Create Maintenance</button>
+#         <button v-else-if="editOrNew == 'edit'" @click.prevent=editMaintenance>Edit Maintenance</button>
 #       </form>
 #     </article>
 #   </section>
@@ -3254,10 +3254,10 @@ rspec
 #     const splitPath = $nuxt.$route.path.split('/')
 #     this.editOrNew = $nuxt.$route.path.split('/')[$nuxt.$route.path.split('/').length-1]
 #     if ($nuxt.$route.path.split('/')[$nuxt.$route.path.split('/').length-1]=='edit') {
-#       const document = await this.$axios.$get(`documents/${this.$route.params.id}`)
-#       this.name = document.name
-#       this.description = document.description,
-#       this.image = document.image  
+#       const maintenance = await this.$axios.$get(`maintenances/${this.$route.params.id}`)
+#       this.name = maintenance.name
+#       this.description = maintenance.description,
+#       this.image = maintenance.image  
 #     }
 #     if (this.editOrNew == 'new') {
 #       this.cars = await this.$axios.$get('/cars', {
@@ -3270,7 +3270,7 @@ rspec
 #       this.image = this.$refs.inputFile.files[0]
 #       this.hideImage = true
 #     },
-#     createDocument: function() {
+#     createMaintenance: function() {
 #       const params = {
 #         'name': this.name,
 #         'description': this.description,
@@ -3281,13 +3281,13 @@ rspec
 #       Object.entries(params).forEach(
 #         ([key, value]) => payload.append(key, value)
 #       )
-#       this.$axios.$post('documents', payload)
+#       this.$axios.$post('maintenances', payload)
 #         .then((res) => {
-#           const documentId = res.id
-#           this.$router.push(`/documents/${documentId}`)
+#           const maintenanceId = res.id
+#           this.$router.push(`/maintenances/${maintenanceId}`)
 #         })
 #     },
-#     editDocument: function() {
+#     editMaintenance: function() {
 #       let params = {}
 #       const filePickerFile = this.$refs.inputFile.files[0]
 #       if (!filePickerFile) {
@@ -3299,9 +3299,9 @@ rspec
 #       Object.entries(params).forEach(
 #         ([key, value]) => payload.append(key, value)
 #       )
-#       this.$axios.$patch(`/documents/${this.$route.params.id}`, payload)
+#       this.$axios.$patch(`/maintenances/${this.$route.params.id}`, payload)
 #         .then(() => {
-#           this.$router.push(`/documents/${this.$route.params.id}`)
+#           this.$router.push(`/maintenances/${this.$route.params.id}`)
 #         })
 #     },
 #     selectCar: function(event) {
@@ -3312,12 +3312,12 @@ rspec
 # </script>
 # ~
 # EOF
-# cat <<'EOF' | puravida pages/documents/index.vue ~
+# cat <<'EOF' | puravida pages/maintenances/index.vue ~
 # <template>
 #   <main class="container">
-#     <h1>Documents</h1>
-#     <NuxtLink to="/documents/new" role="button">Add Document</NuxtLink>
-#     <DocumentSet />
+#     <h1>Maintenances</h1>
+#     <NuxtLink to="/maintenances/new" role="button">Add Maintenance</NuxtLink>
+#     <MaintenanceSet />
 #   </main>
 # </template>
 # <script>
@@ -3325,19 +3325,19 @@ rspec
 # </script>
 # ~
 # EOF
-# cat <<'EOF' | puravida pages/documents/new.vue ~
+# cat <<'EOF' | puravida pages/maintenances/new.vue ~
 # <template>
 #   <main class="container">
-#     <DocumentForm />
+#     <MaintenanceForm />
 #   </main>
 # </template>
 # ~
 # EOF
-# cat <<'EOF' | puravida pages/documents/_id/index.vue ~
+# cat <<'EOF' | puravida pages/maintenances/_id/index.vue ~
 # <template>
 #   <main class="container">
 #     <section>
-#       <DocumentCard :document="document" />
+#       <MaintenanceCard :maintenance="maintenance" />
 #     </section>
 #   </main>
 # </template>
@@ -3345,20 +3345,20 @@ rspec
 # <script>
 # export default {
 #   middleware: 'currentOrAdmin-showEdit',
-#   data: () => ({ document: {} }),
-#   async fetch() { this.document = await this.$axios.$get(`documents/${this.$route.params.id}`) },
+#   data: () => ({ maintenance: {} }),
+#   async fetch() { this.maintenance = await this.$axios.$get(`maintenances/${this.$route.params.id}`) },
 #   methods: {
 #     uploadImage: function() { this.image = this.$refs.inputFile.files[0] },
-#     deleteDocument: function(id) {
-#       this.$axios.$delete(`documents/${this.$route.params.id}`)
-#       this.$router.push('/documents')
+#     deleteMaintenance: function(id) {
+#       this.$axios.$delete(`maintenances/${this.$route.params.id}`)
+#       this.$router.push('/maintenances')
 #     }
 #   }
 # }
 # </script>
 # ~
 # EOF
-# cat <<'EOF' | puravida pages/documents/_id/edit.vue ~
+# cat <<'EOF' | puravida pages/maintenances/_id/edit.vue ~
 # <template>
 #   <main class="container">
 #     <CarForm />
@@ -3392,7 +3392,7 @@ rspec
 #       <li v-if="!isAuthenticated"><strong><NuxtLink to="/log-in">Log In</NuxtLink></strong></li>
 #       <li v-if="!isAuthenticated"><strong><NuxtLink to="/sign-up">Sign Up</NuxtLink></strong></li>
 #       <li v-if="isAuthenticated"><strong><NuxtLink :to="`/cars?user_id=${loggedInUser.id}`">Cars</NuxtLink></strong></li>
-#       <li v-if="isAuthenticated"><strong><NuxtLink :to="`/documents?user_id=${loggedInUser.id}`">Documents</NuxtLink></strong></li>
+#       <li v-if="isAuthenticated"><strong><NuxtLink :to="`/maintenances?user_id=${loggedInUser.id}`">Maintenances</NuxtLink></strong></li>
 #       <li v-if="isAdmin"><strong><NuxtLink to="/admin">Admin</NuxtLink></strong></li>
 #       <li v-if="isAuthenticated" class='dropdown'>
 #         <details role="list" dir="rtl">
