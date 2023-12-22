@@ -17,6 +17,7 @@ cp -a ~/Desktop/fly-drivetracks-notes-and-assets/assets ~/Desktop/backtest/app/
 puravida spec/fixtures/files
 cp -a ~/Desktop/fly-drivetracks-notes-and-assets/assets/images/office-avatars/* ~/Desktop/backtest/spec/fixtures/files/
 cp -a ~/Desktop/fly-drivetracks-notes-and-assets/assets/images/cars/* ~/Desktop/backtest/spec/fixtures/files/
+cp -a ~/Desktop/fly-drivetracks-notes-and-assets/assets/images/maintenances/* ~/Desktop/backtest/spec/fixtures/files/
 cat <<'EOF' | puravida config/initializers/cors.rb ~
 Rails.application.config.middleware.insert_before 0, Rack::Cors do
   allow do
