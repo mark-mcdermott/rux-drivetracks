@@ -1235,8 +1235,7 @@ cat <<'EOF' | puravida spec/models/car_spec.rb ~
 require 'rails_helper'
 
 RSpec.describe "/cars", type: :request do
-  fixtures :users
-  fixtures :cars
+  fixtures :users, :cars
   let(:valid_headers) {{ Authorization: "Bearer " + @michael_token }}
   let(:valid_attributes) {{ 
     name: "Jim's Fiat 500",
@@ -1288,8 +1287,7 @@ cat <<'EOF' | puravida spec/requests/cars_spec.rb ~
 require 'rails_helper'
 
 RSpec.describe "/cars", type: :request do
-  fixtures :users
-  fixtures :cars
+  fixtures :users, :cars
   let(:valid_headers) {{ Authorization: "Bearer " + @michael_token }}
   let(:valid_attributes) {{ 
     name: "Jim's Fiat 500",
@@ -1521,8 +1519,7 @@ require 'rails_helper'
 require 'spec_helper'
 
 RSpec.describe "/users", type: :request do
-  fixtures :users
-  fixtures :cars
+  fixtures :users, :cars
   let(:valid_headers) {{ Authorization: "Bearer " + @michael_token }}
   let(:admin_2_headers) {{ Authorization: "Bearer " + @ryan_token }}
   let(:invalid_token_header) {{ Authorization: "Bearer xyz" }}
@@ -1916,7 +1913,7 @@ rspec
 
 
 echo -e "\n\n🦄  Maintenances (Backend)\n\n"
-rails g scaffold maintenance date:date description vendor cost:decimal image:attachment car:references
+rails g scaffold maintenance date:date description vendor cost:decimal images:attachments car:references
 # rails g scaffold maintenance name description image:attachment ref_id:integer ref_type
 MIGRATION_FILE=$(find /Users/mmcdermott/Desktop/backtest/db/migrate -name "*_create_maintenances.rb")
 sed -i '' 3,20d $MIGRATION_FILE
@@ -2072,8 +2069,7 @@ cat <<'EOF' | puravida spec/requests/maintenances_spec.rb ~
 require 'rails_helper'
 
 RSpec.describe "/cars", type: :request do
-  fixtures :users
-  fixtures :cars
+  fixtures :users, :cars
   let(:valid_headers) {{ Authorization: "Bearer " + @michael_token }}
   let(:valid_attributes) {{ 
     name: "Jim's Fiat 500",
