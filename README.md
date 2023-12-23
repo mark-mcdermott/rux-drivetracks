@@ -2572,6 +2572,13 @@ RSpec.describe "/maintenances", type: :request do
     cost: 350.00,
     car_id: cars(:fiat).id
   }}
+  let(:invalid_attributes) {{ 
+    date: Date.parse("20200713"),
+    description: nil,
+    vendor: "Pep Boys",
+    cost: 350.00,
+    car_id: cars(:fiat).id
+  }}
 
   before :all do
     @michael_token = token_from_email_password("michaelscott@dundermifflin.com", "password")
@@ -2675,27 +2682,78 @@ RSpec.describe "/maintenances", type: :request do
         expect { post maintenances_url, params: valid_attributes, headers: valid_headers, as: :json
         }.to change(Maintenance, :count).by(1)
       end
-
-      # it "renders a JSON response with the new car" do
-      #   post cars_url, params: valid_attributes, headers: valid_headers, as: :json
-      #   expect(response).to have_http_status(:created)
-      #   expect(response.content_type).to match(a_string_including("application/json"))
-      # end
+      it "renders a JSON response with the new maintenance" do
+        post maintenances_url, params: valid_attributes, headers: valid_headers, as: :json
+        expect(response).to have_http_status(:created)
+        expect(response.content_type).to match(a_string_including("application/json"))
+      end
     end
 
-    # context "with invalid parameters" do
-    #   it "does not create a new Car" do
-    #     expect {
-    #       post cars_url, params: invalid_attributes, headers: valid_headers, as: :json
-    #     }.to change(Car, :count).by(0)
-    #   end
+    context "with invalid parameters" do
+      it "does not create new maintenance" do
+        expect {
+          post maintenances_url, params: invalid_attributes, headers: valid_headers, as: :json
+        }.to change(Maintenance, :count).by(0)
+      end
+      it "renders a JSON response with errors for the new car" do
+        post maintenances_url, params: invalid_attributes, headers: valid_headers, as: :json
+        expect(response).to have_http_status(:unprocessable_entity)
+        expect(response.content_type).to match(a_string_including("application/json"))
+      end
+    end
+  end
 
-    #   it "renders a JSON response with errors for the new car" do
-    #     post cars_url, params: invalid_attributes, headers: valid_headers, as: :json
-    #     expect(response).to have_http_status(:unprocessable_entity)
-    #     expect(response.content_type).to match(a_string_including("application/json"))
-    #   end
-    # end
+  describe "PATCH /update" do
+    context "with valid parameters" do
+      let(:new_attributes) {{ description: "UpdatedDescription"}}
+
+      it "updates maintenance's description" do
+        maintenance = maintenances(:fiat_alignment)
+        patch maintenance_url(maintenance), params: new_attributes, headers: valid_headers, as: :json
+        maintenance.reload
+        expect(maintenance.description).to eq("UpdatedDescription")
+      end
+
+      it "renders a JSON response with the maintenance" do
+        maintenance = maintenances(:fiat_alignment)
+        patch maintenance_url(maintenance), params: new_attributes, headers: valid_headers, as: :json
+        expect(response).to have_http_status(:ok)
+        expect(response.content_type).to match(a_string_including("application/json"))
+      end
+
+      it "maintenance's other properties are still correct" do
+        fiat = cars(:fiat)
+        michael = users(:michael)
+        maintenance = maintenances(:fiat_alignment)
+        patch maintenance_url(maintenance), params: new_attributes, headers: valid_headers, as: :json
+        fiat_alignment = JSON.parse(response.body)
+        expect(fiat_alignment['date']).to eq "2020-07-13"
+        expect(fiat_alignment['vendor']).to eq "Pep Boys"
+        expect(fiat_alignment['cost']).to eq "350.0"
+        expect(fiat_alignment['carId']).to eq fiat.id
+        expect(fiat_alignment['carName']).to eq "Michael's Fiat 500"
+        expect(fiat_alignment['userId']).to eq michael.id
+        expect(fiat_alignment['userName']).to eq michael.name
+      end
+
+    end
+
+    context "with invalid parameters" do
+      it "renders a JSON response with errors for the maintenance" do
+        maintenance = maintenances(:fiat_alignment)
+        patch maintenance_url(maintenance), params: invalid_attributes, headers: valid_headers, as: :json
+        expect(response).to have_http_status(:unprocessable_entity)
+        expect(response.content_type).to match(a_string_including("application/json"))
+      end
+    end
+  end
+
+  describe "DELETE /destroy" do
+    it "destroys the requested maintenance" do
+      maintenance = Maintenance.create! valid_attributes
+      expect { delete maintenance_url(maintenance), headers: valid_headers, as: :json
+      }.to change(Maintenance, :count).by(-1)
+    end
   end
 
 end
