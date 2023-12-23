@@ -1942,7 +1942,7 @@ class MaintenancesController < ApplicationController
   # POST /maintenances
   def create
     create_params = maintenance_params
-    create_params['image'] = params['image'].blank? ? nil : params['image'] # if no image is chosen on new maintenance page, params['image'] comes in as a blank string, which throws a 500 error at Maintenance.new(create_params). This changes any params['avatar'] blank string to nil, which is fine in Maintenance.new(create_params).
+    create_params['images'] = params['images'].blank? ? nil : params['images'] # if no image is chosen on new maintenance page, params['image'] comes in as a blank string, which throws a 500 error at Maintenance.new(create_params). This changes any params['image'] blank string to nil, which is fine in Maintenance.new(create_params).
     create_params['car_id'] = create_params['car_id'].to_i
     @maintenance = Maintenance.new(create_params)
     if @maintenance.save
@@ -1974,7 +1974,7 @@ class MaintenancesController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def maintenance_params
-      params.permit(:date, :description, :vendor, :cost, :image, :car_id)
+      params.permit(:id, :date, :description, :vendor, :cost, :images, :car_id)
     end
 end
 ~
