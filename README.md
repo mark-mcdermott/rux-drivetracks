@@ -2351,6 +2351,123 @@ class MaintenancesController < ApplicationController
 end
 ~
 ```
+- `puravida app/controllers/application_controller.rb ~`
+```
+class ApplicationController < ActionController::API
+  SECRET_KEY_BASE = Rails.application.credentials.secret_key_base
+  before_action :require_login
+  rescue_from Exception, with: :response_internal_server_error
+
+  def require_login
+    response_unauthorized if current_user_raw.blank?
+  end
+
+  # this is safe to send to the frontend, excludes password_digest, created_at, updated_at
+  def user_from_token
+    user = prep_raw_user(current_user_raw)
+    render json: { data: user, status: 200 }
+  end
+
+  # unsafe/internal: includes password_digest, created_at, updated_at - we don't want those going to the frontend
+  def current_user_raw
+    if decoded_token.present?
+      user_id = decoded_token[0]['user_id']
+      @user = User.find_by(id: user_id)
+    else
+      nil
+    end
+  end
+
+  def encode_token(payload)
+    JWT.encode payload, SECRET_KEY_BASE, 'HS256'
+  end
+
+  def decoded_token
+    if auth_header and auth_header.split(' ')[0] == "Bearer"
+      token = auth_header.split(' ')[1]
+      begin
+        JWT.decode token, SECRET_KEY_BASE, true, { algorithm: 'HS256' }
+      rescue JWT::DecodeError
+        []
+      end
+    end
+  end
+
+  def response_unauthorized
+    render status: 401, json: { status: 401, message: 'Unauthorized' }
+  end
+  
+  def response_internal_server_error
+    render status: 500, json: { status: 500, message: 'Internal Server Error' }
+  end
+
+  # We don't want to send the whole user record from the database to the frontend, so we only send what we need.
+  # The db user row has password_digest (unsafe) and created_at and updated_at (extraneous).
+  # We also change avatar from a weird active_storage object to just the avatar url before it gets to the frontend.
+  def prep_raw_user(user)
+    avatar = user.avatar.present? ? url_for(user.avatar) : nil
+    car_ids = Car.where(user_id: user.id).map { |car| car.id }
+    cars = Car.where(user_id: user.id).map { |car| prep_raw_car(car) }
+    # documents = Document.where(car_id: cars).map { |document| document.id }
+    user = user.admin ? user.slice(:id,:email,:name,:admin) : user.slice(:id,:email,:name)
+    user['avatar'] = avatar
+    user['car_ids'] = car_ids
+    user['cars'] = cars
+    # user['document_ids'] = documents
+    user
+  end
+
+  def prep_raw_car(car)
+    user_id = car.user_id
+    user_name = User.find(car.user_id).name
+    # documents = Document.where(car_id: car.id)
+    # documents = documents.map { |document| document.slice(:id,:name,:description,:car_id) }
+    image = car.image.present? ? url_for(car.image) : nil
+    car = car.slice(:id,:name,:year,:make,:model,:trim,:body,:color,:plate,:vin,:cost,:initial_mileage,:purchase_date,:purchase_vendor)
+    car['userId'] = user_id
+    car['userName'] = user_name
+    car['image'] = image
+    # car['documents'] = documents
+    car
+  end
+
+  def prep_raw_maintenance(maintenance)
+    car = Car.find(maintenance.car_id)
+    user = User.find(car.user_id)
+    images = maintenance.images.map { |image| url_for(image) }
+    maintenance = maintenance.slice(:id,:date,:description,:vendor,:cost,:car_id)
+    maintenance['carId'] = car.id
+    maintenance['carName'] = car.name
+    maintenance['userId'] = user.id
+    maintenance['userName'] = user.name
+    maintenance['images'] = images
+    maintenance
+  end
+
+  def prep_raw_document(document)
+    car_id = document.car_id
+    car = Car.find(car_id)
+    user = User.find(car.user_id)
+    image = document.image.present? ? url_for(document.image) : nil
+    document = document.slice(:id,:name,:description)
+    document['carId'] = car_id
+    document['carName'] = car.name
+    document['carDescription'] = car.description
+    document['userId'] = user.id
+    document['userName'] = user.name
+    document['image'] = image
+    document
+  end
+  
+  private 
+  
+    def auth_header
+      request.headers['Authorization']
+    end
+
+end
+~
+```
 - `puravida spec/fixtures/maintenances.yml ~`
 ```
 fiat_alignment:
