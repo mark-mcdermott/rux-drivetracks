@@ -2565,6 +2565,13 @@ RSpec.describe "/maintenances", type: :request do
   fixtures :cars
   fixtures :maintenances
   let(:valid_headers) {{ Authorization: "Bearer " + @michael_token }}
+  let(:valid_attributes) {{ 
+    date: Date.parse("20200713"),
+    description: "Alignment",
+    vendor: "Pep Boys",
+    cost: 350.00,
+    car_id: cars(:fiat).id
+  }}
 
   before :all do
     @michael_token = token_from_email_password("michaelscott@dundermifflin.com", "password")
@@ -2612,7 +2619,7 @@ RSpec.describe "/maintenances", type: :request do
       maintenances = JSON.parse(response.body)
       fiat = Car.find_by(name: "Michael's Fiat 500")
       michael = User.find_by(name: "Michael Scott")
-      alignment = maintenances.find { |maintenance| maintenance['car_id'] == fiat.id }
+      alignment = maintenances.find { |maintenance| maintenance['car_id'] == fiat.id and maintenance['cost'] == "350.0"}
       expect(alignment['date']).to eq "2020-07-13"
       expect(alignment['description']).to eq "Alignment"
       expect(alignment['vendor']).to eq "Pep Boys"
@@ -2623,20 +2630,72 @@ RSpec.describe "/maintenances", type: :request do
       expect(alignment['userName']).to eq michael.name
     end
     it "second maintenance has correct properties" do
-      # get maintenances_url, headers: valid_headers
-      # maintenances = JSON.parse(response.body)
-      # fiat = Car.find_by(name: "Michael's Fiat 500")
-      # michael = User.find_by(name: "Michael Scott")
-      # alignment = maintenances.find { |maintenance| maintenance['car_id'] == fiat.id }
-      # expect(alignment['date']).to eq "2020-07-13"
-      # expect(alignment['description']).to eq "Alignment"
-      # expect(alignment['vendor']).to eq "Pep Boys"
-      # expect(alignment['cost']).to eq "350.0"
-      # expect(alignment['carId']).to eq fiat.id
-      # expect(alignment['carName']).to eq fiat.name
-      # expect(alignment['userId']).to eq michael.id
-      # expect(alignment['userName']).to eq michael.name
+      get maintenances_url, headers: valid_headers
+      maintenances = JSON.parse(response.body)
+      elantra = Car.find_by(name: "Jim's Hyundai Elantra")
+      jim = User.find_by(name: "Jim Halpert")
+      tires = maintenances.find { |maintenance| maintenance['car_id'] == elantra.id and maintenance['cost'] == "812.0"}
+      expect(tires['date']).to eq "2020-01-11"
+      expect(tires['description']).to eq "New Tires"
+      expect(tires['vendor']).to eq "Scott's"
+      expect(tires['cost']).to eq "812.0"
+      expect(tires['carId']).to eq elantra.id
+      expect(tires['carName']).to eq elantra.name
+      expect(tires['userId']).to eq jim.id
+      expect(tires['userName']).to eq jim.name
     end
+  end
+
+  describe "GET /show" do
+    it "renders a successful response" do
+      maintenance = maintenances(:fiat_alignment)
+      get maintenance_url(maintenance), headers: valid_headers
+      expect(response).to be_successful
+    end
+    it "gets correct maintenance properties" do
+      maintenance = maintenances(:fiat_alignment)
+      fiat = cars(:fiat)
+      michael = users(:michael)
+      get maintenance_url(maintenance.id), headers: valid_headers
+      fiat_alignment = JSON.parse(response.body)
+      expect(fiat_alignment['date']).to eq "2020-07-13"
+      expect(fiat_alignment['description']).to eq "Alignment"
+      expect(fiat_alignment['vendor']).to eq "Pep Boys"
+      expect(fiat_alignment['cost']).to eq "350.0"
+      expect(fiat_alignment['carId']).to eq fiat.id
+      expect(fiat_alignment['carName']).to eq "Michael's Fiat 500"
+      expect(fiat_alignment['userId']).to eq michael.id
+      expect(fiat_alignment['userName']).to eq michael.name
+    end
+  end
+
+  describe "POST /create" do
+    context "with valid parameters" do
+      it "creates a new maintenance" do
+        expect { post maintenances_url, params: valid_attributes, headers: valid_headers, as: :json
+        }.to change(Maintenance, :count).by(1)
+      end
+
+      # it "renders a JSON response with the new car" do
+      #   post cars_url, params: valid_attributes, headers: valid_headers, as: :json
+      #   expect(response).to have_http_status(:created)
+      #   expect(response.content_type).to match(a_string_including("application/json"))
+      # end
+    end
+
+    # context "with invalid parameters" do
+    #   it "does not create a new Car" do
+    #     expect {
+    #       post cars_url, params: invalid_attributes, headers: valid_headers, as: :json
+    #     }.to change(Car, :count).by(0)
+    #   end
+
+    #   it "renders a JSON response with errors for the new car" do
+    #     post cars_url, params: invalid_attributes, headers: valid_headers, as: :json
+    #     expect(response).to have_http_status(:unprocessable_entity)
+    #     expect(response.content_type).to match(a_string_including("application/json"))
+    #   end
+    # end
   end
 
 end
@@ -2646,6 +2705,16 @@ end
 ### Maintenances (Backend)
 - `rails g scaffold maintenance name description image:attachment user:references car:references`
 - `rails db:migrate`
+- `puravida app/models/maintenance.rb ~`
+```
+class Maintenance < ApplicationRecord
+  belongs_to :car
+  has_many_attached :images
+  validates :date, presence: true
+  validates :description, presence: true
+end
+~
+```
 - `puravida app/controllers/maintenances_controller.rb ~`
 ```
 class MaintenancesController < ApplicationController
