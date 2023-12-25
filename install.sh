@@ -1929,6 +1929,36 @@ class Maintenance < ApplicationRecord
 end
 ~
 EOF
+cat <<'EOF' | puravida spec/models/maintenance_spec.rb ~
+require 'rails_helper'
+
+RSpec.describe Maintenance, type: :model do
+  fixtures :users, :cars, :maintenances
+  let(:valid_attributes) {{ 
+    date: Date.parse("20200713"),
+    description: "Alignment",
+    vendor: "Pep Boys",
+    cost: 350.00,
+    car_id: cars(:fiat).id
+  }}
+  let(:invalid_attributes) {{ 
+    date: Date.parse("20200713"),
+    description: nil,
+    vendor: "Pep Boys",
+    cost: 350.00,
+    car_id: cars(:fiat).id
+  }}
+
+  it "is valid with valid attributes" do
+    expect(Maintenance.new(valid_attributes)).to be_valid
+  end
+  it "is not valid width poorly formed email" do
+    expect(Maintenance.new(invalid_attributes)).to_not be_valid
+  end
+
+end
+~
+EOF
 cat <<'EOF' | puravida app/controllers/maintenances_controller.rb ~
 class MaintenancesController < ApplicationController
   before_action :set_maintenance, only: %i[ show update destroy ]
@@ -2421,56 +2451,71 @@ EOF
 # user = User.create(name: "Pam Beesly", email: "pambeesly@dundermifflin.com", admin: "false", password: "password")
 # user.avatar.attach(io: URI.open("#{Rails.root}/app/assets/images/office-avatars/pam-beesly.png"), filename: "jim-halpert.png")
 # user.save!
-# car = Car.create(name: "Wrenches", description: "Michael's wrench", user_id: 1)
-# car.image.attach(io: URI.open("#{Rails.root}/app/assets/images/cars/allen-wrenches.jpg"), filename: "allen-wrenches.jpg")
+# car = Car.create(name: "Michael's Fiat 500", make: "Fiat", model: "500", trim: "Sport", color: "Yellow", body: "Hatchback", plate: "6XYK922", vin: "3C3CFFBR0CT382584", year: 2012, cost: "10235.00", purchase_vendor: "Ted Fleid", initial_mileage: 47361, purchase_date: Date.parse("20180606"), user_id: 1)
+# car.image.attach(io: URI.open("#{Rails.root}/app/assets/images/cars/fiat-500.jpg"), filename: "fiat-500.jpg")
 # car.save!
-# car = Car.create(name: "Bolts", description: "Michael's bolt", user_id: 1)
-# car.image.attach(io: URI.open("#{Rails.root}/app/assets/images/cars/bolts.jpg"), filename: "bolts.jpg")
+# car = Car.create(name: "Michael's Honda Civic", make: "Honda", model: "Civic", trim: "Vp", color: "Blue", body: "Sedan", plate: "4HGJ708", vin: "2HGEJ6618XH589506", year: 1999, cost: "10352", purchase_vendor: "Howdy Honda", initial_mileage: 78032, purchase_date: Date.parse("20160713"), user_id: 1)
+# car.image.attach(io: URI.open("#{Rails.root}/app/assets/images/cars/honda-civic.jpg"), filename: "honda-civic.jpg")
 # car.save!
-# car = Car.create(name: "Brackets", description: "Jim's bracket", user_id: 2)
-# car.image.attach(io: URI.open("#{Rails.root}/app/assets/images/cars/brackets.png"), filename: "brackets.png")
+# car = Car.create(name: "Jim's Hyundai Elantra", make: "Hyundai", model: "Elantra", trim: "GLS", color: "Black", body: "Sedan", plate: "8CEU662", vin: "KMHDU46D17U090264", year: 2007, cost: "15000.00", purchase_vendor: "Feit Hyundai", initial_mileage: 53032, purchase_date: Date.parse("20200115"), user_id: 2)
+# car.image.attach(io: URI.open("#{Rails.root}/app/assets/images/cars/hyundai-elantra.jpg"), filename: "hyundai-elantra.jpg")
 # car.save!
-# car = Car.create(name: "Nuts", description: "Jim's nut", user_id: 2)
-# car.image.attach(io: URI.open("#{Rails.root}/app/assets/images/cars/nuts.jpg"), filename: "nuts.jpg")
+# car = Car.create(name: "Jim's Nissan Leaf", make: "Nissan", model: "Leaf", trim: "SV", color: "Silver", body: "Hatchback", plate: "ABC123", vin: "1N4AZ1CP8LC310110", year: 2020, cost: "22590.00", purchase_vendor: "Carvana", initial_mileage: 21440, purchase_date: Date.parse("20230429"), user_id: 2)
+# car.image.attach(io: URI.open("#{Rails.root}/app/assets/images/cars/nissan-leaf.jpg"), filename: "nissan-leaf.jpg")
 # car.save!
-# car = Car.create(name: "Pipes", description: "Jim's pipe", user_id: 2)
-# car.image.attach(io: URI.open("#{Rails.root}/app/assets/images/cars/pipes.jpg"), filename: "pipes.jpg")
+# car = Car.create(name: "Pam's Scion Xb", make: "Scion", model: "Xb", trim: "Base / Parklan Edition", color: "Gray", body: "Wagon", plate: "7MBE060", vin: "JTLZE4FE0FJ074884", year: 2015, cost: "25867.00", purchase_vendor: "Craigslist", initial_mileage: 35631, purchase_date: Date.parse("20201109"), user_id: 3)
+# car.image.attach(io: URI.open("#{Rails.root}/app/assets/images/cars/scion.jpg"), filename: "scion.jpg")
 # car.save!
-# car = Car.create(name: "Screws", description: "Pam's screw", user_id: 3)
-# car.image.attach(io: URI.open("#{Rails.root}/app/assets/images/cars/screws.jpg"), filename: "screws.jpg")
+# car = Car.create(name: "Pam's Toyota Camry", make: "Toyota", model: "Camry", trim: "LE", color: "Black", body: "Sedan", plate: "HDH1439", vin: "4T1BE46K49U358097", year: 2009, cost: "7300", purchase_vendor: "Tanne Toyota", initial_mileage: 134087, purchase_date: Date.parse("20100513"), user_id: 3)
+# car.image.attach(io: URI.open("#{Rails.root}/app/assets/images/cars/toyota-camry.jpg"), filename: "toyota-camry.jpg")
 # car.save!
-# car = Car.create(name: "Washers", description: "Pam's washer", user_id: 3)
-# car.image.attach(io: URI.open("#{Rails.root}/app/assets/images/cars/washers.jpg"), filename: "washers.jpg")
-# car.save!
-# maintenance = Maintenance.create(name: "Sub-Button", description: "Michael's wrench's button", car_id: 1)
-# maintenance.image.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/button.jpg"), filename: "button.jpg")
+# maintenance = Maintenance.create(date: Date.parse("20200713"), description: "Alignment", vendor: "Pep Boys", cost: "350.00", car_id: 1)
+# maintenance.images.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/fiat-alignment-1.jpg"), filename: "fiat-alignment-1.jpg")
+# maintenance.images.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/fiat-alignment-2.jpg"), filename: "fiat-alignment-2.jpg")
 # maintenance.save!
-# maintenance = Maintenance.create(name: "Sub-Buzzer", description: "Michael's bolt's buzzer", car_id: 2)
-# maintenance.image.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/buzzer.jpg"), filename: "buzzer.jpg")
+# maintenance = Maintenance.create(date: Date.parse("20210812"), description: "Oil Change", vendor: "Jiffy Lube", cost: "78.00", car_id: 1)
+# maintenance.images.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/fiat-oil-change-1.jpg"), filename: "fiat-oil-change-1.jpg")
+# maintenance.images.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/fiat-oil-change-2.jpg"), filename: "fiat-oil-change-2.jpg")
 # maintenance.save!
-# maintenance = Maintenance.create(name: "Sub-Capacitor", description: "Jim's bracket's capacitor", car_id: 3)
-# maintenance.image.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/capacitor.jpg"), filename: "capacitor.jpg")
+# maintenance = Maintenance.create(date: Date.parse("20170123"), description: "Brake Repair", vendor: "WalMart", cost: "400.00", car_id: 2)
+# maintenance.images.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/civic-brake-repair-1.jpg"), filename: "civic-brake-repair-1.jpg")
+# maintenance.images.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/civic-brake-repair-2.jpg"), filename: "civic-brake-repair-2.jpg")
 # maintenance.save!
-# maintenance = Maintenance.create(name: "Sub-Dipswitch", description: "Jim's nut's dipswitch", car_id: 4)
-# maintenance.image.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/dip.jpg"), filename: "dip.jpg")
+# maintenance = Maintenance.create(date: Date.parse("20200311"), description: "Tire Rotation", vendor: "Goodyear", cost: "105.00", car_id: 2)
+# maintenance.images.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/civic-tire-rotation-1.jpg"), filename: "civic-tire-rotation-1.jpg")
+# maintenance.images.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/civic-tire-rotation-2.jpg"), filename: "civic-tire-rotation-2.jpg")
 # maintenance.save!
-# maintenance = Maintenance.create(name: "Sub-Led", description: "Jim's pipe's led", car_id: 5)
-# maintenance.image.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/led.jpg"), filename: "led.jpg")
+# maintenance = Maintenance.create(date: Date.parse("20200111"), description: "New Tires", vendor: "Scott's", cost: "812.00", car_id: 3)
+# maintenance.images.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/elantra-new-tires-1.jpg"), filename: "elantra-new-tires-1.jpg")
+# maintenance.images.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/elantra-new-tires-2.jpg"), filename: "elantra-new-tires-2.jpg")
 # maintenance.save!
-# maintenance = Maintenance.create(name: "Sub-Relay", description: "Pam's screw's relay", car_id: 6)
-# maintenance.image.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/relay.png"), filename: "relay.png")
+# maintenance = Maintenance.create(date: Date.parse("20230627"), description: "Repaired Body Dents", vendor: "Tenede Auto", cost: "1343.00", car_id: 3)
+# maintenance.images.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/elantra-repaired-body-1.jpg"), filename: "elantra-repaired-body-1.jpg")
+# maintenance.images.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/elantra-repaired-body-2.jpg"), filename: "elantra-repaired-body-2.jpg")
 # maintenance.save!
-# maintenance = Maintenance.create(name: "Sub-Resistor", description: "Pam's washer's resistor", car_id: 7)
-# maintenance.image.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/resistor.jpg"), filename: "resistor.jpg")
+# maintenance = Maintenance.create(date: Date.parse("20150614"), description: "Windshield Replacement", vendor: "45th St. Car Repair", cost: "800.00", car_id: 4)
+# maintenance.images.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/leaf-windshield-replacement-1.jpg"), filename: "leaf-windshield-replacement-1.jpg")
+# maintenance.images.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/leaf-windshield-replacement-2.jpg"), filename: "leaf-windshield-replacement-2.jpg")
 # maintenance.save!
-# maintenance = Maintenance.create(name: "Sub-Semiconductor", description: "Pam's washer's semiconductor", car_id: 7)
-# maintenance.image.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/semiconductor.jpg"), filename: "semiconductor.jpg")
+# maintenance = Maintenance.create(date: Date.parse("20170811"), description: "New Spark Plugs", vendor: "Jim & Tony's Automotive Service", cost: "5.00", car_id: 4)
+# maintenance.images.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/leaf-new-spark-plugs-1.jpg"), filename: "leaf-new-spark-plugs-1.jpg")
+# maintenance.images.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/leaf-new-spark-plugs-2.jpg"), filename: "leaf-new-spark-plugs-2.jpg")
 # maintenance.save!
-# maintenance = Maintenance.create(name: "Sub-Toggle", description: "Michel's wrench's toggle", car_id: 1)
-# maintenance.image.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/toggle.jpg"), filename: "toggle.jpg")
+# maintenance = Maintenance.create(date: Date.parse("20200909"), description: "Engine Overhaul", vendor: "Auto Stoppe", cost: "5932.00", car_id: 5)
+# maintenance.images.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/scion-engine-overhaul-1.jpg"), filename: "scion-engine-overhaul-1.jpg")
+# maintenance.images.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/scion-engine-overhaul-2.jpg"), filename: "scion-engine-overhaul-2.jpg")
 # maintenance.save!
-# maintenance = Maintenance.create(name: "Sub-Tube", description: "Jim's bracket's tube", car_id: 3)
-# maintenance.image.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/tube.jpg"), filename: "tube.jpg")
+# maintenance = Maintenance.create(date: Date.parse("20201030"), description: "50,000 Mile Maintenance", vendor: "Dealership", cost: "0", car_id: 5)
+# maintenance.images.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/scion-5k-mile-maintenance-1.jpg"), filename: "scion-5k-mile-maintenance-1.jpg")
+# maintenance.images.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/scion-5k-mile-maintenance-2.jpg"), filename: "scion-5k-mile-maintenance-2.jpg")
+# maintenance.save!
+# maintenance = Maintenance.create(date: Date.parse("20220903"), description: "Fuel Line Replacement", vendor: "Foreign Auto Austin", cost: "37.00", car_id: 6)
+# maintenance.images.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/camry-fuel-line-1.jpg"), filename: "camry-fuel-line-1.jpg")
+# maintenance.images.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/camry-fuel-line-2.jpg"), filename: "camry-fuel-line-2.jpg")
+# maintenance.save!
+# maintenance = Maintenance.create(date: Date.parse("20230601"), description: "Replaced Radiator", vendor: "Blan's Auto Repair", cost: "400.00", car_id: 6)
+# maintenance.images.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/camry-replaced-radiator-1.jpg"), filename: "camry-replaced-radiator-1.jpg")
+# maintenance.images.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/camry-replaced-radiator-2.jpg"), filename: "camry-replaced-radiator-2.jpg")
 # maintenance.save!
 # ~
 # EOF
