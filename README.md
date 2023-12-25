@@ -1332,6 +1332,16 @@ class Car < ApplicationRecord
 end
 ~
 ```
+`puravida app/models/user.rb ~`
+```
+class User < ApplicationRecord
+  has_many :cars, dependent: :destroy
+  has_one_attached :avatar
+  has_secure_password
+  validates :email, format: { with: /\A(.+)@(.+)\z/, message: "Email invalid" }, uniqueness: { case_sensitive: false }, length: { minimum: 4, maximum: 254 }
+end
+~
+```
 - `puravida app/controllers/application_controller.rb ~`
 ```
 class ApplicationController < ActionController::API
@@ -2299,6 +2309,16 @@ class Maintenance < ApplicationRecord
   has_many_attached :images
   validates :date, presence: true
   validates :description, presence: true
+end
+~
+```
+- `puravida app/models/car.rb ~`
+```
+class Car < ApplicationRecord
+  belongs_to :user
+  has_many :maintenances, dependent: :destroy
+  has_one_attached :image
+  validates :name, presence: true, allow_blank: false, length: { minimum: 4, maximum: 254 }
 end
 ~
 ```
