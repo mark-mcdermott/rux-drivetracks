@@ -1922,12 +1922,12 @@ rspec
 
 echo -e "\n\n🦄  Maintenances (Backend)\n\n"
 rails g scaffold maintenance date:date description vendor cost:decimal images:attachments car:references
-# rails g scaffold maintenance name description image:attachment ref_id:integer ref_type
 MIGRATION_FILE=$(find /Users/mmcdermott/Desktop/backtest/db/migrate -name "*_create_maintenances.rb")
-sed -i '' 3,20d $MIGRATION_FILE
+sed -i '' 3,11d $MIGRATION_FILE
 awk 'NR==3 {print "\t\tcreate_table :maintenances do |t|\n\t\t\tt.date :date\n\t\t\tt.string :description\n\t\t\tt.string :vendor\n\t\t\tt.decimal :cost, precision: 10, scale: 2\n\t\t\tt.references :car, null: false, foreign_key: {on_delete: :cascade}\n\t\t\tt.timestamps\n\t\tend"} 1' $MIGRATION_FILE > temp.txt
 mv temp.txt $MIGRATION_FILE
 rails db:migrate
+
 cat <<'EOF' | puravida app/models/maintenance.rb ~
 class Maintenance < ApplicationRecord
   belongs_to :car
@@ -2538,9 +2538,10 @@ rails db:seed
 
 rm -rf spec/factories
 rm -rf spec/routing
+rspec
 
 echo -e "\n\n🦄 Documents (Backend)\n\n"
-
+# rails g scaffold maintenance name description image:attachment ref_id:integer ref_type
 
 # echo -e "\n\n🦄 FRONTEND\n\n"
 
