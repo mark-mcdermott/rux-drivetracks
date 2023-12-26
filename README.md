@@ -2932,10 +2932,6 @@ end
 class Document < ApplicationRecord
   belongs_to :documentable, polymorphic: true
   has_one_attached :attachment
-  enum documentable_type: {
-    car: 0,
-    maintenance: 1
-  }
 end
 ~
 ```
@@ -2944,39 +2940,63 @@ end
 ```
 fiat_title:
   name: Fiat title
+  documentable_type: Car
+  documentable: fiat
 
 fiat_contract:
   name: Fiat contract
+  documentable_type: Car
+  documentable: fiat
 
 civic_title:
   name: civic title
+  documentable_type: Car
+  documentable: civic
 
 civic_contract:
   name: civic contract
+  documentable_type: Car
+  documentable: civic
 
 elantra_title:
   name: elantra title
+  documentable_type: Car
+  documentable: elantra
 
 elantra_contract:
   name: elantra contract
+  documentable_type: Car
+  documentable: elantra
 
 leaf_title:
   name: leaf title
+  documentable_type: Car
+  documentable: leaf
 
 leaf_contract:
   name: leaf contract
+  documentable_type: Car
+  documentable: leaf
 
 scion_title:
   name: scion title
+  documentable_type: Car
+  documentable: scion
 
 scion_contract:
   name: scion contract
+  documentable_type: Car
+  documentable: scion
 
 camry_title:
   name: camry title
+  documentable_type: Car
+  documentable: camry
 
 camry_contract:
   name: camry contract
+  documentable_type: Car
+  documentable: camry
 ~
 ```
 
@@ -3147,6 +3167,11 @@ RSpec.describe "/documents", type: :request do
     it "renders a successful response" do
       get documents_url, headers: valid_headers
       expect(response).to be_successful
+    end
+    it "gets twelve documents" do
+      get documents_url, headers: valid_headers
+      require 'pry'; binding.pry
+      expect(JSON.parse(response.body).length).to eq 12
     end
 
   end
