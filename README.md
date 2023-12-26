@@ -3117,12 +3117,14 @@ class ApplicationController < ActionController::API
 
   def prep_raw_document(document)
     attachment = document.attachment.present? ? url_for(document.attachment) : nil
+    documentable_type = document.documentable_type
+    documentable_id = document.documentable_id
     document = document.slice(:id,:date,:name,:notes)
     document['attachment'] = attachment
     car_id = nil
-    if document.documentable_type == "car"
+    if documentable_type == "Car"
       car_id = documentable_id
-    elsif document.documentable_type == "maintenance"
+    elsif documentable_type == "Maintenance"
       maintenance_id = documentable_id
       maintenance = Maintenance.find(maintenance_id)
       car_id = maintenance.car_id
@@ -3131,11 +3133,9 @@ class ApplicationController < ActionController::API
       document['maintenanceDescription'] = maintenance.description
     end
     car = Car.find(car_id)
-    user = car.user_id
+    user = User.find(car.user_id)
     document['carId'] = car_id
     document['carName'] = car.name
-    document['carDescription'] = car.description
-    user = User.find(user_id)
     document['userId'] = user.id
     document['userName'] = user.name
     document
