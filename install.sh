@@ -2558,6 +2558,45 @@ end
 ~
 EOF
 
+cat <<'EOF' | puravida spec/fixtures/documents.yml ~
+fiat_title:
+  name: Fiat title
+
+fiat_contract:
+  name: Fiat contract
+
+civic_title:
+  name: civic title
+
+civic_contract:
+  name: civic contract
+
+elantra_title:
+  name: elantra title
+
+elantra_contract:
+  name: elantra contract
+
+leaf_title:
+  name: leaf title
+
+leaf_contract:
+  name: leaf contract
+
+scion_title:
+  name: scion title
+
+scion_contract:
+  name: scion contract
+
+camry_title:
+  name: camry title
+
+camry_contract:
+  name: camry contract
+~
+EOF
+
 cat <<'EOF' | puravida app/models/car.rb ~
 class Car < ApplicationRecord
   belongs_to :user
