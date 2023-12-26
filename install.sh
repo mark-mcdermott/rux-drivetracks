@@ -2541,7 +2541,30 @@ rm -rf spec/routing
 rspec
 
 echo -e "\n\n🦄 Documents (Backend)\n\n"
-# rails g scaffold maintenance name description image:attachment ref_id:integer ref_type
+rails g scaffold document date:date name notes:text attachment:attachment documentable:references{polymorphic}
+rails db:migrate
+
+cat <<'EOF' | puravida app/models/car.rb ~
+class Car < ApplicationRecord
+  belongs_to :user
+  has_many :maintenances, dependent: :destroy
+  has_many :documents, :as => :documentable
+  has_one_attached :image
+  validates :name, presence: true, allow_blank: false, length: { minimum: 4, maximum: 254 }
+end
+~
+EOF
+
+cat <<'EOF' | puravida app/models/maintenance.rb ~
+class Maintenance < ApplicationRecord
+  belongs_to :car
+  has_many_attached :images
+  has_many :documents, :as => :documentable
+  validates :date, presence: true
+  validates :description, presence: true
+end
+~
+EOF
 
 # echo -e "\n\n🦄 FRONTEND\n\n"
 

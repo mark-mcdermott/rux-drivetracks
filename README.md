@@ -2923,6 +2923,31 @@ end
 - `rails s`
 
 ## Documents (Backend)
+- `rails g scaffold document date:date name notes:text attachment:attachment documentable:references{polymorphic}`
+- `rails db:migrate`
+- `puravida app/models/car.rb ~`
+```
+class Car < ApplicationRecord
+  belongs_to :user
+  has_many :maintenances, dependent: :destroy
+  has_many :documents, :as => :documentable
+  has_one_attached :image
+  validates :name, presence: true, allow_blank: false, length: { minimum: 4, maximum: 254 }
+end
+~
+```
+- `puravida app/models/maintenance.rb ~`
+```
+class Maintenance < ApplicationRecord
+  belongs_to :car
+  has_many_attached :images
+  has_many :documents, :as => :documentable
+  validates :date, presence: true
+  validates :description, presence: true
+end
+~
+```
+
 
 ## FRONTEND
 
