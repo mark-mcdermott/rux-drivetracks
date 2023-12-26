@@ -2705,6 +2705,29 @@ class ApplicationController < ActionController::API
 end
 ~
 EOF
+cat <<'EOF' | puravida spec/requests/documents_spec.rb ~
+require 'rails_helper'
+
+RSpec.describe "/documents", type: :request do
+  let(:valid_headers) {{ Authorization: "Bearer " + @michael_token }}
+  fixtures :users
+
+  before :each do
+    @michael_token = token_from_email_password("michaelscott@dundermifflin.com", "password")
+  end
+
+  describe "GET /index" do
+    it "renders a successful response" do
+      get documents_url, headers: valid_headers
+      expect(response).to be_successful
+    end
+
+  end
+
+
+end
+~
+EOF
 
 # echo -e "\n\n🦄 FRONTEND\n\n"
 
