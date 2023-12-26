@@ -2693,6 +2693,7 @@ class ApplicationController < ActionController::API
     user = User.find(user_id)
     document['userId'] = user.id
     document['userName'] = user.name
+    document
   end
   
   private 
