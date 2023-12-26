@@ -2925,6 +2925,18 @@ end
 ## Documents (Backend)
 - `rails g scaffold document date:date name notes:text attachment:attachment documentable:references{polymorphic}`
 - `rails db:migrate`
+- `puravida app/models/document.rb ~`
+```
+class Document < ApplicationRecord
+  belongs_to :documentable, polymorphic: true
+  has_one_attached :attachment
+  enum documentable_type: {
+    car: 0,
+    maintenance: 1
+  }
+end
+~
+```
 - `puravida app/models/car.rb ~`
 ```
 class Car < ApplicationRecord
