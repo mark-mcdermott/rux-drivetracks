@@ -2998,6 +2998,126 @@ camry_contract:
   name: camry contract
   documentable_type: Car
   documentable: camry
+
+fiat_alignment_document_1:
+  name: fiat_alignment_document_1
+  documentable_type: Maintenance
+  documentable: fiat
+
+fiat_alignment_document_2:
+  name: fiat_alignment_document_2
+  documentable_type: Maintenance
+  documentable: fiat
+
+fiat_oil_change_document_1:
+  name: fiat_oil_change_document_1
+  documentable_type: Maintenance
+  documentable: fiat
+
+fiat_oil_change_document_2:
+  name: fiat_oil_change_document_2
+  documentable_type: Maintenance
+  documentable: fiat
+
+civic_brake_repair_document_1:
+  name: civic_brake_repair_document_1
+  documentable_type: Maintenance
+  documentable: civic
+
+civic_brake_repair_document_2:
+  name: civic_brake_repair_document_2
+  documentable_type: Maintenance
+  documentable: civic
+
+civic_tire_rotation_document_1:
+  name: civic_tire_rotation_document_1
+  documentable_type: Maintenance
+  documentable: civic
+
+civic_tire_rotation_document_2:
+  name: civic_tire_rotation_document_2
+  documentable_type: Maintenance
+  documentable: civic
+
+elantra_new_tires_document_1:
+  name: elantra_new_tires_document_1
+  documentable_type: Maintenance
+  documentable: elantra
+
+elantra_new_tires_document_2:
+  name: elantra_new_tires_document_2
+  documentable_type: Maintenance
+  documentable: elantra
+
+elantra_repaired_body_document_1:
+  name: elantra_repaired_body_document_1
+  documentable_type: Maintenance
+  documentable: elantra
+
+elantra_repaired_body_document_2:
+  name: elantra_repaired_body_document_2
+  documentable_type: Maintenance
+  documentable: elantra
+
+leaf_windshield_replacement_document_1:
+  name: leaf_windshield_replacement_document_1
+  documentable_type: Maintenance
+  documentable: leaf
+
+leaf_windshield_replacement_document_2:
+  name: leaf_windshield_replacement_document_2
+  documentable_type: Maintenance
+  documentable: leaf
+
+leaf_new_spark_plugs_document_1:
+  name: leaf_new_spark_plugs_document_1
+  documentable_type: Maintenance
+  documentable: leaf
+
+leaf_new_spark_plugs_document_2:
+  name: leaf_new_spark_plugs_document_2
+  documentable_type: Maintenance
+  documentable: leaf
+
+scion_engine_overhaul_document_1:
+  name: scion_engine_overhaul_document_1
+  documentable_type: Maintenance
+  documentable: scion
+
+scion_engine_overhaul_document_2:
+  name: scion_engine_overhaul_document_2
+  documentable_type: Maintenance
+  documentable: scion
+
+scion_5k_mile_maintenance_document_1:
+  name: scion_5k_mile_maintenance_document_1
+  documentable_type: Maintenance
+  documentable: scion
+
+scion_5k_mile_maintenance_document_2:
+  name: scion_5k_mile_maintenance_document_2
+  documentable_type: Maintenance
+  documentable: scion
+
+camry_fuel_line_document_1:
+  name: camry_fuel_line_document_1
+  documentable_type: Maintenance
+  documentable: camry
+
+camry_fuel_line_document_2:
+  name: camry_fuel_line_document_2
+  documentable_type: Maintenance
+  documentable: camry
+
+camry_replaced_radiator_document_1:
+  name: camry_replaced_radiator_document_1
+  documentable_type: Maintenance
+  documentable: camry
+
+camry_replaced_radiator_document_2:
+  name: camry_replaced_radiator_document_2
+  documentable_type: Maintenance
+  documentable: camry
 ~
 ```
 
