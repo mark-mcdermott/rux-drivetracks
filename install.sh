@@ -18,8 +18,9 @@ puravida spec/fixtures/files
 cp -a ~/Desktop/fly-drivetracks-notes-and-assets/assets/images/office-avatars/* ~/Desktop/backtest/spec/fixtures/files/
 cp -a ~/Desktop/fly-drivetracks-notes-and-assets/assets/images/cars/* ~/Desktop/backtest/spec/fixtures/files/
 cp -a ~/Desktop/fly-drivetracks-notes-and-assets/assets/images/maintenances/* ~/Desktop/backtest/spec/fixtures/files/
-cp -a ~/Desktop/fly-drivetracks-notes-and-assets/assets/images/documents/contracts/* ~/Desktop/backtest/spec/fixtures/files/
-cp -a ~/Desktop/fly-drivetracks-notes-and-assets/assets/images/documents/titles/* ~/Desktop/backtest/spec/fixtures/files/
+cp -a ~/Desktop/fly-drivetracks-notes-and-assets/assets/images/documents/car-documents/contracts/* ~/Desktop/backtest/spec/fixtures/files/
+cp -a ~/Desktop/fly-drivetracks-notes-and-assets/assets/images/documents/car-documents/titles/* ~/Desktop/backtest/spec/fixtures/files/
+cp -a ~/Desktop/fly-drivetracks-notes-and-assets/assets/images/documents/maintenance-documents/* ~/Desktop/backtest/spec/fixtures/files/
 cat <<'EOF' | puravida config/initializers/cors.rb ~
 Rails.application.config.middleware.insert_before 0, Rack::Cors do
   allow do
@@ -2766,6 +2767,60 @@ class ApplicationController < ActionController::API
 end
 ~
 EOF
+
+cat <<'EOF' | puravida app/controllers/documents_controller.rb ~
+class DocumentsController < ApplicationController
+  before_action :set_document, only: %i[ show update destroy ]
+
+  # GET /documents
+  def index
+    @documents = Document.all.map { |document| prep_raw_document(document) }
+    render json: @documents
+  end
+
+  # GET /documents/1
+  def show
+    render json: @document
+  end
+
+  # POST /documents
+  def create
+    @document = Document.new(document_params)
+
+    if @document.save
+      render json: @document, status: :created, location: @document
+    else
+      render json: @document.errors, status: :unprocessable_entity
+    end
+  end
+
+  # PATCH/PUT /documents/1
+  def update
+    if @document.update(document_params)
+      render json: @document
+    else
+      render json: @document.errors, status: :unprocessable_entity
+    end
+  end
+
+  # DELETE /documents/1
+  def destroy
+    @document.destroy
+  end
+
+  private
+    # Use callbacks to share common setup or constraints between actions.
+    def set_document
+      @document = Document.find(params[:id])
+    end
+
+    # Only allow a list of trusted parameters through.
+    def document_params
+      params.require(:document).permit(:date, :name, :notes, :attachment, :documentable_id, :documentable_type)
+    end
+end
+
+
 cat <<'EOF' | puravida spec/requests/documents_spec.rb ~
 require 'rails_helper'
 
@@ -2785,6 +2840,35 @@ RSpec.describe "/documents", type: :request do
     it "gets twelve documents" do
       get documents_url, headers: valid_headers
       require 'pry'; binding.pry
+      expect(JSON.parse(response.body).length).to eq 12
+    end
+
+  end
+
+
+end
+~
+EOF
+
+```
+cat <<'EOF' | puravida spec/requests/documents_spec.rb ~
+require 'rails_helper'
+
+RSpec.describe "/documents", type: :request do
+  let(:valid_headers) {{ Authorization: "Bearer " + @michael_token }}
+  fixtures :users, :cars, :maintenances, :documents
+
+  before :all do
+    @michael_token = token_from_email_password("michaelscott@dundermifflin.com", "password")
+  end
+
+  describe "GET /index" do
+    it "renders a successful response" do
+      get documents_url, headers: valid_headers
+      expect(response).to be_successful
+    end
+    it "gets twelve documents" do
+      get documents_url, headers: valid_headers
       expect(JSON.parse(response.body).length).to eq 12
     end
 

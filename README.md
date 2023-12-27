@@ -26,8 +26,9 @@ This readme uses a small custom bash command called [puravida](#user-content-pur
 - copy the contents of the `office-avatars` folder into `spec/fixtures/files` folder
 - copy the contents of the `cars` folder into `spec/fixtures/files` folder
 - copy the contents of the `maintenances` folder into `spec/fixtures/files` folder
-- copy the contents of the `documents/contracts` folder into `spec/fixtures/files` folder
-- copy the contents of the `documents/titles` folder into `spec/fixtures/files` folder
+- copy the contents of the `documents/car-documents/contracts` folder into `spec/fixtures/files` folder
+- copy the contents of the `documents/car-documents/titles` folder into `spec/fixtures/files` folder
+- copy the contents of the `documents/maintenance-documents` folder into `spec/fixtures/files` folder
 - `puravida config/initializers/cors.rb ~`
 ```
 Rails.application.config.middleware.insert_before 0, Rack::Cors do
@@ -3150,6 +3151,62 @@ class ApplicationController < ActionController::API
 end
 ~
 ```
+
+- `puravida app/controllers/documents_controller.rb ~`
+```
+class DocumentsController < ApplicationController
+  before_action :set_document, only: %i[ show update destroy ]
+
+  # GET /documents
+  def index
+    @documents = Document.all.map { |document| prep_raw_document(document) }
+    render json: @documents
+  end
+
+  # GET /documents/1
+  def show
+    render json: @document
+  end
+
+  # POST /documents
+  def create
+    @document = Document.new(document_params)
+
+    if @document.save
+      render json: @document, status: :created, location: @document
+    else
+      render json: @document.errors, status: :unprocessable_entity
+    end
+  end
+
+  # PATCH/PUT /documents/1
+  def update
+    if @document.update(document_params)
+      render json: @document
+    else
+      render json: @document.errors, status: :unprocessable_entity
+    end
+  end
+
+  # DELETE /documents/1
+  def destroy
+    @document.destroy
+  end
+
+  private
+    # Use callbacks to share common setup or constraints between actions.
+    def set_document
+      @document = Document.find(params[:id])
+    end
+
+    # Only allow a list of trusted parameters through.
+    def document_params
+      params.require(:document).permit(:date, :name, :notes, :attachment, :documentable_id, :documentable_type)
+    end
+end
+~
+```
+
 - `puravida spec/requests/documents_spec.rb ~`
 ```
 
@@ -3157,9 +3214,9 @@ require 'rails_helper'
 
 RSpec.describe "/documents", type: :request do
   let(:valid_headers) {{ Authorization: "Bearer " + @michael_token }}
-  fixtures :users
+  fixtures :users, :cars, :maintenances, :documents
 
-  before :each do
+  before :all do
     @michael_token = token_from_email_password("michaelscott@dundermifflin.com", "password")
   end
 
@@ -3170,7 +3227,6 @@ RSpec.describe "/documents", type: :request do
     end
     it "gets twelve documents" do
       get documents_url, headers: valid_headers
-      require 'pry'; binding.pry
       expect(JSON.parse(response.body).length).to eq 12
     end
 
@@ -3180,6 +3236,7 @@ RSpec.describe "/documents", type: :request do
 end
 ~
 ```
+
 
 
 ## FRONTEND
