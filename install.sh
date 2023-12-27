@@ -2939,39 +2939,12 @@ class DocumentsController < ApplicationController
       params.require(:document).permit(:date, :name, :notes, :attachment, :documentable_id, :documentable_type)
     end
 end
-
-
-cat <<'EOF' | puravida spec/requests/documents_spec.rb ~
-require 'rails_helper'
-
-RSpec.describe "/documents", type: :request do
-  let(:valid_headers) {{ Authorization: "Bearer " + @michael_token }}
-  fixtures :users
-
-  before :each do
-    @michael_token = token_from_email_password("michaelscott@dundermifflin.com", "password")
-  end
-
-  describe "GET /index" do
-    it "renders a successful response" do
-      get documents_url, headers: valid_headers
-      expect(response).to be_successful
-    end
-    it "gets twelve documents" do
-      get documents_url, headers: valid_headers
-      require 'pry'; binding.pry
-      expect(JSON.parse(response.body).length).to eq 12
-    end
-
-  end
-
-
-end
 ~
 EOF
 
-```
+
 cat <<'EOF' | puravida spec/requests/documents_spec.rb ~
+
 require 'rails_helper'
 
 RSpec.describe "/documents", type: :request do
@@ -2982,6 +2955,81 @@ RSpec.describe "/documents", type: :request do
     @michael_token = token_from_email_password("michaelscott@dundermifflin.com", "password")
   end
 
+  before :each do
+    @fiat_title = documents(:fiat_title)
+    @fiat_title.images.attach([fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'fiat-alignment-1.jpg'),'image/jpeg'), fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'fiat-alignment-2.jpg'),'image/jpeg')])
+    @fiat_contract = documents(:fiat_contract)
+    @fiat_contract.images.attach([fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'contract-fiat-500.webp'),'image/jpeg'), fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'contract-fiat-500.webp'),'image/jpeg')])
+    @civic_title = documents(:civic_title)
+    @civic_title.images.attach([fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'title-honda-civic.png'),'image/png'), fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'title-honda-civic.png'),'image/png')])
+    @civic_contract = documents(:civic_contract)
+    @civic_contract.images.attach([fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'contract-honda-civic.png'),'image/png'), fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'contract-honda-civic.png'),'image/png')])
+    @elantra_title = documents(:elantra_title)
+    @elantra_title.images.attach([fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'title-hyundai-elantra.pdf'),'application/pdf'), fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'title-hyundai-elantra.pdf'),'image/pdf')])
+    @elantra_contract = documents(:elantra_contract)
+    @elantra_contract.images.attach([fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'contract-hyundai-elantra.jpg'),'image/jpeg'), fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'contract-hyundai-elantra.jpg'),'image/jpeg')])
+    @leaf_title = documents(:leaf_title)
+    @leaf_title.images.attach([fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'title-nissan-leaf.png'),'image/png'), fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'title-nissan-leaf.png'),'image/png')])
+    @leaf_contract = documents(:leaf_contract)
+    @leaf_contract.images.attach([fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'contract-nissan-leaf.png'),'image/png'), fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'contract-nissan-leaf.png'),'image/png')])
+    @scion_title = documents(:scion_title)
+    @scion_title.images.attach([fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'title-scion.jpg'),'image/jpeg'), fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'title-scion.jpg'),'image/jpeg')])
+    @scion_contract = documents(:scion_contract)
+    @scion_contract.images.attach([fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'contract-scion.pdf'),'application/pdf'), fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'contract-scion.pdf'),'application/pdf')])
+    @camry_title = documents(:camry_title)
+    @camry_title.images.attach([fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'title-toyota-camry.jpg'),'image/jpeg'), fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'title-toyota-camry.jpg'),'image/jpeg')])
+    @camry_contract = documents(:camry_contract)
+    @camry_contract.images.attach([fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'contract-toyota-camry.jpg'),'image/jpeg'), fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'contract-toyota-camry.jpg'),'image/jpeg')])
+    @fiat_alignment_document_1 = documents(:fiat_alignment_document_1)
+    @fiat_alignment_document_1.images.attach([fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'fiat-alignment-1.png'),'image/png'), fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'fiat-alignment-1.png'),'image/png')])
+    @fiat_alignment_document_2 = documents(:fiat_alignment_document_2)
+    @fiat_alignment_document_2.images.attach([fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'fiat-alignment-2.txt'),'text/plain'), fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'fiat-alignment-2.txt'),'text/plain')])
+    @fiat_oil_change_document_1 = documents(:fiat_oil_change_document_1)
+    @fiat_oil_change_document_1.images.attach([fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'fiat-oil-change-1.txt'),'text/plain'), fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'fiat-oil-change-1.txt'),'text/plain')])
+    @fiat_oil_change_document_2 = documents(:fiat_oil_change_document_2)
+    @fiat_oil_change_document_2.images.attach([fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'fiat-oil-change-2.txt'),'text/plain'), fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'fiat-oil-change-2.txt'),'text/plain')])
+    @civic_brake_repair_document_1 = documents(:civic_brake_repair_document_1)
+    @civic_brake_repair_document_1.images.attach([fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'civic-brake-repair-1.jpg'),'image/jpeg'), fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'civic-brake-repair-1.jpg'),'image/jpeg')])
+    @civic_brake_repair_document_2 = documents(:civic_brake_repair_document_2)
+    @civic_brake_repair_document_2.images.attach([fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'civic-brake-repair-2.pdf'),'text/plain'), fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'civic-brake-repair-2.pdf'),'text/plain')])
+    @civic_tire_rotation_document_1 = documents(:civic_tire_rotation_document_1)
+    @civic_tire_rotation_document_1.images.attach([fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'civic-tire-rotation-1.pdf'),'application/png'), fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'civic-tire-rotation-1.pdf'),'application/png')])
+    @civic_tire_rotation_document_2 = documents(:civic_tire_rotation_document_2)
+    @civic_tire_rotation_document_2.images.attach([fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'civic-tire-rotation-2.png'),'image/png'), fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'civic-tire-rotation-2.png'),'image/png')])
+    @elantra_new_tires_document_1 = documents(:elantra_new_tires_document_1)
+    @elantra_new_tires_document_1.images.attach([fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'elantra-new-tires-1.pdf'),'application/pdf'), fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'elantra-new-tires-1.pdf'),'application/pdf')])
+    @elantra_new_tires_document_2 = documents(:elantra_new_tires_document_2)
+    @elantra_new_tires_document_2.images.attach([fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'elantra-new-tires-2.pdf'),'application/pdf'), fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'elantra-new-tires-2.pdf'),'application/pdf')])
+    @elantra_repaired_body_document_1 = documents(:elantra_repaired_body_document_1)
+    @elantra_repaired_body_document_1.images.attach([fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'elantra-repaired-body-1.png'),'image/png'), fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'elantra-repaired-body-1.png'),'image/png')])
+    @elantra_repaired_body_document_2 = documents(:elantra_repaired_body_document_2)
+    @elantra_repaired_body_document_2.images.attach([fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'elantra-repaired-body-2.pdf'),'application/pdf'), fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'elantra-repaired-body-2.pdf'),'application/pdf')])
+    @leaf_windshield_replacement_document_1 = documents(:leaf_windshield_replacement_document_1)
+    @leaf_windshield_replacement_document_1.images.attach([fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'leaf-windshield-replacement-1.webp'),'image/webp'), fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'leaf-windshield-replacement-1.webp'),'image/webp')])
+    @leaf_windshield_replacement_document_2 = documents(:leaf_windshield_replacement_document_2)
+    @leaf_windshield_replacement_document_2.images.attach([fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'leaf-windshield-replacement-2.webp'),'image/webp'), fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'leaf-windshield-replacement-2.webp'),'image/webp')])
+    @leaf_new_spark_plugs_document_1 = documents(:leaf_new_spark_plugs_document_1)
+    @leaf_new_spark_plugs_document_1.images.attach([fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'leaf-new-spark-plugs-1.txt'),'text/plain'), fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'leaf-new-spark-plugs-1.txt'),'text/plain')])
+    @leaf_new_spark_plugs_document_2 = documents(:leaf_new_spark_plugs_document_2)
+    @leaf_new_spark_plugs_document_2.images.attach([fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'leaf-new-spark-plugs-2.png'),'image/png'), fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'leaf-new-spark-plugs-2.png'),'image/png')])
+    @scion_engine_overhaul_document_1 = documents(:scion_engine_overhaul_document_1)
+    @scion_engine_overhaul_document_1.images.attach([fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'scion-engine-overhaul-1.png'),'image/png'), fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'scion-engine-overhaul-1.png'),'image/png')])
+    @scion_engine_overhaul_document_2 = documents(:scion_engine_overhaul_document_2)
+    @scion_engine_overhaul_document_2.images.attach([fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'scion-engine-overhaul-2.jpg'),'image/jpeg'), fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'scion-engine-overhaul-2.jpg'),'image/jpeg')])
+    @scion_5k_mile_maintenance_document_1 = documents(:scion_5k_mile_maintenance_document_1)
+    @scion_5k_mile_maintenance_document_1.images.attach([fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'scion-5k-mile-maintenance-1.jpg'),'image/jpeg'), fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'scion-5k-mile-maintenance-1.jpg'),'image/jpeg')])
+    @scion_5k_mile_maintenance_document_2 = documents(:scion_5k_mile_maintenance_document_2)
+    @scion_5k_mile_maintenance_document_2.images.attach([fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'scion-5k-mile-maintenance-2.png'),'image/png'), fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'scion-5k-mile-maintenance-2.png'),'image/png')])
+    @camry_fuel_line_document_1 = documents(:camry_fuel_line_document_1)
+    @camry_fuel_line_document_1.images.attach([fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'camry-fuel-line-1.txt'),'text/plain'), fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'camry-fuel-line-1.txt'),'text/plain')])
+    @camry_fuel_line_document_2 = documents(:camry_fuel_line_document_2)
+    @camry_fuel_line_document_2.images.attach([fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'camry-fuel-line-2.webp'),'image/webp'), fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'camry-fuel-line-2.webp'),'image/webp')])
+    @camry_replaced_radiator_document_1 = documents(:camry_replaced_radiator_document_1)
+    @camry_replaced_radiator_document_1.images.attach([fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'camry-replaced-radiator-1.png'),'image/png'), fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'camry-replaced-radiator-1.png'),'image/png')])
+    @camry_replaced_radiator_document_2 = documents(:camry_replaced_radiator_document_2)
+    @camry_replaced_radiator_document_2.images.attach([fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'camry-replaced-radiator-2.webp'),'image/webp'), fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'camry-replaced-radiator-2.webp'),'image/webp')])
+  end
+
   describe "GET /index" do
     it "renders a successful response" do
       get documents_url, headers: valid_headers
@@ -2990,6 +3038,27 @@ RSpec.describe "/documents", type: :request do
     it "gets twelve documents" do
       get documents_url, headers: valid_headers
       expect(JSON.parse(response.body).length).to eq 12
+    end
+    it "first document has correct properties" do
+      get documents_url, headers: valid_headers
+      documents = JSON.parse(response.body)
+      fiat_title = documents.select{|document| document['name'] == "Fiat title"}[0]
+      
+      # michael = User.find_by(name: "Michael Scott")
+      # alignment = maintenances.find { |maintenance| maintenance['car_id'] == fiat.id and maintenance['cost'] == "350.0"}
+      expect(fiat_title['date']).to be_nil
+      expect(fiat_title['name']).to eq "Fiat title"
+      expect(fiat_title['notes']).to be_nil
+      # expect(alignment['carId']).to eq fiat.id
+      # expect(alignment['carName']).to eq fiat.name
+      
+      # expect(fiat_title['description']).to eq "Alignment"
+      # expect(fiat_title['vendor']).to eq "Pep Boys"
+      # expect(fiat_title['cost']).to eq "350.0"
+      # expect(fiat_title['carId']).to eq fiat.id
+      # expect(fiat_title['carName']).to eq fiat.name
+      # expect(fiat_title['userId']).to eq michael.id
+      # expect(fiat_title['userName']).to eq michael.name
     end
 
   end
