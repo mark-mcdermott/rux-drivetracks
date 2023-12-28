@@ -4536,6 +4536,7 @@ cat <<'EOF' | puravida components/nav/Default.vue ~
       <li v-if="!isAuthenticated"><strong><NuxtLink to="/sign-up">Sign Up</NuxtLink></strong></li>
       <li v-if="isAuthenticated"><strong><NuxtLink :to="`/cars?user_id=${loggedInUser.id}`">Cars</NuxtLink></strong></li>
       <li v-if="isAuthenticated"><strong><NuxtLink :to="`/maintenances?user_id=${loggedInUser.id}`">Maintenances</NuxtLink></strong></li>
+      <li v-if="isAuthenticated"><strong><NuxtLink :to="`/documents?user_id=${loggedInUser.id}`">Documents</NuxtLink></strong></li>
       <li v-if="isAdmin"><strong><NuxtLink to="/admin">Admin</NuxtLink></strong></li>
       <li v-if="isAuthenticated" class='dropdown'>
         <details role="list" dir="rtl">
