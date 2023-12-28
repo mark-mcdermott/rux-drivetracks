@@ -4421,15 +4421,19 @@ export default { middleware: 'currentOrAdmin-showEdit' }
 <template>
   <article>
     <h2>
-      <NuxtLink :to="`/maintenances/${maintenance.id}`">{{ maintenance.name }}</NuxtLink> 
+      <NuxtLink :to="`/maintenances/${maintenance.id}`">{{ maintenance.description }}</NuxtLink> 
       <NuxtLink :to="`/maintenances/${maintenance.id}/edit`"><font-awesome-icon icon="pencil" /></NuxtLink>
       <a @click.prevent=deleteCar(maintenance.id) href="#"><font-awesome-icon icon="trash" /></a>
     </h2>
     <p>id: {{ maintenance.id }}</p>
     <p>description: {{ maintenance.description }}</p>
-    <p v-if="maintenance.image !== null" class="no-margin">image:</p>
-    <img v-if="maintenance.image !== null" :src="maintenance.image" />
-    <p>car: <NuxtLink :to="`/cars/${maintenance.carId}`">{{ maintenance.carName }} - {{ maintenance.carDescription }}</NuxtLink></p>
+    <p v-if="maintenance.images !== null" class="no-margin">images:</p>
+    <div v-if="maintenance.images !== null" :src="maintenance.image">
+      <div v-for="image in maintenance.images" :key="image">
+        <img :src="image" />
+      </div>
+    </div>
+    <p>car: <NuxtLink :to="`/cars/${maintenance.carId}`">{{ maintenance.carName }}</NuxtLink></p>
   </article>
 </template>
 
