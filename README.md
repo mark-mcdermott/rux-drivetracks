@@ -4726,6 +4726,155 @@ export default {
 ~
 ```
 
+- `puravida components/document/Set.vue ~`
+```
+<template>
+  <section>
+    <div v-for="document in documents" :key="document.id">
+      <DocumentCard :document="document" :documents= "documents" />
+    </div>
+  </section>
+</template>
+
+<script>
+import { mapGetters } from 'vuex'
+export default {
+  computed: { ...mapGetters(['isAuthenticated', 'isAdmin', 'loggedInUser']) }, 
+  data: () => ({
+    documents: []
+  }),
+  async fetch() {
+    const query = this.$store.$auth.ctx.query
+    const adminQuery = query.admin
+    const idQuery = query.user_id
+    
+    if (this.isAdmin && adminQuery) {
+      this.documents = await this.$axios.$get('documents')
+    } else if (idQuery) {
+      this.documents = await this.$axios.$get('documents', {
+        params: { user_id: idQuery }
+      })
+    } else {
+      this.documents = await this.$axios.$get('documents', {
+        params: { user_id: this.loggedInUser.id }
+      })
+    }
+  }
+}
+</script>
+~
+```
+
+- `puravida components/document/Form.vue ~`
+```
+<template>
+  <section>
+    <h1 v-if="editOrNew === 'edit'">Edit Document</h1>
+    <h1 v-else-if="editOrNew === 'new'">Add Document</h1>
+    <article>
+      <form enctype="multipart/form-data">
+        <p v-if="editOrNew === 'edit'">id: {{ $route.params.id }}</p>
+        <p>Name: </p><input v-model="name">
+        <p>Description: </p><input v-model="description">
+        <p class="no-margin">Image: </p>
+        <img v-if="!hideImage && editOrNew === 'edit'" :src="image" />    
+        <input type="file" ref="inputFile" @change=uploadImage()>
+        <p>Car: </p>
+        <select v-if="editOrNew === 'new'" name="car" @change="selectCar($event)">
+          <option value=""></option>
+          <option v-for="car in cars" :key="car.id" :value="car.id">{{ car.name }} - {{ car.description }}</option>
+        </select>
+        <button v-if="editOrNew !== 'edit'" @click.prevent=createMaintenance>Create Document</button>
+        <button v-else-if="editOrNew == 'edit'" @click.prevent=editMaintenance>Edit Document</button>
+      </form>
+    </article>
+  </section>
+</template>
+
+<script>
+import { mapGetters } from 'vuex'
+export default {
+  data () {
+    return {
+      name: "",
+      description: "",
+      image: "",
+      editOrNew: "",
+      hideImage: false,
+      cars: [],
+      carId: ""
+    }
+  },
+  mounted() {
+    const splitPath = $nuxt.$route.path.split('/')
+    this.editOrNew = splitPath[splitPath.length-1]
+  },
+  computed: {
+    ...mapGetters(['isAuthenticated', 'isAdmin', 'loggedInUser`']),
+  },
+  async fetch() {
+    const splitPath = $nuxt.$route.path.split('/')
+    this.editOrNew = $nuxt.$route.path.split('/')[$nuxt.$route.path.split('/').length-1]
+    if ($nuxt.$route.path.split('/')[$nuxt.$route.path.split('/').length-1]=='edit') {
+      const document = await this.$axios.$get(`documents/${this.$route.params.id}`)
+      this.name = document.name
+      this.description = document.description,
+      this.image = document.image  
+    }
+    if (this.editOrNew == 'new') {
+      this.cars = await this.$axios.$get('/cars', {
+        params: { user_id: this.$auth.$state.user.id }
+      })
+    }
+  },
+  methods: {
+    uploadImage: function() {
+      this.image = this.$refs.inputFile.files[0]
+      this.hideImage = true
+    },
+    createDocument: function() {
+      const params = {
+        'name': this.name,
+        'description': this.description,
+        'image': this.image,
+        'car_id': this.carId
+      }
+      let payload = new FormData()
+      Object.entries(params).forEach(
+        ([key, value]) => payload.append(key, value)
+      )
+      this.$axios.$post('documents', payload)
+        .then((res) => {
+          const documentId = res.id
+          this.$router.push(`/documents/${documentId}`)
+        })
+    },
+    editDocument: function() {
+      let params = {}
+      const filePickerFile = this.$refs.inputFile.files[0]
+      if (!filePickerFile) {
+        params = { 'name': this.name, 'description': this.description }
+      } else {
+        params = { 'name': this.name, 'description': this.description, 'image': this.image }
+      } 
+      let payload = new FormData()
+      Object.entries(params).forEach(
+        ([key, value]) => payload.append(key, value)
+      )
+      this.$axios.$patch(`/documents/${this.$route.params.id}`, payload)
+        .then(() => {
+          this.$router.push(`/documents/${this.$route.params.id}`)
+        })
+    },
+    selectCar: function(event) {
+      this.carId = event.target.value
+    }
+  }
+}
+</script>
+~
+```
+
 - `puravida pages/documents/index.vue ~`
 ```
 <template>
