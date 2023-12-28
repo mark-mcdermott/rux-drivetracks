@@ -4678,6 +4678,120 @@ export default { middleware: 'currentOrAdmin-showEdit' }
 
 
 
+### Documents (frontend)
+- `puravida components/document/Card.vue ~`
+```
+<template>
+  <article>
+    <h2>
+      <NuxtLink :to="`/documents/${document.id}`">{{ document.description }}</NuxtLink> 
+      <NuxtLink :to="`/documents/${document.id}/edit`"><font-awesome-icon icon="pencil" /></NuxtLink>
+      <a @click.prevent=deleteCar(document.id) href="#"><font-awesome-icon icon="trash" /></a>
+    </h2>
+    <p>id: {{ document.id }}</p>
+    <p>description: {{ document.description }}</p>
+    <p v-if="document.attachment !== null" class="no-margin">attachment:</p>
+    <img v-if="document.attachment !== null" :src="document.image" />
+    <p>car:</p>
+  </article>
+</template>
+
+<script>
+import { mapGetters } from 'vuex'
+export default {
+  name: 'DocumentCard',
+  computed: { ...mapGetters(['isAdmin']) },
+  props: {
+    document: {
+      type: Object,
+      default: () => ({}),
+    },
+    documents: {
+      type: Array,
+      default: () => ([]),
+    },
+  },
+  methods: {
+    uploadImage: function() {
+      this.image = this.$refs.inputFile.files[0];
+    },
+    deleteDocument: function(id) {
+      this.$axios.$delete(`documents/${id}`)
+      const index = this.documents.findIndex((i) => { return i.id === id })
+      this.documents.splice(index, 1);
+    }
+  }
+}
+</script>
+~
+```
+
+- `puravida pages/documents/index.vue ~`
+```
+<template>
+  <main class="container">
+    <h1>Documents</h1>
+    <NuxtLink to="/documents/new" role="button">Add Document</NuxtLink>
+    <DocumentSet />
+  </main>
+</template>
+<script>
+export default { middleware: 'currentOrAdmin-index' }
+</script>
+~
+```
+- `puravida pages/documents/new.vue ~`
+```
+<template>
+  <main class="container">
+    <DocumentForm />
+  </main>
+</template>
+~
+```
+- `puravida pages/documents/_id/index.vue ~`
+```
+<template>
+  <main class="container">
+    <section>
+      <DocumentCard :document="document" />
+    </section>
+  </main>
+</template>
+
+<script>
+export default {
+  middleware: 'currentOrAdmin-showEdit',
+  data: () => ({ document: {} }),
+  async fetch() { this.document = await this.$axios.$get(`documents/${this.$route.params.id}`) },
+  methods: {
+    uploadImage: function() { this.image = this.$refs.inputFile.files[0] },
+    deleteDocument: function(id) {
+      this.$axios.$delete(`documents/${this.$route.params.id}`)
+      this.$router.push('/documents')
+    }
+  }
+}
+</script>
+~
+```
+- `puravida pages/documents/_id/edit.vue ~`
+```
+<template>
+  <main class="container">
+    <DocumentForm />
+  </main>
+</template>
+
+<script>
+export default { middleware: 'currentOrAdmin-showEdit' }
+</script>
+~
+```
+
+
+
+
 ### Nav
 - `puravida components/nav/Brand.vue ~`
 ```
