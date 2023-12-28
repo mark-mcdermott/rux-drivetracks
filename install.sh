@@ -3683,6 +3683,12 @@ cat <<'EOF' | puravida components/car/Card.vue ~
         <NuxtLink :to="`/maintenances/${maintenance.id}`">{{ maintenance.description }}</NuxtLink>
       </li>
     </ul>
+    <h4 v-if="car.documents !== null">Documents</h4>
+    <ul v-if="car.documents !== null">
+      <li v-for="document in car.documents" :key="document.id">
+        <NuxtLink :to="`/documents/${document.id}`">{{ document.name }}</NuxtLink>
+      </li>
+    </ul>
   </article>
 </template>
 
