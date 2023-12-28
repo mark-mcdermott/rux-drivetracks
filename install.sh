@@ -2905,10 +2905,11 @@ class DocumentsController < ApplicationController
 
   # POST /documents
   def create
-    @document = Document.new(document_params)
-
+    create_params = document_params
+    create_params['attachment'] = params['attachment'].blank? ? nil : params['attachment'] # if no image is chosen on new maintenance page, params['image'] comes in as a blank string, which throws a 500 error at Maintenance.new(create_params). This changes any params['image'] blank string to nil, which is fine in Maintenance.new(create_params).
+    @document = Document.new(create_params)
     if @document.save
-      render json: @document, status: :created, location: @document
+      render json: prep_raw_document(@document), status: :created, location: @document
     else
       render json: @document.errors, status: :unprocessable_entity
     end
