@@ -3,8 +3,8 @@ export PATH=/usr/local/bin:$PATH
 
 echo -e "\n\n🦄 BACKEND\n\n"
 cd ~/Desktop
-rails new backtest --api --database=postgresql --skip-test-unit
-cd backtest
+rails new back --api --database=postgresql --skip-test-unit
+cd back
 rails db:drop db:create
 bundle add rack-cors bcrypt jwt pry
 bundle add rspec-rails --group "development, test"
@@ -13,14 +13,14 @@ bundle
 rails active_storage:install
 rails generate rspec:install
 rails db:migrate
-cp -a ~/Desktop/fly-drivetracks-notes-and-assets/assets ~/Desktop/backtest/app/
+cp -a ~/Desktop/fly-drivetracks-notes-and-assets/assets ~/Desktop/back/app/
 puravida spec/fixtures/files
-cp -a ~/Desktop/fly-drivetracks-notes-and-assets/assets/images/office-avatars/* ~/Desktop/backtest/spec/fixtures/files/
-cp -a ~/Desktop/fly-drivetracks-notes-and-assets/assets/images/cars/* ~/Desktop/backtest/spec/fixtures/files/
-cp -a ~/Desktop/fly-drivetracks-notes-and-assets/assets/images/maintenances/* ~/Desktop/backtest/spec/fixtures/files/
-cp -a ~/Desktop/fly-drivetracks-notes-and-assets/assets/images/documents/car-documents/contracts/* ~/Desktop/backtest/spec/fixtures/files/
-cp -a ~/Desktop/fly-drivetracks-notes-and-assets/assets/images/documents/car-documents/titles/* ~/Desktop/backtest/spec/fixtures/files/
-cp -a ~/Desktop/fly-drivetracks-notes-and-assets/assets/images/documents/maintenance-documents/* ~/Desktop/backtest/spec/fixtures/files/
+cp -a ~/Desktop/fly-drivetracks-notes-and-assets/assets/images/office-avatars/* ~/Desktop/back/spec/fixtures/files/
+cp -a ~/Desktop/fly-drivetracks-notes-and-assets/assets/images/cars/* ~/Desktop/back/spec/fixtures/files/
+cp -a ~/Desktop/fly-drivetracks-notes-and-assets/assets/images/maintenances/* ~/Desktop/back/spec/fixtures/files/
+cp -a ~/Desktop/fly-drivetracks-notes-and-assets/assets/images/documents/car-documents/contracts/* ~/Desktop/back/spec/fixtures/files/
+cp -a ~/Desktop/fly-drivetracks-notes-and-assets/assets/images/documents/car-documents/titles/* ~/Desktop/back/spec/fixtures/files/
+cp -a ~/Desktop/fly-drivetracks-notes-and-assets/assets/images/documents/maintenance-documents/* ~/Desktop/back/spec/fixtures/files/
 cat <<'EOF' | puravida config/initializers/cors.rb ~
 Rails.application.config.middleware.insert_before 0, Rack::Cors do
   allow do
@@ -71,7 +71,7 @@ rspec
 
 echo -e "\n\n🦄  Users\n\n"
 rails g scaffold user name email avatar:attachment admin:boolean password_digest
-MIGRATION_FILE=$(find /Users/mmcdermott/Desktop/backtest/db/migrate -name "*_create_users.rb")
+MIGRATION_FILE=$(find /Users/mmcdermott/Desktop/back/db/migrate -name "*_create_users.rb")
 sed -i '' 3,10d $MIGRATION_FILE
 awk 'NR==3 {print "\t\tcreate_table :users do |t|\n\t\t\tt.string :name, null: false\n\t\t\tt.string :email, null: false, index: { unique: true }\n\t\t\tt.boolean :admin, default: false\n\t\t\tt.string :password_digest\n\t\t\tt.timestamps\n\t\tend"} 1' $MIGRATION_FILE > temp.txt
 mv temp.txt $MIGRATION_FILE
@@ -960,7 +960,7 @@ rspec
 
 echo -e "\n\n🦄  Cars (Backend)\n\n"
 rails g scaffold Car name image:attachment year:integer make model trim body color plate vin cost:decimal initial_mileage:integer purchase_date:date purchase_vendor user:references
-MIGRATION_FILE=$(find /Users/mmcdermott/Desktop/backtest/db/migrate -name "*_create_cars.rb")
+MIGRATION_FILE=$(find /Users/mmcdermott/Desktop/back/db/migrate -name "*_create_cars.rb")
 sed -i '' 3,20d $MIGRATION_FILE
 awk 'NR==3 {print "\t\tcreate_table :cars do |t|\n\t\t\tt.string :name, null: false\n\t\t\tt.integer :year\n\t\t\tt.string :make\n\t\t\tt.string :model\n\t\t\tt.string :trim\n\t\t\tt.string :body\n\t\t\tt.string :color\n\t\t\tt.string :plate\n\t\t\tt.string :vin\n\t\t\tt.decimal :cost, precision: 10, scale: 2\n\t\t\tt.integer :initial_mileage\n\t\t\tt.date :purchase_date\n\t\t\tt.string :purchase_vendor\n\t\t\tt.references :user, null: false, foreign_key: {on_delete: :cascade}\n\t\t\tt.timestamps\n\t\tend"} 1' $MIGRATION_FILE > temp.txt
 mv temp.txt $MIGRATION_FILE
@@ -1925,7 +1925,7 @@ rspec
 
 echo -e "\n\n🦄  Maintenances (Backend)\n\n"
 rails g scaffold maintenance date:date description vendor cost:decimal images:attachments car:references
-MIGRATION_FILE=$(find /Users/mmcdermott/Desktop/backtest/db/migrate -name "*_create_maintenances.rb")
+MIGRATION_FILE=$(find /Users/mmcdermott/Desktop/back/db/migrate -name "*_create_maintenances.rb")
 sed -i '' 3,11d $MIGRATION_FILE
 awk 'NR==3 {print "\t\tcreate_table :maintenances do |t|\n\t\t\tt.date :date\n\t\t\tt.string :description\n\t\t\tt.string :vendor\n\t\t\tt.decimal :cost, precision: 10, scale: 2\n\t\t\tt.references :car, null: false, foreign_key: {on_delete: :cascade}\n\t\t\tt.timestamps\n\t\tend"} 1' $MIGRATION_FILE > temp.txt
 mv temp.txt $MIGRATION_FILE
