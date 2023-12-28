@@ -2107,6 +2107,7 @@ class ApplicationController < ActionController::API
   def prep_raw_car(car)
     user_id = car.user_id
     user_name = User.find(car.user_id).name
+    maintenances = Maintenance.where(car_id: car.id).map { |maintenance| prep_raw_maintenance(maintenance) }
     # documents = Document.where(car_id: car.id)
     # documents = documents.map { |document| document.slice(:id,:name,:description,:car_id) }
     image = car.image.present? ? url_for(car.image) : nil
@@ -2114,6 +2115,7 @@ class ApplicationController < ActionController::API
     car['userId'] = user_id
     car['userName'] = user_name
     car['image'] = image
+    car['maintenances'] = maintenances
     # car['documents'] = documents
     car
   end
@@ -2828,6 +2830,7 @@ class ApplicationController < ActionController::API
   def prep_raw_car(car)
     user_id = car.user_id
     user_name = User.find(car.user_id).name
+    maintenances = Maintenance.where(car_id: car.id).map { |maintenance| prep_raw_maintenance(maintenance) }
     # documents = Document.where(car_id: car.id)
     # documents = documents.map { |document| document.slice(:id,:name,:description,:car_id) }
     image = car.image.present? ? url_for(car.image) : nil
@@ -2835,6 +2838,7 @@ class ApplicationController < ActionController::API
     car['userId'] = user_id
     car['userName'] = user_name
     car['image'] = image
+    car['maintenances'] = maintenances
     # car['documents'] = documents
     car
   end
@@ -3225,1338 +3229,1338 @@ end
 EOF
 rspec
 
-# echo -e "\n\n🦄 FRONTEND\n\n"
+echo -e "\n\n🦄 FRONTEND\n\n"
 
-# echo -e "\n\n🦄 Setup\n\n"
+echo -e "\n\n🦄 Setup\n\n"
 
-# cd ~/Desktop
-# npx create-nuxt-app front
-# cd front
-# npm install @picocss/pico @nuxtjs/auth@4.5.1 @fortawesome/fontawesome-svg-core @fortawesome/free-solid-svg-icons @fortawesome/free-brands-svg-icons @fortawesome/vue-fontawesome@latest-2
-# npm install --save-dev sass sass-loader@10
-# cat <<'EOF' | puravida assets/scss/main.scss ~
-# @import "node_modules/@picocss/pico/scss/pico.scss";
+cd ~/Desktop
+npx create-nuxt-app front
+cd front
+npm install @picocss/pico @nuxtjs/auth@4.5.1 @fortawesome/fontawesome-svg-core @fortawesome/free-solid-svg-icons @fortawesome/free-brands-svg-icons @fortawesome/vue-fontawesome@latest-2
+npm install --save-dev sass sass-loader@10
+cat <<'EOF' | puravida assets/scss/main.scss ~
+@import "node_modules/@picocss/pico/scss/pico.scss";
 
-# // Pico overrides 
-# // $primary-500: #e91e63;
+// Pico overrides 
+// $primary-500: #e91e63;
 
-# h1 {
-#   margin: 4rem 0
-# }
+h1 {
+  margin: 4rem 0
+}
 
-# .no-margin {
-#   margin: 0
-# }
+.no-margin {
+  margin: 0
+}
 
-# .small-bottom-margin {
-#   margin: 0 0 0.5rem
-# }
+.small-bottom-margin {
+  margin: 0 0 0.5rem
+}
 
-# .big-bottom-margin {
-#   margin: 0 0 8rem
-# }
+.big-bottom-margin {
+  margin: 0 0 8rem
+}
 
-# .half-width {
-#   margin: 0 0 4rem;
-#   width: 50%;
-# }
+.half-width {
+  margin: 0 0 4rem;
+  width: 50%;
+}
 
-# nav img {
-#   width: 40px;
-#   border-radius: 50%;
-#   border: 3px solid var(--primary);
-# }
+nav img {
+  width: 40px;
+  border-radius: 50%;
+  border: 3px solid var(--primary);
+}
 
-# article img {
-#   margin-bottom: var(--typography-spacing-vertical);
-#   width: 250px;
-# }
+article img {
+  margin-bottom: var(--typography-spacing-vertical);
+  width: 250px;
+}
 
-# ul.features { 
-#   margin: 0 0 2.5rem 1rem;
-#   li {
-#     margin: 0;
-#     padding: 0;
-#   }
-# }
+ul.features { 
+  margin: 0 0 2.5rem 1rem;
+  li {
+    margin: 0;
+    padding: 0;
+  }
+}
 
-# .aligned-columns {
-#   margin: 0 0 2rem;
-#   p {
-#     margin: 0;
-#     span {
-#       margin: 0 0.5rem 0 0;
-#       display: inline-block;
-#       width: 8rem;
-#       text-align: right;
-#       font-weight: bold;
-#     }
-#   }
-# }
-# ~
-# EOF
-# cat <<'EOF' | puravida nuxt.config.js ~
-# let development = process.env.NODE_ENV !== 'production'
-# export default {
-#   ssr: false,
-#   head: { title: 'front', htmlAttrs: { lang: 'en' },
-#     meta: [ { charset: 'utf-8' },
-#       { name: 'viewport', content: 'width=device-width, initial-scale=1' },
-#       { hid: 'description', name: 'description', content: '' },
-#       { name: 'format-detection', content: 'telephone=no' }
-#     ], link: [{ rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }]
-#   },
-#   css: ['@fortawesome/fontawesome-svg-core/styles.css','@/assets/scss/main.scss'],
-#   plugins: [ '~/plugins/fontawesome.js' ],
-#   components: true,
-#   buildModules: [],
-#   router: { middleware: ['auth'] },
-#   modules: ['@nuxtjs/axios', '@nuxtjs/auth'],
-#   axios: { baseURL: development ? 'http://localhost:3000' : 'https://ruxtmin-back.fly.dev/' },
-#   server: { port: development ? 3001 : 3000 },
-#   auth: {
-#     redirect: { login: '/' },
-#     strategies: {
-#       local: {
-#         endpoints: {
-#           login: { url: 'login', method: 'post', propertyName: 'data' },
-#           logout: false,
-#           user: { url: 'me', method: 'get', propertyName: 'data' }
-#         }
-#       }
-#     }
-#   }
-# }
-# ~
-# EOF
-# cat <<'EOF' | puravida middleware/adminOnly.js ~
-# export default function ({ store, redirect }) {
-#   if (!store.state.auth.user.admin) {
-#     return redirect('/')
-#   }
-# }
-# ~
-# EOF
-# cat <<'EOF' | puravida middleware/currentOrAdmin-showEdit.js ~
-# import { mapGetters } from 'vuex'
-# export default function ({ route, store, redirect }) {
-#   const { isAdmin, loggedInUser } = store.getters
-#   const url = route.fullPath;
-#   const splitPath = url.split('/')
-#   let elemId = null
-#   let isElemUsers = false
-#   let isCar = false;
-#   let isMaintenance = false;
-#   let isUser = false;
-#   const userCars = loggedInUser.car_ids
-#   const userMaintenances = loggedInUser.maintenance_ids
+.aligned-columns {
+  margin: 0 0 2rem;
+  p {
+    margin: 0;
+    span {
+      margin: 0 0.5rem 0 0;
+      display: inline-block;
+      width: 8rem;
+      text-align: right;
+      font-weight: bold;
+    }
+  }
+}
+~
+EOF
+cat <<'EOF' | puravida nuxt.config.js ~
+let development = process.env.NODE_ENV !== 'production'
+export default {
+  ssr: false,
+  head: { title: 'front', htmlAttrs: { lang: 'en' },
+    meta: [ { charset: 'utf-8' },
+      { name: 'viewport', content: 'width=device-width, initial-scale=1' },
+      { hid: 'description', name: 'description', content: '' },
+      { name: 'format-detection', content: 'telephone=no' }
+    ], link: [{ rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }]
+  },
+  css: ['@fortawesome/fontawesome-svg-core/styles.css','@/assets/scss/main.scss'],
+  plugins: [ '~/plugins/fontawesome.js' ],
+  components: true,
+  buildModules: [],
+  router: { middleware: ['auth'] },
+  modules: ['@nuxtjs/axios', '@nuxtjs/auth'],
+  axios: { baseURL: development ? 'http://localhost:3000' : 'https://ruxtmin-back.fly.dev/' },
+  server: { port: development ? 3001 : 3000 },
+  auth: {
+    redirect: { login: '/' },
+    strategies: {
+      local: {
+        endpoints: {
+          login: { url: 'login', method: 'post', propertyName: 'data' },
+          logout: false,
+          user: { url: 'me', method: 'get', propertyName: 'data' }
+        }
+      }
+    }
+  }
+}
+~
+EOF
+cat <<'EOF' | puravida middleware/adminOnly.js ~
+export default function ({ store, redirect }) {
+  if (!store.state.auth.user.admin) {
+    return redirect('/')
+  }
+}
+~
+EOF
+cat <<'EOF' | puravida middleware/currentOrAdmin-showEdit.js ~
+import { mapGetters } from 'vuex'
+export default function ({ route, store, redirect }) {
+  const { isAdmin, loggedInUser } = store.getters
+  const url = route.fullPath;
+  const splitPath = url.split('/')
+  let elemId = null
+  let isElemUsers = false
+  let isCar = false;
+  let isMaintenance = false;
+  let isUser = false;
+  const userCars = loggedInUser.car_ids
+  const userMaintenances = loggedInUser.maintenance_ids
 
-#   if (url.includes("maintenance")) {
-#     isMaintenance = true
-#   } else if (url.includes("car")) {
-#     isCar = true
-#   } else if (url.includes("users")) {
-#     isUser = true
-#   }
+  if (url.includes("maintenance")) {
+    isMaintenance = true
+  } else if (url.includes("car")) {
+    isCar = true
+  } else if (url.includes("users")) {
+    isUser = true
+  }
 
-#   if (isEditPage(url)) {
-#     elemId = parseInt(splitPath[splitPath.length-2])
-#   } else if (isShowPage(url)) {
-#     elemId = parseInt(splitPath[splitPath.length-1])
-#   }
+  if (isEditPage(url)) {
+    elemId = parseInt(splitPath[splitPath.length-2])
+  } else if (isShowPage(url)) {
+    elemId = parseInt(splitPath[splitPath.length-1])
+  }
   
-#   if (isCar) {
-#     isElemUsers = userCars.includes(elemId) ? true : false
-#   } else if (isMaintenance) {
-#     isElemUsers = userMaintenances.includes(elemId) ? true : false
-#   } else if (isUser) {
-#     isElemUsers = loggedInUser.id === elemId ? true : false
-#   }
+  if (isCar) {
+    isElemUsers = userCars.includes(elemId) ? true : false
+  } else if (isMaintenance) {
+    isElemUsers = userMaintenances.includes(elemId) ? true : false
+  } else if (isUser) {
+    isElemUsers = loggedInUser.id === elemId ? true : false
+  }
 
-#   if (!isAdmin && !isElemUsers) {
-#     return redirect('/')
-#   }
-# }
+  if (!isAdmin && !isElemUsers) {
+    return redirect('/')
+  }
+}
 
-# function isEditPage(url) {
-#   return url.includes("edit") ? true : false
-# }
+function isEditPage(url) {
+  return url.includes("edit") ? true : false
+}
 
-# function isShowPage(url) {
-#   const splitUrl = url.split('/')
-#   return (!isNaN(splitUrl[splitUrl.length-1]) && !isEditPage(url)) ? true : false
-# }
-# ~
-# EOF
-# cat <<'EOF' | puravida middleware/currentOrAdmin-index.js ~
-# export default function ({ route, store, redirect }) {
-#   const { isAdmin, loggedInUser } = store.getters
-#   const query = route.query
-#   const isAdminRequest = query['admin'] ? true : false
-#   const isUserIdRequest = query['user_id'] ? true : false
-#   const isQueryEmpty = Object.keys(query).length === 0 ? true : false
-#   const userIdRequestButNotAdmin = isUserIdRequest && !isAdmin
-#   const requested_user_id = parseInt(query['user_id'])
-#   const actual_user_id = loggedInUser.id
-#   const allowedAccess = requested_user_id === actual_user_id ? true : false
+function isShowPage(url) {
+  const splitUrl = url.split('/')
+  return (!isNaN(splitUrl[splitUrl.length-1]) && !isEditPage(url)) ? true : false
+}
+~
+EOF
+cat <<'EOF' | puravida middleware/currentOrAdmin-index.js ~
+export default function ({ route, store, redirect }) {
+  const { isAdmin, loggedInUser } = store.getters
+  const query = route.query
+  const isAdminRequest = query['admin'] ? true : false
+  const isUserIdRequest = query['user_id'] ? true : false
+  const isQueryEmpty = Object.keys(query).length === 0 ? true : false
+  const userIdRequestButNotAdmin = isUserIdRequest && !isAdmin
+  const requested_user_id = parseInt(query['user_id'])
+  const actual_user_id = loggedInUser.id
+  const allowedAccess = requested_user_id === actual_user_id ? true : false
 
-#   if ((isAdminRequest || isQueryEmpty) && !isAdmin) {
-#     return redirect('/')
-#   } else if (userIdRequestButNotAdmin && !allowedAccess) {
-#     return redirect('/cars?user_id=' + loggedInUser.id)
-#   }
-# }
-# ~
-# EOF
-# cat <<'EOF' | puravida plugins/fontawesome.js ~
-# import Vue from 'vue'
-# import { library, config } from '@fortawesome/fontawesome-svg-core'
-# import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-# import { fas } from '@fortawesome/free-solid-svg-icons'
+  if ((isAdminRequest || isQueryEmpty) && !isAdmin) {
+    return redirect('/')
+  } else if (userIdRequestButNotAdmin && !allowedAccess) {
+    return redirect('/cars?user_id=' + loggedInUser.id)
+  }
+}
+~
+EOF
+cat <<'EOF' | puravida plugins/fontawesome.js ~
+import Vue from 'vue'
+import { library, config } from '@fortawesome/fontawesome-svg-core'
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import { fas } from '@fortawesome/free-solid-svg-icons'
 
-# config.autoAddCss = false
-# library.add(fas)
-# Vue.component('font-awesome-icon', FontAwesomeIcon)
-# ~
-# EOF
-# rm -f components/*.vue
-# echo -e "\n\n🦄 New User Page\n\n"
-# cat <<'EOF' | puravida components/user/Form.vue ~
-# <template>
-#   <section>
-#     <h1 v-if="editNewOrSignup === 'edit'">Edit User</h1>
-#     <h1 v-else-if="editNewOrSignup === 'new'">Add User</h1>
-#     <h1 v-else-if="editNewOrSignup === 'sign-up'">Sign Up</h1>
-#     <article>
-#       <form enctype="multipart/form-data">
-#         <p v-if="editNewOrSignup === 'edit'">id: {{ $route.params.id }}</p>
-#         <p>Name: </p><input v-model="name">
-#         <p>Email: </p><input v-model="email">
-#         <p class="no-margin">Avatar: </p>
-#         <img v-if="!hideAvatar && editNewOrSignup === 'edit'" :src="avatar" />    
-#         <input type="file" ref="inputFile" @change=uploadAvatar()>
-#         <p v-if="editNewOrSignup !== 'edit'">Password: </p>
-#         <input v-if="editNewOrSignup !== 'edit'" type="password" v-model="password">
-#         <button v-if="editNewOrSignup !== 'edit'" @click.prevent=createUser>Create User</button>
-#         <button v-else-if="editNewOrSignup == 'edit'" @click.prevent=editUser>Edit User</button>
-#       </form>
-#     </article>
-#   </section>
-# </template>
+config.autoAddCss = false
+library.add(fas)
+Vue.component('font-awesome-icon', FontAwesomeIcon)
+~
+EOF
+rm -f components/*.vue
+echo -e "\n\n🦄 New User Page\n\n"
+cat <<'EOF' | puravida components/user/Form.vue ~
+<template>
+  <section>
+    <h1 v-if="editNewOrSignup === 'edit'">Edit User</h1>
+    <h1 v-else-if="editNewOrSignup === 'new'">Add User</h1>
+    <h1 v-else-if="editNewOrSignup === 'sign-up'">Sign Up</h1>
+    <article>
+      <form enctype="multipart/form-data">
+        <p v-if="editNewOrSignup === 'edit'">id: {{ $route.params.id }}</p>
+        <p>Name: </p><input v-model="name">
+        <p>Email: </p><input v-model="email">
+        <p class="no-margin">Avatar: </p>
+        <img v-if="!hideAvatar && editNewOrSignup === 'edit'" :src="avatar" />    
+        <input type="file" ref="inputFile" @change=uploadAvatar()>
+        <p v-if="editNewOrSignup !== 'edit'">Password: </p>
+        <input v-if="editNewOrSignup !== 'edit'" type="password" v-model="password">
+        <button v-if="editNewOrSignup !== 'edit'" @click.prevent=createUser>Create User</button>
+        <button v-else-if="editNewOrSignup == 'edit'" @click.prevent=editUser>Edit User</button>
+      </form>
+    </article>
+  </section>
+</template>
 
-# <script>
-# import { mapGetters } from 'vuex'
-# export default {
-#   data () {
-#     return {
-#       name: "",
-#       email: "",
-#       avatar: "",
-#       password: "",
-#       editNewOrSignup: "",
-#       hideAvatar: false
-#     }
-#   },
-#   mounted() {
-#     const splitPath = $nuxt.$route.path.split('/')
-#     this.editNewOrSignup = splitPath[splitPath.length-1]
-#   },
-#   computed: {
-#     ...mapGetters(['isAuthenticated', 'isAdmin', 'loggedInUser`']),
-#   },
-#   async fetch() {
-#     const splitPath = $nuxt.$route.path.split('/')
-#     this.editNewOrSignup = $nuxt.$route.path.split('/')[$nuxt.$route.path.split('/').length-1]
-#     if ($nuxt.$route.path.split('/')[$nuxt.$route.path.split('/').length-1]=='edit') {
-#       const user = await this.$axios.$get(`users/${this.$route.params.id}`)
-#       this.name = user.name
-#       this.email = user.email,
-#       this.avatar = user.avatar  
-#     }
-#   },
-#   methods: {
-#     uploadAvatar: function() {
-#       this.avatar = this.$refs.inputFile.files[0]
-#       this.hideAvatar = true
-#     },
-#     createUser: function() {
-#       const params = {
-#         'name': this.name,
-#         'email': this.email,
-#         'avatar': this.avatar,
-#         'password': this.password,
-#       }
-#       let payload = new FormData()
-#       Object.entries(params).forEach(
-#         ([key, value]) => payload.append(key, value)
-#       )
-#       this.$axios.$post('users', payload)
-#         .then(() => {
-#           this.$auth.loginWith('local', {
-#             data: {
-#             email: this.email,
-#             password: this.password
-#             },
-#           })
-#           .then(() => {
-#             const userId = this.$auth.$state.user.id
-#             this.$router.push(`/users/${userId}`)
-#           })
-#         })
-#     },
-#     editUser: function() {
-#       let params = {}
-#       const filePickerFile = this.$refs.inputFile.files[0]
-#       if (!filePickerFile) {
-#         params = { 'name': this.name, 'email': this.email }
-#       } else {
-#         params = { 'name': this.name, 'email': this.email, 'avatar': this.avatar }
-#       }
+<script>
+import { mapGetters } from 'vuex'
+export default {
+  data () {
+    return {
+      name: "",
+      email: "",
+      avatar: "",
+      password: "",
+      editNewOrSignup: "",
+      hideAvatar: false
+    }
+  },
+  mounted() {
+    const splitPath = $nuxt.$route.path.split('/')
+    this.editNewOrSignup = splitPath[splitPath.length-1]
+  },
+  computed: {
+    ...mapGetters(['isAuthenticated', 'isAdmin', 'loggedInUser`']),
+  },
+  async fetch() {
+    const splitPath = $nuxt.$route.path.split('/')
+    this.editNewOrSignup = $nuxt.$route.path.split('/')[$nuxt.$route.path.split('/').length-1]
+    if ($nuxt.$route.path.split('/')[$nuxt.$route.path.split('/').length-1]=='edit') {
+      const user = await this.$axios.$get(`users/${this.$route.params.id}`)
+      this.name = user.name
+      this.email = user.email,
+      this.avatar = user.avatar  
+    }
+  },
+  methods: {
+    uploadAvatar: function() {
+      this.avatar = this.$refs.inputFile.files[0]
+      this.hideAvatar = true
+    },
+    createUser: function() {
+      const params = {
+        'name': this.name,
+        'email': this.email,
+        'avatar': this.avatar,
+        'password': this.password,
+      }
+      let payload = new FormData()
+      Object.entries(params).forEach(
+        ([key, value]) => payload.append(key, value)
+      )
+      this.$axios.$post('users', payload)
+        .then(() => {
+          this.$auth.loginWith('local', {
+            data: {
+            email: this.email,
+            password: this.password
+            },
+          })
+          .then(() => {
+            const userId = this.$auth.$state.user.id
+            this.$router.push(`/users/${userId}`)
+          })
+        })
+    },
+    editUser: function() {
+      let params = {}
+      const filePickerFile = this.$refs.inputFile.files[0]
+      if (!filePickerFile) {
+        params = { 'name': this.name, 'email': this.email }
+      } else {
+        params = { 'name': this.name, 'email': this.email, 'avatar': this.avatar }
+      }
     
-#       let payload = new FormData()
-#       Object.entries(params).forEach(
-#         ([key, value]) => payload.append(key, value)
-#       )
-#       this.$axios.$patch(`/users/${this.$route.params.id}`, payload)
-#         .then(() => {
-#           this.$router.push(`/users/${this.$route.params.id}`)
-#         })
-#     },
-#   }
-# }
-# </script>
-# ~
-# EOF
-# cat <<'EOF' | puravida pages/users/new.vue ~
-# <template>
-#   <main class="container">
-#     <UserForm />
-#   </main>
-# </template>
-# ~
-# EOF
-# echo -e "\n\n🦄 Users Page\n\n"
-# cat <<'EOF' | puravida components/user/Card.vue ~
-# <template>
-#   <article>
-#     <h2>
-#       <NuxtLink :to="`/users/${user.id}`">{{ user.name }}</NuxtLink> 
-#       <NuxtLink :to="`/users/${user.id}/edit`"><font-awesome-icon icon="pencil" /></NuxtLink>
-#       <a @click.prevent=deleteUser(user.id) href="#"><font-awesome-icon icon="trash" /></a>
-#     </h2>
-#     <p>id: {{ user.id }}</p>
-#     <p>email: {{ user.email }}</p>
-#     <p v-if="user.avatar !== null" class="no-margin">avatar:</p>
-#     <img v-if="user.avatar !== null" :src="user.avatar" />
-#     <p v-if="isAdmin">admin: {{ user.admin }}</p>
-#   </article>
-# </template>
+      let payload = new FormData()
+      Object.entries(params).forEach(
+        ([key, value]) => payload.append(key, value)
+      )
+      this.$axios.$patch(`/users/${this.$route.params.id}`, payload)
+        .then(() => {
+          this.$router.push(`/users/${this.$route.params.id}`)
+        })
+    },
+  }
+}
+</script>
+~
+EOF
+cat <<'EOF' | puravida pages/users/new.vue ~
+<template>
+  <main class="container">
+    <UserForm />
+  </main>
+</template>
+~
+EOF
+echo -e "\n\n🦄 Users Page\n\n"
+cat <<'EOF' | puravida components/user/Card.vue ~
+<template>
+  <article>
+    <h2>
+      <NuxtLink :to="`/users/${user.id}`">{{ user.name }}</NuxtLink> 
+      <NuxtLink :to="`/users/${user.id}/edit`"><font-awesome-icon icon="pencil" /></NuxtLink>
+      <a @click.prevent=deleteUser(user.id) href="#"><font-awesome-icon icon="trash" /></a>
+    </h2>
+    <p>id: {{ user.id }}</p>
+    <p>email: {{ user.email }}</p>
+    <p v-if="user.avatar !== null" class="no-margin">avatar:</p>
+    <img v-if="user.avatar !== null" :src="user.avatar" />
+    <p v-if="isAdmin">admin: {{ user.admin }}</p>
+  </article>
+</template>
 
-# <script>
-# import { mapGetters } from 'vuex'
-# export default {
-#   name: 'UserCard',
-#   computed: { ...mapGetters(['isAdmin']) },
-#   props: {
-#     user: {
-#       type: Object,
-#       default: () => ({}),
-#     },
-#     users: {
-#       type: Array,
-#       default: () => ([]),
-#     },
-#   },
-#   methods: {
-#     uploadAvatar: function() {
-#       this.avatar = this.$refs.inputFile.files[0];
-#     },
-#     deleteUser: function(id) {
-#       this.$axios.$delete(`users/${id}`)
-#       const index = this.users.findIndex((i) => { return i.id === id })
-#       this.users.splice(index, 1);
-#     }
-#   }
-# }
-# </script>
-# ~
-# EOF
-# cat <<'EOF' | puravida components/user/Set.vue ~
-# <template>
-#   <section>
-#     <div v-for="user in users" :key="user.id">
-#       <UserCard :user="user" :users="users" />
-#     </div>
-#   </section>
-# </template>
+<script>
+import { mapGetters } from 'vuex'
+export default {
+  name: 'UserCard',
+  computed: { ...mapGetters(['isAdmin']) },
+  props: {
+    user: {
+      type: Object,
+      default: () => ({}),
+    },
+    users: {
+      type: Array,
+      default: () => ([]),
+    },
+  },
+  methods: {
+    uploadAvatar: function() {
+      this.avatar = this.$refs.inputFile.files[0];
+    },
+    deleteUser: function(id) {
+      this.$axios.$delete(`users/${id}`)
+      const index = this.users.findIndex((i) => { return i.id === id })
+      this.users.splice(index, 1);
+    }
+  }
+}
+</script>
+~
+EOF
+cat <<'EOF' | puravida components/user/Set.vue ~
+<template>
+  <section>
+    <div v-for="user in users" :key="user.id">
+      <UserCard :user="user" :users="users" />
+    </div>
+  </section>
+</template>
 
-# <script>
-# export default {
-#   data: () => ({
-#     users: []
-#   }),
-#   async fetch() {
-#     this.users = await this.$axios.$get('users')
-#   }
-# }
-# </script>
-# ~
-# EOF
+<script>
+export default {
+  data: () => ({
+    users: []
+  }),
+  async fetch() {
+    this.users = await this.$axios.$get('users')
+  }
+}
+</script>
+~
+EOF
 
-# cat <<'EOF' | puravida pages/users/index.vue ~
-# <template>
-#   <main class="container">
-#     <h1>Users</h1>
-#     <NuxtLink to="/users/new" role="button">Add User</NuxtLink>
-#     <UserSet />
-#   </main>
-# </template>
+cat <<'EOF' | puravida pages/users/index.vue ~
+<template>
+  <main class="container">
+    <h1>Users</h1>
+    <NuxtLink to="/users/new" role="button">Add User</NuxtLink>
+    <UserSet />
+  </main>
+</template>
 
-# <script>
-# export default { middleware: 'adminOnly' }
-# </script>
-# ~
-# EOF
+<script>
+export default { middleware: 'adminOnly' }
+</script>
+~
+EOF
 
-# echo -e "\n\n🦄 User Page\n\n"
-# cat <<'EOF' | puravida pages/users/_id/index.vue ~
-# <template>
-#   <main class="container">
-#     <section>
-#       <UserCard :user="user" />
-#     </section>
-#   </main>
-# </template>
+echo -e "\n\n🦄 User Page\n\n"
+cat <<'EOF' | puravida pages/users/_id/index.vue ~
+<template>
+  <main class="container">
+    <section>
+      <UserCard :user="user" />
+    </section>
+  </main>
+</template>
 
-# <script>
-# export default {
-#   middleware: 'currentOrAdmin-showEdit',
-#   data: () => ({ user: {} }),
-#   async fetch() { this.user = await this.$axios.$get(`users/${this.$route.params.id}`) },
-#   methods: {
-#     uploadAvatar: function() { this.avatar = this.$refs.inputFile.files[0] },
-#     deleteUser: function(id) {
-#       this.$axios.$delete(`users/${this.$route.params.id}`)
-#       this.$router.push('/users')
-#     }
-#   }
-# }
-# </script>
-# ~
-# EOF
+<script>
+export default {
+  middleware: 'currentOrAdmin-showEdit',
+  data: () => ({ user: {} }),
+  async fetch() { this.user = await this.$axios.$get(`users/${this.$route.params.id}`) },
+  methods: {
+    uploadAvatar: function() { this.avatar = this.$refs.inputFile.files[0] },
+    deleteUser: function(id) {
+      this.$axios.$delete(`users/${this.$route.params.id}`)
+      this.$router.push('/users')
+    }
+  }
+}
+</script>
+~
+EOF
 
-# echo -e "\n\n🦄 User Edit Page\n\n"
-# cat <<'EOF' | puravida pages/users/_id/edit.vue ~
-# <template>
-#   <main class="container">
-#     <UserForm />
-#   </main>
-# </template>
+echo -e "\n\n🦄 User Edit Page\n\n"
+cat <<'EOF' | puravida pages/users/_id/edit.vue ~
+<template>
+  <main class="container">
+    <UserForm />
+  </main>
+</template>
 
-# <script>
-# export default { middleware: 'currentOrAdmin-showEdit' }
-# </script>
-# ~
-# EOF
+<script>
+export default { middleware: 'currentOrAdmin-showEdit' }
+</script>
+~
+EOF
 
 
-# echo -e "\n\n🦄 Cars (frontend)\n\n"
-# cat <<'EOF' | puravida components/car/Card.vue ~
-# <template>
-#   <article>
-#     <h2>
-#       <NuxtLink :to="`/cars/${car.id}`">{{ car.name }}</NuxtLink> 
-#       <NuxtLink :to="`/cars/${car.id}/edit`"><font-awesome-icon icon="pencil" /></NuxtLink>
-#       <a @click.prevent=deleteCar(car.id) href="#"><font-awesome-icon icon="trash" /></a>
-#     </h2>
-#     <p>id: {{ car.id }}</p>
-#     <p>description: {{ car.description }}</p>
-#     <p v-if="car.image !== null" class="no-margin">image:</p>
-#     <img v-if="car.image !== null" :src="car.image" />
-#     <h4 v-if="car.maintenances !== null">Maintenances</h4>
-#     <ul v-if="car.maintenances !== null">
-#       <li v-for="maintenance in car.maintenances" :key="maintenance.id">
-#         <NuxtLink :to="`/maintenances/${maintenance.id}`">{{ maintenance.name }} - {{ maintenance.description }}</NuxtLink>
-#       </li>
-#     </ul>
-#   </article>
-# </template>
+echo -e "\n\n🦄 Cars (frontend)\n\n"
+cat <<'EOF' | puravida components/car/Card.vue ~
+<template>
+  <article>
+    <h2>
+      <NuxtLink :to="`/cars/${car.id}`">{{ car.name }}</NuxtLink> 
+      <NuxtLink :to="`/cars/${car.id}/edit`"><font-awesome-icon icon="pencil" /></NuxtLink>
+      <a @click.prevent=deleteCar(car.id) href="#"><font-awesome-icon icon="trash" /></a>
+    </h2>
+    <p>id: {{ car.id }}</p>
+    <p>description: {{ car.description }}</p>
+    <p v-if="car.image !== null" class="no-margin">image:</p>
+    <img v-if="car.image !== null" :src="car.image" />
+    <h4 v-if="car.maintenances !== null">Maintenances</h4>
+    <ul v-if="car.maintenances !== null">
+      <li v-for="maintenance in car.maintenances" :key="maintenance.id">
+        <NuxtLink :to="`/maintenances/${maintenance.id}`">{{ maintenance.name }} - {{ maintenance.description }}</NuxtLink>
+      </li>
+    </ul>
+  </article>
+</template>
 
-# <script>
-# import { mapGetters } from 'vuex'
-# export default {
-#   name: 'CarCard',
-#   computed: { ...mapGetters(['isAdmin']) },
-#   props: {
-#     car: {
-#       type: Object,
-#       default: () => ({}),
-#     },
-#     cars: {
-#       type: Array,
-#       default: () => ([]),
-#     },
-#   },
-#   methods: {
-#     uploadImage: function() {
-#       this.image = this.$refs.inputFile.files[0];
-#     },
-#     deleteCar: function(id) {
-#       this.$axios.$delete(`cars/${id}`)
-#       const index = this.cars.findIndex((i) => { return i.id === id })
-#       this.cars.splice(index, 1);
-#     }
-#   }
-# }
-# </script>
-# ~
-# EOF
-# cat <<'EOF' | puravida components/car/Set.vue ~
-# <template>
-#   <section>
-#     <div v-for="car in cars" :key="car.id">
-#       <CarCard :car="car" :cars="cars" />
-#     </div>
-#   </section>
-# </template>
+<script>
+import { mapGetters } from 'vuex'
+export default {
+  name: 'CarCard',
+  computed: { ...mapGetters(['isAdmin']) },
+  props: {
+    car: {
+      type: Object,
+      default: () => ({}),
+    },
+    cars: {
+      type: Array,
+      default: () => ([]),
+    },
+  },
+  methods: {
+    uploadImage: function() {
+      this.image = this.$refs.inputFile.files[0];
+    },
+    deleteCar: function(id) {
+      this.$axios.$delete(`cars/${id}`)
+      const index = this.cars.findIndex((i) => { return i.id === id })
+      this.cars.splice(index, 1);
+    }
+  }
+}
+</script>
+~
+EOF
+cat <<'EOF' | puravida components/car/Set.vue ~
+<template>
+  <section>
+    <div v-for="car in cars" :key="car.id">
+      <CarCard :car="car" :cars="cars" />
+    </div>
+  </section>
+</template>
 
-# <script>
-# import { mapGetters } from 'vuex'
-# export default {
-#   computed: { ...mapGetters(['isAuthenticated', 'isAdmin', 'loggedInUser']) }, 
-#   data: () => ({
-#     cars: []
-#   }),
-#   async fetch() {
-#     const query = this.$store.$auth.ctx.query
-#     const adminQuery = query.admin
-#     const idQuery = query.user_id
+<script>
+import { mapGetters } from 'vuex'
+export default {
+  computed: { ...mapGetters(['isAuthenticated', 'isAdmin', 'loggedInUser']) }, 
+  data: () => ({
+    cars: []
+  }),
+  async fetch() {
+    const query = this.$store.$auth.ctx.query
+    const adminQuery = query.admin
+    const idQuery = query.user_id
     
-#     if (this.isAdmin && adminQuery) {
-#       this.cars = await this.$axios.$get('cars')
-#     } else if (idQuery) {
-#       this.cars = await this.$axios.$get('cars', {
-#         params: { user_id: idQuery }
-#       })
-#     } else {
-#       this.cars = await this.$axios.$get('cars', {
-#         params: { user_id: this.loggedInUser.id }
-#       })
-#     }
-#   }
-# }
-# </script>
-# ~
-# EOF
+    if (this.isAdmin && adminQuery) {
+      this.cars = await this.$axios.$get('cars')
+    } else if (idQuery) {
+      this.cars = await this.$axios.$get('cars', {
+        params: { user_id: idQuery }
+      })
+    } else {
+      this.cars = await this.$axios.$get('cars', {
+        params: { user_id: this.loggedInUser.id }
+      })
+    }
+  }
+}
+</script>
+~
+EOF
 
-# cat <<'EOF' | puravida components/car/Form.vue ~
-# <template>
-#   <section>
-#     <h1 v-if="editOrNew === 'edit'">Edit Car</h1>
-#     <h1 v-else-if="editOrNew === 'new'">Add Car</h1>
-#     <article>
-#       <form enctype="multipart/form-data">
-#         <p v-if="editOrNew === 'edit'">id: {{ $route.params.id }}</p>
-#         <p>Name: </p><input v-model="name">
-#         <p>Description: </p><input v-model="description">
-#         <p class="no-margin">Image: </p>
-#         <img v-if="!hideImage && editOrNew === 'edit'" :src="image" />    
-#         <input type="file" ref="inputFile" @change=uploadImage()>
-#         <button v-if="editOrNew !== 'edit'" @click.prevent=createCar>Create Car</button>
-#         <button v-else-if="editOrNew == 'edit'" @click.prevent=editCar>Edit Car</button>
-#       </form>
-#     </article>
-#   </section>
-# </template>
+cat <<'EOF' | puravida components/car/Form.vue ~
+<template>
+  <section>
+    <h1 v-if="editOrNew === 'edit'">Edit Car</h1>
+    <h1 v-else-if="editOrNew === 'new'">Add Car</h1>
+    <article>
+      <form enctype="multipart/form-data">
+        <p v-if="editOrNew === 'edit'">id: {{ $route.params.id }}</p>
+        <p>Name: </p><input v-model="name">
+        <p>Description: </p><input v-model="description">
+        <p class="no-margin">Image: </p>
+        <img v-if="!hideImage && editOrNew === 'edit'" :src="image" />    
+        <input type="file" ref="inputFile" @change=uploadImage()>
+        <button v-if="editOrNew !== 'edit'" @click.prevent=createCar>Create Car</button>
+        <button v-else-if="editOrNew == 'edit'" @click.prevent=editCar>Edit Car</button>
+      </form>
+    </article>
+  </section>
+</template>
 
-# <script>
-# import { mapGetters } from 'vuex'
-# export default {
-#   data () {
-#     return {
-#       name: "",
-#       description: "",
-#       image: "",
-#       editOrNew: "",
-#       hideImage: false
-#     }
-#   },
-#   mounted() {
-#     const splitPath = $nuxt.$route.path.split('/')
-#     this.editOrNew = splitPath[splitPath.length-1]
-#   },
-#   computed: {
-#     ...mapGetters(['isAuthenticated', 'isAdmin', 'loggedInUser`']),
-#   },
-#   async fetch() {
-#     const splitPath = $nuxt.$route.path.split('/')
-#     this.editOrNew = $nuxt.$route.path.split('/')[$nuxt.$route.path.split('/').length-1]
-#     if ($nuxt.$route.path.split('/')[$nuxt.$route.path.split('/').length-1]=='edit') {
-#       const car = await this.$axios.$get(`cars/${this.$route.params.id}`)
-#       this.name = car.name
-#       this.description = car.description,
-#       this.image = car.image  
-#     }
-#   },
-#   methods: {
-#     uploadImage: function() {
-#       this.image = this.$refs.inputFile.files[0]
-#       this.hideImage = true
-#     },
-#     createCar: function() {
-#       const userId = this.$auth.$state.user.id
-#       const params = {
-#         'name': this.name,
-#         'description': this.description,
-#         'image': this.image,
-#         'user_id': userId
-#       }
-#       let payload = new FormData()
-#       Object.entries(params).forEach(
-#         ([key, value]) => payload.append(key, value)
-#       )
-#       this.$axios.$post('cars', payload)
-#         .then((res) => {
-#           const carId = res.id
-#           this.$router.push(`/cars/${carId}`)
-#         })
-#     },
-#     editCar: function() {
-#       let params = {}
-#       const filePickerFile = this.$refs.inputFile.files[0]
-#       if (!filePickerFile) {
-#         params = { 'name': this.name, 'description': this.description }
-#       } else {
-#         params = { 'name': this.name, 'description': this.description, 'image': this.image }
-#       }
+<script>
+import { mapGetters } from 'vuex'
+export default {
+  data () {
+    return {
+      name: "",
+      description: "",
+      image: "",
+      editOrNew: "",
+      hideImage: false
+    }
+  },
+  mounted() {
+    const splitPath = $nuxt.$route.path.split('/')
+    this.editOrNew = splitPath[splitPath.length-1]
+  },
+  computed: {
+    ...mapGetters(['isAuthenticated', 'isAdmin', 'loggedInUser`']),
+  },
+  async fetch() {
+    const splitPath = $nuxt.$route.path.split('/')
+    this.editOrNew = $nuxt.$route.path.split('/')[$nuxt.$route.path.split('/').length-1]
+    if ($nuxt.$route.path.split('/')[$nuxt.$route.path.split('/').length-1]=='edit') {
+      const car = await this.$axios.$get(`cars/${this.$route.params.id}`)
+      this.name = car.name
+      this.description = car.description,
+      this.image = car.image  
+    }
+  },
+  methods: {
+    uploadImage: function() {
+      this.image = this.$refs.inputFile.files[0]
+      this.hideImage = true
+    },
+    createCar: function() {
+      const userId = this.$auth.$state.user.id
+      const params = {
+        'name': this.name,
+        'description': this.description,
+        'image': this.image,
+        'user_id': userId
+      }
+      let payload = new FormData()
+      Object.entries(params).forEach(
+        ([key, value]) => payload.append(key, value)
+      )
+      this.$axios.$post('cars', payload)
+        .then((res) => {
+          const carId = res.id
+          this.$router.push(`/cars/${carId}`)
+        })
+    },
+    editCar: function() {
+      let params = {}
+      const filePickerFile = this.$refs.inputFile.files[0]
+      if (!filePickerFile) {
+        params = { 'name': this.name, 'description': this.description }
+      } else {
+        params = { 'name': this.name, 'description': this.description, 'image': this.image }
+      }
     
-#       let payload = new FormData()
-#       Object.entries(params).forEach(
-#         ([key, value]) => payload.append(key, value)
-#       )
-#       this.$axios.$patch(`/cars/${this.$route.params.id}`, payload)
-#         .then(() => {
-#           this.$router.push(`/cars/${this.$route.params.id}`)
-#         })
-#     },
-#   }
-# }
-# </script>
-# ~
-# EOF
+      let payload = new FormData()
+      Object.entries(params).forEach(
+        ([key, value]) => payload.append(key, value)
+      )
+      this.$axios.$patch(`/cars/${this.$route.params.id}`, payload)
+        .then(() => {
+          this.$router.push(`/cars/${this.$route.params.id}`)
+        })
+    },
+  }
+}
+</script>
+~
+EOF
 
 
-# cat <<'EOF' | puravida pages/cars/index.vue ~
-# <template>
-#   <main class="container">
-#     <h1>Cars</h1>
-#     <NuxtLink to="/cars/new" role="button">Add Car</NuxtLink>
-#     <CarSet />
-#   </main>
-# </template>
-# <script>
-# export default { middleware: 'currentOrAdmin-index' }
-# </script>
-# ~
-# EOF
+cat <<'EOF' | puravida pages/cars/index.vue ~
+<template>
+  <main class="container">
+    <h1>Cars</h1>
+    <NuxtLink to="/cars/new" role="button">Add Car</NuxtLink>
+    <CarSet />
+  </main>
+</template>
+<script>
+export default { middleware: 'currentOrAdmin-index' }
+</script>
+~
+EOF
 
-# cat <<'EOF' | puravida pages/cars/new.vue ~
-# <template>
-#   <main class="container">
-#     <CarForm />
-#   </main>
-# </template>
-# ~
-# EOF
+cat <<'EOF' | puravida pages/cars/new.vue ~
+<template>
+  <main class="container">
+    <CarForm />
+  </main>
+</template>
+~
+EOF
 
-# cat <<'EOF' | puravida pages/cars/_id/index.vue ~
-# <template>
-#   <main class="container">
-#     <section>
-#       <CarCard :car="car" />
-#     </section>
-#   </main>
-# </template>
+cat <<'EOF' | puravida pages/cars/_id/index.vue ~
+<template>
+  <main class="container">
+    <section>
+      <CarCard :car="car" />
+    </section>
+  </main>
+</template>
 
-# <script>
-# export default {
-#   middleware: 'currentOrAdmin-showEdit',
-#   data: () => ({ car: {} }),
-#   async fetch() { this.car = await this.$axios.$get(`cars/${this.$route.params.id}`) },
-#   methods: {
-#     uploadImage: function() { this.image = this.$refs.inputFile.files[0] },
-#     deleteCar: function(id) {
-#       this.$axios.$delete(`cars/${this.$route.params.id}`)
-#       this.$router.push('/cars')
-#     }
-#   }
-# }
-# </script>
-# ~
-# EOF
+<script>
+export default {
+  middleware: 'currentOrAdmin-showEdit',
+  data: () => ({ car: {} }),
+  async fetch() { this.car = await this.$axios.$get(`cars/${this.$route.params.id}`) },
+  methods: {
+    uploadImage: function() { this.image = this.$refs.inputFile.files[0] },
+    deleteCar: function(id) {
+      this.$axios.$delete(`cars/${this.$route.params.id}`)
+      this.$router.push('/cars')
+    }
+  }
+}
+</script>
+~
+EOF
 
-# cat <<'EOF' | puravida pages/cars/_id/edit.vue ~
-# <template>
-#   <main class="container">
-#     <CarForm />
-#   </main>
-# </template>
+cat <<'EOF' | puravida pages/cars/_id/edit.vue ~
+<template>
+  <main class="container">
+    <CarForm />
+  </main>
+</template>
 
-# <script>
-# export default { middleware: 'currentOrAdmin-showEdit' }
-# </script>
-# ~
-# EOF
+<script>
+export default { middleware: 'currentOrAdmin-showEdit' }
+</script>
+~
+EOF
 
-# echo -e "\n\n🦄 Maintenances (frontend)\n\n"
-# cat <<'EOF' | puravida components/maintenance/Card.vue ~
-# <template>
-#   <article>
-#     <h2>
-#       <NuxtLink :to="`/maintenances/${maintenance.id}`">{{ maintenance.name }}</NuxtLink> 
-#       <NuxtLink :to="`/maintenances/${maintenance.id}/edit`"><font-awesome-icon icon="pencil" /></NuxtLink>
-#       <a @click.prevent=deleteCar(maintenance.id) href="#"><font-awesome-icon icon="trash" /></a>
-#     </h2>
-#     <p>id: {{ maintenance.id }}</p>
-#     <p>description: {{ maintenance.description }}</p>
-#     <p v-if="maintenance.image !== null" class="no-margin">image:</p>
-#     <img v-if="maintenance.image !== null" :src="maintenance.image" />
-#     <p>car: <NuxtLink :to="`/cars/${maintenance.carId}`">{{ maintenance.carName }} - {{ maintenance.carDescription }}</NuxtLink></p>
-#   </article>
-# </template>
+echo -e "\n\n🦄 Maintenances (frontend)\n\n"
+cat <<'EOF' | puravida components/maintenance/Card.vue ~
+<template>
+  <article>
+    <h2>
+      <NuxtLink :to="`/maintenances/${maintenance.id}`">{{ maintenance.name }}</NuxtLink> 
+      <NuxtLink :to="`/maintenances/${maintenance.id}/edit`"><font-awesome-icon icon="pencil" /></NuxtLink>
+      <a @click.prevent=deleteCar(maintenance.id) href="#"><font-awesome-icon icon="trash" /></a>
+    </h2>
+    <p>id: {{ maintenance.id }}</p>
+    <p>description: {{ maintenance.description }}</p>
+    <p v-if="maintenance.image !== null" class="no-margin">image:</p>
+    <img v-if="maintenance.image !== null" :src="maintenance.image" />
+    <p>car: <NuxtLink :to="`/cars/${maintenance.carId}`">{{ maintenance.carName }} - {{ maintenance.carDescription }}</NuxtLink></p>
+  </article>
+</template>
 
-# <script>
-# import { mapGetters } from 'vuex'
-# export default {
-#   name: 'MaintenanceCard',
-#   computed: { ...mapGetters(['isAdmin']) },
-#   props: {
-#     maintenance: {
-#       type: Object,
-#       default: () => ({}),
-#     },
-#     maintenances: {
-#       type: Array,
-#       default: () => ([]),
-#     },
-#   },
-#   methods: {
-#     uploadImage: function() {
-#       this.image = this.$refs.inputFile.files[0];
-#     },
-#     deleteMaintenance: function(id) {
-#       this.$axios.$delete(`maintenances/${id}`)
-#       const index = this.maintenances.findIndex((i) => { return i.id === id })
-#       this.maintenances.splice(index, 1);
-#     }
-#   }
-# }
-# </script>
-# ~
-# EOF
-# cat <<'EOF' | puravida components/maintenance/Set.vue ~
-# <template>
-#   <section>
-#     <div v-for="maintenance in maintenances" :key="maintenance.id">
-#       <MaintenanceCard :maintenance="maintenance" :maintenances= "maintenances" />
-#     </div>
-#   </section>
-# </template>
+<script>
+import { mapGetters } from 'vuex'
+export default {
+  name: 'MaintenanceCard',
+  computed: { ...mapGetters(['isAdmin']) },
+  props: {
+    maintenance: {
+      type: Object,
+      default: () => ({}),
+    },
+    maintenances: {
+      type: Array,
+      default: () => ([]),
+    },
+  },
+  methods: {
+    uploadImage: function() {
+      this.image = this.$refs.inputFile.files[0];
+    },
+    deleteMaintenance: function(id) {
+      this.$axios.$delete(`maintenances/${id}`)
+      const index = this.maintenances.findIndex((i) => { return i.id === id })
+      this.maintenances.splice(index, 1);
+    }
+  }
+}
+</script>
+~
+EOF
+cat <<'EOF' | puravida components/maintenance/Set.vue ~
+<template>
+  <section>
+    <div v-for="maintenance in maintenances" :key="maintenance.id">
+      <MaintenanceCard :maintenance="maintenance" :maintenances= "maintenances" />
+    </div>
+  </section>
+</template>
 
-# <script>
-# import { mapGetters } from 'vuex'
-# export default {
-#   computed: { ...mapGetters(['isAuthenticated', 'isAdmin', 'loggedInUser']) }, 
-#   data: () => ({
-#     maintenances: []
-#   }),
-#   async fetch() {
-#     const query = this.$store.$auth.ctx.query
-#     const adminQuery = query.admin
-#     const idQuery = query.user_id
+<script>
+import { mapGetters } from 'vuex'
+export default {
+  computed: { ...mapGetters(['isAuthenticated', 'isAdmin', 'loggedInUser']) }, 
+  data: () => ({
+    maintenances: []
+  }),
+  async fetch() {
+    const query = this.$store.$auth.ctx.query
+    const adminQuery = query.admin
+    const idQuery = query.user_id
     
-#     if (this.isAdmin && adminQuery) {
-#       this.maintenances = await this.$axios.$get('maintenances')
-#     } else if (idQuery) {
-#       this.maintenances = await this.$axios.$get('maintenances', {
-#         params: { user_id: idQuery }
-#       })
-#     } else {
-#       this.maintenances = await this.$axios.$get('maintenances', {
-#         params: { user_id: this.loggedInUser.id }
-#       })
-#     }
-#   }
-# }
-# </script>
-# ~
-# EOF
-# cat <<'EOF' | puravida components/maintenance/Form.vue ~
-# <template>
-#   <section>
-#     <h1 v-if="editOrNew === 'edit'">Edit Maintenance</h1>
-#     <h1 v-else-if="editOrNew === 'new'">Add Maintenance</h1>
-#     <article>
-#       <form enctype="multipart/form-data">
-#         <p v-if="editOrNew === 'edit'">id: {{ $route.params.id }}</p>
-#         <p>Name: </p><input v-model="name">
-#         <p>Description: </p><input v-model="description">
-#         <p class="no-margin">Image: </p>
-#         <img v-if="!hideImage && editOrNew === 'edit'" :src="image" />    
-#         <input type="file" ref="inputFile" @change=uploadImage()>
-#         <p>Car: </p>
-#         <select v-if="editOrNew === 'new'" name="car" @change="selectCar($event)">
-#           <option value=""></option>
-#           <option v-for="car in cars" :key="car.id" :value="car.id">{{ car.name }} - {{ car.description }}</option>
-#         </select>
-#         <button v-if="editOrNew !== 'edit'" @click.prevent=createMaintenance>Create Maintenance</button>
-#         <button v-else-if="editOrNew == 'edit'" @click.prevent=editMaintenance>Edit Maintenance</button>
-#       </form>
-#     </article>
-#   </section>
-# </template>
+    if (this.isAdmin && adminQuery) {
+      this.maintenances = await this.$axios.$get('maintenances')
+    } else if (idQuery) {
+      this.maintenances = await this.$axios.$get('maintenances', {
+        params: { user_id: idQuery }
+      })
+    } else {
+      this.maintenances = await this.$axios.$get('maintenances', {
+        params: { user_id: this.loggedInUser.id }
+      })
+    }
+  }
+}
+</script>
+~
+EOF
+cat <<'EOF' | puravida components/maintenance/Form.vue ~
+<template>
+  <section>
+    <h1 v-if="editOrNew === 'edit'">Edit Maintenance</h1>
+    <h1 v-else-if="editOrNew === 'new'">Add Maintenance</h1>
+    <article>
+      <form enctype="multipart/form-data">
+        <p v-if="editOrNew === 'edit'">id: {{ $route.params.id }}</p>
+        <p>Name: </p><input v-model="name">
+        <p>Description: </p><input v-model="description">
+        <p class="no-margin">Image: </p>
+        <img v-if="!hideImage && editOrNew === 'edit'" :src="image" />    
+        <input type="file" ref="inputFile" @change=uploadImage()>
+        <p>Car: </p>
+        <select v-if="editOrNew === 'new'" name="car" @change="selectCar($event)">
+          <option value=""></option>
+          <option v-for="car in cars" :key="car.id" :value="car.id">{{ car.name }} - {{ car.description }}</option>
+        </select>
+        <button v-if="editOrNew !== 'edit'" @click.prevent=createMaintenance>Create Maintenance</button>
+        <button v-else-if="editOrNew == 'edit'" @click.prevent=editMaintenance>Edit Maintenance</button>
+      </form>
+    </article>
+  </section>
+</template>
 
-# <script>
-# import { mapGetters } from 'vuex'
-# export default {
-#   data () {
-#     return {
-#       name: "",
-#       description: "",
-#       image: "",
-#       editOrNew: "",
-#       hideImage: false,
-#       cars: [],
-#       carId: ""
-#     }
-#   },
-#   mounted() {
-#     const splitPath = $nuxt.$route.path.split('/')
-#     this.editOrNew = splitPath[splitPath.length-1]
-#   },
-#   computed: {
-#     ...mapGetters(['isAuthenticated', 'isAdmin', 'loggedInUser`']),
-#   },
-#   async fetch() {
-#     const splitPath = $nuxt.$route.path.split('/')
-#     this.editOrNew = $nuxt.$route.path.split('/')[$nuxt.$route.path.split('/').length-1]
-#     if ($nuxt.$route.path.split('/')[$nuxt.$route.path.split('/').length-1]=='edit') {
-#       const maintenance = await this.$axios.$get(`maintenances/${this.$route.params.id}`)
-#       this.name = maintenance.name
-#       this.description = maintenance.description,
-#       this.image = maintenance.image  
-#     }
-#     if (this.editOrNew == 'new') {
-#       this.cars = await this.$axios.$get('/cars', {
-#         params: { user_id: this.$auth.$state.user.id }
-#       })
-#     }
-#   },
-#   methods: {
-#     uploadImage: function() {
-#       this.image = this.$refs.inputFile.files[0]
-#       this.hideImage = true
-#     },
-#     createMaintenance: function() {
-#       const params = {
-#         'name': this.name,
-#         'description': this.description,
-#         'image': this.image,
-#         'car_id': this.carId
-#       }
-#       let payload = new FormData()
-#       Object.entries(params).forEach(
-#         ([key, value]) => payload.append(key, value)
-#       )
-#       this.$axios.$post('maintenances', payload)
-#         .then((res) => {
-#           const maintenanceId = res.id
-#           this.$router.push(`/maintenances/${maintenanceId}`)
-#         })
-#     },
-#     editMaintenance: function() {
-#       let params = {}
-#       const filePickerFile = this.$refs.inputFile.files[0]
-#       if (!filePickerFile) {
-#         params = { 'name': this.name, 'description': this.description }
-#       } else {
-#         params = { 'name': this.name, 'description': this.description, 'image': this.image }
-#       } 
-#       let payload = new FormData()
-#       Object.entries(params).forEach(
-#         ([key, value]) => payload.append(key, value)
-#       )
-#       this.$axios.$patch(`/maintenances/${this.$route.params.id}`, payload)
-#         .then(() => {
-#           this.$router.push(`/maintenances/${this.$route.params.id}`)
-#         })
-#     },
-#     selectCar: function(event) {
-#       this.carId = event.target.value
-#     }
-#   }
-# }
-# </script>
-# ~
-# EOF
-# cat <<'EOF' | puravida pages/maintenances/index.vue ~
-# <template>
-#   <main class="container">
-#     <h1>Maintenances</h1>
-#     <NuxtLink to="/maintenances/new" role="button">Add Maintenance</NuxtLink>
-#     <MaintenanceSet />
-#   </main>
-# </template>
-# <script>
-# export default { middleware: 'currentOrAdmin-index' }
-# </script>
-# ~
-# EOF
-# cat <<'EOF' | puravida pages/maintenances/new.vue ~
-# <template>
-#   <main class="container">
-#     <MaintenanceForm />
-#   </main>
-# </template>
-# ~
-# EOF
-# cat <<'EOF' | puravida pages/maintenances/_id/index.vue ~
-# <template>
-#   <main class="container">
-#     <section>
-#       <MaintenanceCard :maintenance="maintenance" />
-#     </section>
-#   </main>
-# </template>
+<script>
+import { mapGetters } from 'vuex'
+export default {
+  data () {
+    return {
+      name: "",
+      description: "",
+      image: "",
+      editOrNew: "",
+      hideImage: false,
+      cars: [],
+      carId: ""
+    }
+  },
+  mounted() {
+    const splitPath = $nuxt.$route.path.split('/')
+    this.editOrNew = splitPath[splitPath.length-1]
+  },
+  computed: {
+    ...mapGetters(['isAuthenticated', 'isAdmin', 'loggedInUser`']),
+  },
+  async fetch() {
+    const splitPath = $nuxt.$route.path.split('/')
+    this.editOrNew = $nuxt.$route.path.split('/')[$nuxt.$route.path.split('/').length-1]
+    if ($nuxt.$route.path.split('/')[$nuxt.$route.path.split('/').length-1]=='edit') {
+      const maintenance = await this.$axios.$get(`maintenances/${this.$route.params.id}`)
+      this.name = maintenance.name
+      this.description = maintenance.description,
+      this.image = maintenance.image  
+    }
+    if (this.editOrNew == 'new') {
+      this.cars = await this.$axios.$get('/cars', {
+        params: { user_id: this.$auth.$state.user.id }
+      })
+    }
+  },
+  methods: {
+    uploadImage: function() {
+      this.image = this.$refs.inputFile.files[0]
+      this.hideImage = true
+    },
+    createMaintenance: function() {
+      const params = {
+        'name': this.name,
+        'description': this.description,
+        'image': this.image,
+        'car_id': this.carId
+      }
+      let payload = new FormData()
+      Object.entries(params).forEach(
+        ([key, value]) => payload.append(key, value)
+      )
+      this.$axios.$post('maintenances', payload)
+        .then((res) => {
+          const maintenanceId = res.id
+          this.$router.push(`/maintenances/${maintenanceId}`)
+        })
+    },
+    editMaintenance: function() {
+      let params = {}
+      const filePickerFile = this.$refs.inputFile.files[0]
+      if (!filePickerFile) {
+        params = { 'name': this.name, 'description': this.description }
+      } else {
+        params = { 'name': this.name, 'description': this.description, 'image': this.image }
+      } 
+      let payload = new FormData()
+      Object.entries(params).forEach(
+        ([key, value]) => payload.append(key, value)
+      )
+      this.$axios.$patch(`/maintenances/${this.$route.params.id}`, payload)
+        .then(() => {
+          this.$router.push(`/maintenances/${this.$route.params.id}`)
+        })
+    },
+    selectCar: function(event) {
+      this.carId = event.target.value
+    }
+  }
+}
+</script>
+~
+EOF
+cat <<'EOF' | puravida pages/maintenances/index.vue ~
+<template>
+  <main class="container">
+    <h1>Maintenances</h1>
+    <NuxtLink to="/maintenances/new" role="button">Add Maintenance</NuxtLink>
+    <MaintenanceSet />
+  </main>
+</template>
+<script>
+export default { middleware: 'currentOrAdmin-index' }
+</script>
+~
+EOF
+cat <<'EOF' | puravida pages/maintenances/new.vue ~
+<template>
+  <main class="container">
+    <MaintenanceForm />
+  </main>
+</template>
+~
+EOF
+cat <<'EOF' | puravida pages/maintenances/_id/index.vue ~
+<template>
+  <main class="container">
+    <section>
+      <MaintenanceCard :maintenance="maintenance" />
+    </section>
+  </main>
+</template>
 
-# <script>
-# export default {
-#   middleware: 'currentOrAdmin-showEdit',
-#   data: () => ({ maintenance: {} }),
-#   async fetch() { this.maintenance = await this.$axios.$get(`maintenances/${this.$route.params.id}`) },
-#   methods: {
-#     uploadImage: function() { this.image = this.$refs.inputFile.files[0] },
-#     deleteMaintenance: function(id) {
-#       this.$axios.$delete(`maintenances/${this.$route.params.id}`)
-#       this.$router.push('/maintenances')
-#     }
-#   }
-# }
-# </script>
-# ~
-# EOF
-# cat <<'EOF' | puravida pages/maintenances/_id/edit.vue ~
-# <template>
-#   <main class="container">
-#     <CarForm />
-#   </main>
-# </template>
+<script>
+export default {
+  middleware: 'currentOrAdmin-showEdit',
+  data: () => ({ maintenance: {} }),
+  async fetch() { this.maintenance = await this.$axios.$get(`maintenances/${this.$route.params.id}`) },
+  methods: {
+    uploadImage: function() { this.image = this.$refs.inputFile.files[0] },
+    deleteMaintenance: function(id) {
+      this.$axios.$delete(`maintenances/${this.$route.params.id}`)
+      this.$router.push('/maintenances')
+    }
+  }
+}
+</script>
+~
+EOF
+cat <<'EOF' | puravida pages/maintenances/_id/edit.vue ~
+<template>
+  <main class="container">
+    <CarForm />
+  </main>
+</template>
 
-# <script>
-# export default { middleware: 'currentOrAdmin-showEdit' }
-# </script>
-# ~
-# EOF
+<script>
+export default { middleware: 'currentOrAdmin-showEdit' }
+</script>
+~
+EOF
 
-# echo -e "\n\n🦄 Nav\n\n"
-# cat <<'EOF' | puravida components/nav/Brand.vue ~
-# <template>
-#   <span>
-#     <font-awesome-icon icon="laptop-code" /> Ruxtmin
-#   </span>
-# </template>
-# ~
-# EOF
-# cat <<'EOF' | puravida components/nav/Default.vue ~
-# <template>
-#   <nav class="top-nav container-fluid">
-#     <ul><li><strong><NuxtLink to="/"><NavBrand /></NuxtLink></strong></li></ul>
-#     <input id="menu-toggle" type="checkbox" />
-#     <label class='menu-button-container' for="menu-toggle">
-#       <div class='menu-button'></div>
-#     </label>
-#     <ul class="menu">
-#       <li v-if="!isAuthenticated"><strong><NuxtLink to="/log-in">Log In</NuxtLink></strong></li>
-#       <li v-if="!isAuthenticated"><strong><NuxtLink to="/sign-up">Sign Up</NuxtLink></strong></li>
-#       <li v-if="isAuthenticated"><strong><NuxtLink :to="`/cars?user_id=${loggedInUser.id}`">Cars</NuxtLink></strong></li>
-#       <li v-if="isAuthenticated"><strong><NuxtLink :to="`/maintenances?user_id=${loggedInUser.id}`">Maintenances</NuxtLink></strong></li>
-#       <li v-if="isAdmin"><strong><NuxtLink to="/admin">Admin</NuxtLink></strong></li>
-#       <li v-if="isAuthenticated" class='dropdown'>
-#         <details role="list" dir="rtl">
-#           <summary class='summary' aria-haspopup="listbox" role="link">
-#             <img v-if="loggedInUser.avatar" :src="loggedInUser.avatar" />
-#             <font-awesome-icon v-else icon="circle-user" />
-#           </summary>
-#           <ul role="listbox">
-#             <li><NuxtLink :to="`/users/${loggedInUser.id}`">Profile</NuxtLink></li>
-#             <li><NuxtLink :to="`/users/${loggedInUser.id}/edit`">Settings</NuxtLink></li>
-#             <li><a @click="logOut">Log Out</a></li>
-#           </ul>
-#         </details>
-#       </li>
-#       <!-- <li v-if="isAuthenticated"><strong><NuxtLink :to="`/users/${loggedInUser.id}`">Settings</NuxtLink></strong></li> -->
-#       <li class="logout-desktop" v-if="isAuthenticated"><strong><a @click="logOut">Log Out</a></strong></li>
-#     </ul>
-#   </nav>
-# </template>
+echo -e "\n\n🦄 Nav\n\n"
+cat <<'EOF' | puravida components/nav/Brand.vue ~
+<template>
+  <span>
+    <font-awesome-icon icon="laptop-code" /> Ruxtmin
+  </span>
+</template>
+~
+EOF
+cat <<'EOF' | puravida components/nav/Default.vue ~
+<template>
+  <nav class="top-nav container-fluid">
+    <ul><li><strong><NuxtLink to="/"><NavBrand /></NuxtLink></strong></li></ul>
+    <input id="menu-toggle" type="checkbox" />
+    <label class='menu-button-container' for="menu-toggle">
+      <div class='menu-button'></div>
+    </label>
+    <ul class="menu">
+      <li v-if="!isAuthenticated"><strong><NuxtLink to="/log-in">Log In</NuxtLink></strong></li>
+      <li v-if="!isAuthenticated"><strong><NuxtLink to="/sign-up">Sign Up</NuxtLink></strong></li>
+      <li v-if="isAuthenticated"><strong><NuxtLink :to="`/cars?user_id=${loggedInUser.id}`">Cars</NuxtLink></strong></li>
+      <li v-if="isAuthenticated"><strong><NuxtLink :to="`/maintenances?user_id=${loggedInUser.id}`">Maintenances</NuxtLink></strong></li>
+      <li v-if="isAdmin"><strong><NuxtLink to="/admin">Admin</NuxtLink></strong></li>
+      <li v-if="isAuthenticated" class='dropdown'>
+        <details role="list" dir="rtl">
+          <summary class='summary' aria-haspopup="listbox" role="link">
+            <img v-if="loggedInUser.avatar" :src="loggedInUser.avatar" />
+            <font-awesome-icon v-else icon="circle-user" />
+          </summary>
+          <ul role="listbox">
+            <li><NuxtLink :to="`/users/${loggedInUser.id}`">Profile</NuxtLink></li>
+            <li><NuxtLink :to="`/users/${loggedInUser.id}/edit`">Settings</NuxtLink></li>
+            <li><a @click="logOut">Log Out</a></li>
+          </ul>
+        </details>
+      </li>
+      <!-- <li v-if="isAuthenticated"><strong><NuxtLink :to="`/users/${loggedInUser.id}`">Settings</NuxtLink></strong></li> -->
+      <li class="logout-desktop" v-if="isAuthenticated"><strong><a @click="logOut">Log Out</a></strong></li>
+    </ul>
+  </nav>
+</template>
 
-# <script>
-# import { mapGetters } from 'vuex'
-# export default {
-#   computed: { ...mapGetters(['isAuthenticated', 'isAdmin', 'loggedInUser']) }, 
-#   methods: { logOut() { this.$auth.logout() } }
-# }
-# </script>
+<script>
+import { mapGetters } from 'vuex'
+export default {
+  computed: { ...mapGetters(['isAuthenticated', 'isAdmin', 'loggedInUser']) }, 
+  methods: { logOut() { this.$auth.logout() } }
+}
+</script>
 
-# <style lang="sass" scoped>
-# // css-only responsive nav
-# // from https://codepen.io/alvarotrigo/pen/MWEJEWG (accessed 10/16/23, modified slightly)
+<style lang="sass" scoped>
+// css-only responsive nav
+// from https://codepen.io/alvarotrigo/pen/MWEJEWG (accessed 10/16/23, modified slightly)
 
-# h2 
-#   vertical-align: center
-#   text-align: center
+h2 
+  vertical-align: center
+  text-align: center
 
-# html, body 
-#   margin: 0
-#   height: 100%
+html, body 
+  margin: 0
+  height: 100%
 
-# .top-nav 
-#   height: 50px
+.top-nav 
+  height: 50px
 
-# .top-nav > ul 
-#   margin-top: 15px
+.top-nav > ul 
+  margin-top: 15px
 
-# .menu 
-#   display: flex
-#   flex-direction: row
-#   list-style-type: none
-#   margin: 0
-#   padding: 0
+.menu 
+  display: flex
+  flex-direction: row
+  list-style-type: none
+  margin: 0
+  padding: 0
 
-# [type="checkbox"] ~ label.menu-button-container 
-#   display: none
-#   height: 100%
-#   width: 30px
-#   cursor: pointer
-#   flex-direction: column
-#   justify-content: center
-#   align-items: center
+[type="checkbox"] ~ label.menu-button-container 
+  display: none
+  height: 100%
+  width: 30px
+  cursor: pointer
+  flex-direction: column
+  justify-content: center
+  align-items: center
 
-# #menu-toggle 
-#   display: none
+#menu-toggle 
+  display: none
 
-# .menu-button,
-# .menu-button::before,
-# .menu-button::after 
-#   display: block
-#   background-color: #000
-#   position: absolute
-#   height: 4px
-#   width: 30px
-#   transition: transform 400ms cubic-bezier(0.23, 1, 0.32, 1)
-#   border-radius: 2px
+.menu-button,
+.menu-button::before,
+.menu-button::after 
+  display: block
+  background-color: #000
+  position: absolute
+  height: 4px
+  width: 30px
+  transition: transform 400ms cubic-bezier(0.23, 1, 0.32, 1)
+  border-radius: 2px
 
-# .menu-button::before 
-#   content: ''
-#   margin-top: -8px
+.menu-button::before 
+  content: ''
+  margin-top: -8px
 
-# .menu-button::after 
-#   content: ''
-#   margin-top: 8px
+.menu-button::after 
+  content: ''
+  margin-top: 8px
 
-# #menu-toggle:checked + .menu-button-container .menu-button::before 
-#   margin-top: 0px
-#   transform: rotate(405deg)
+#menu-toggle:checked + .menu-button-container .menu-button::before 
+  margin-top: 0px
+  transform: rotate(405deg)
 
-# #menu-toggle:checked + .menu-button-container .menu-button 
-#   background: rgba(255, 255, 255, 0)
+#menu-toggle:checked + .menu-button-container .menu-button 
+  background: rgba(255, 255, 255, 0)
 
-# #menu-toggle:checked + .menu-button-container .menu-button::after 
-#   margin-top: 0px
-#   transform: rotate(-405deg)
+#menu-toggle:checked + .menu-button-container .menu-button::after 
+  margin-top: 0px
+  transform: rotate(-405deg)
 
-# .menu 
-#   > li 
-#     overflow: visible
+.menu 
+  > li 
+    overflow: visible
 
-#   > li.dropdown
-#     background: none
+  > li.dropdown
+    background: none
 
-#     .summary
-#       margin: 0
-#       padding: 1rem 0
-#       font-size: 1.5rem
+    .summary
+      margin: 0
+      padding: 1rem 0
+      font-size: 1.5rem
 
-#       &:focus
-#         color: var(--color)
-#         background: none
+      &:focus
+        color: var(--color)
+        background: none
 
-#       &:after
-#         display: none
+      &:after
+        display: none
 
-#     ul
-#       padding-top: 0
-#       margin-top: 0
-#       right: -1rem
+    ul
+      padding-top: 0
+      margin-top: 0
+      right: -1rem
 
-#   > li.logout-desktop
-#     display: none
+  > li.logout-desktop
+    display: none
 
-# @media (max-width: 991px) 
-#   .menu 
+@media (max-width: 991px) 
+  .menu 
     
-#     > li 
-#       overflow: hidden
+    > li 
+      overflow: hidden
     
-#     > li.dropdown
-#       display: none
+    > li.dropdown
+      display: none
 
-#     > li.logout-desktop
-#       display: flex
+    > li.logout-desktop
+      display: flex
 
-#   [type="checkbox"] ~ label.menu-button-container 
-#     display: flex
+  [type="checkbox"] ~ label.menu-button-container 
+    display: flex
 
-#   .top-nav > ul.menu 
-#     position: absolute
-#     top: 0
-#     margin-top: 50px
-#     left: 0
-#     flex-direction: column
-#     width: 100%
-#     justify-content: center
-#     align-items: center
+  .top-nav > ul.menu 
+    position: absolute
+    top: 0
+    margin-top: 50px
+    left: 0
+    flex-direction: column
+    width: 100%
+    justify-content: center
+    align-items: center
 
-#   #menu-toggle ~ .menu li 
-#     height: 0
-#     margin: 0
-#     padding: 0
-#     border: 0
-#     transition: height 400ms cubic-bezier(0.23, 1, 0.32, 1)
+  #menu-toggle ~ .menu li 
+    height: 0
+    margin: 0
+    padding: 0
+    border: 0
+    transition: height 400ms cubic-bezier(0.23, 1, 0.32, 1)
 
-#   #menu-toggle:checked ~ .menu li 
-#     border: 1px solid #333
-#     height: 2.5em
-#     padding: 0.5em
-#     transition: height 400ms cubic-bezier(0.23, 1, 0.32, 1)
+  #menu-toggle:checked ~ .menu li 
+    border: 1px solid #333
+    height: 2.5em
+    padding: 0.5em
+    transition: height 400ms cubic-bezier(0.23, 1, 0.32, 1)
 
-#   .menu > li 
-#     display: flex
-#     justify-content: center
-#     margin: 0
-#     padding: 0.5em 0
-#     width: 100%
-#     // color: white
-#     background-color: #222
+  .menu > li 
+    display: flex
+    justify-content: center
+    margin: 0
+    padding: 0.5em 0
+    width: 100%
+    // color: white
+    background-color: #222
 
-#   .menu > li:not(:last-child) 
-#     border-bottom: 1px solid #444
-# </style>
-# ~
-# EOF
-# cat <<'EOF' | puravida layouts/default.vue ~
-# <template>
-#   <div>
-#     <NavDefault />
-#     <Nuxt />
-#   </div>
-# </template>
-# ~
-# EOF
-# echo -e "\n\n🦄 Home\n\n"
-# cat <<'EOF' | puravida pages/index.vue ~
-# <template>
-#   <main class="container">
-#     <h1>Rails 7 Nuxt 2 Admin Boilerplate</h1>
+  .menu > li:not(:last-child) 
+    border-bottom: 1px solid #444
+</style>
+~
+EOF
+cat <<'EOF' | puravida layouts/default.vue ~
+<template>
+  <div>
+    <NavDefault />
+    <Nuxt />
+  </div>
+</template>
+~
+EOF
+echo -e "\n\n🦄 Home\n\n"
+cat <<'EOF' | puravida pages/index.vue ~
+<template>
+  <main class="container">
+    <h1>Rails 7 Nuxt 2 Admin Boilerplate</h1>
     
-#     <h2 class="small-bottom-margin">Features</h2>
-#     <ul class="features">
-#       <li>Admin dashboard</li>
-#       <li>Placeholder users</li>
-#       <li>Placeholder user item ("car")</li>
-#     </ul>
+    <h2 class="small-bottom-margin">Features</h2>
+    <ul class="features">
+      <li>Admin dashboard</li>
+      <li>Placeholder users</li>
+      <li>Placeholder user item ("car")</li>
+    </ul>
 
-#     <h3 class="small-bottom-margin stack">Stack</h3>
-#     <div class="aligned-columns">
-#       <p><span>frontend:</span> Nuxt 2</p>
-#       <p><span>backend API:</span> Rails 7</p>
-#       <p><span>database:</span> Postgres</p>
-#       <p><span>styles:</span> Sass</p>
-#       <p><span>css framework:</span> Pico.css</p>
-#       <p><span>e2e tests:</span> Cypress</p>
-#       <p><span>api tests:</span> RSpec</p>
-#     </div>
+    <h3 class="small-bottom-margin stack">Stack</h3>
+    <div class="aligned-columns">
+      <p><span>frontend:</span> Nuxt 2</p>
+      <p><span>backend API:</span> Rails 7</p>
+      <p><span>database:</span> Postgres</p>
+      <p><span>styles:</span> Sass</p>
+      <p><span>css framework:</span> Pico.css</p>
+      <p><span>e2e tests:</span> Cypress</p>
+      <p><span>api tests:</span> RSpec</p>
+    </div>
 
-#     <h3 class="small-bottom-margin tools">Tools</h3>
-#     <div class="aligned-columns">
-#       <p><span>user avatars:</span> local active storage</p>
-#       <p><span>backend auth:</span> bcrypt & jwt</p>
-#       <p><span>frontend auth:</span> nuxt auth module</p>
-#     </div>
+    <h3 class="small-bottom-margin tools">Tools</h3>
+    <div class="aligned-columns">
+      <p><span>user avatars:</span> local active storage</p>
+      <p><span>backend auth:</span> bcrypt & jwt</p>
+      <p><span>frontend auth:</span> nuxt auth module</p>
+    </div>
 
-#     <h3 class="small-bottom-margin">User Logins</h3>
-#     <table class="half-width">
-#       <tr><th>Email</th><th>Password</th><th>Notes</th></tr>
-#       <tr><td>michaelscott@dundermifflin.com</td><td>password</td><td>(admin)</td></tr>
-#       <tr><td>jimhalpert@dundermifflin.com</td><td>password</td><td></td></tr>
-#       <tr><td>pambeesly@dundermifflin.com</td><td>password</td><td></td></tr>
-#     </table>
+    <h3 class="small-bottom-margin">User Logins</h3>
+    <table class="half-width">
+      <tr><th>Email</th><th>Password</th><th>Notes</th></tr>
+      <tr><td>michaelscott@dundermifflin.com</td><td>password</td><td>(admin)</td></tr>
+      <tr><td>jimhalpert@dundermifflin.com</td><td>password</td><td></td></tr>
+      <tr><td>pambeesly@dundermifflin.com</td><td>password</td><td></td></tr>
+    </table>
     
-#     <p class="big-bottom-margin">
-#       <NuxtLink to="/log-in" role="button" class="secondary">Log In</NuxtLink> 
-#       <NuxtLink to="/sign-up" role="button" class="contrast outline">Sign Up</NuxtLink>
-#     </p>    
+    <p class="big-bottom-margin">
+      <NuxtLink to="/log-in" role="button" class="secondary">Log In</NuxtLink> 
+      <NuxtLink to="/sign-up" role="button" class="contrast outline">Sign Up</NuxtLink>
+    </p>    
 
-#   </main>
-# </template>
+  </main>
+</template>
 
-# <script>
-# export default { auth: false }
-# </script>
-# ~
-# EOF
-# cat <<'EOF' | puravida components/Notification.vue ~
-# <template>
-#   <div class="notification is-danger">
-#     {{ message }}
-#   </div>
-# </template>
+<script>
+export default { auth: false }
+</script>
+~
+EOF
+cat <<'EOF' | puravida components/Notification.vue ~
+<template>
+  <div class="notification is-danger">
+    {{ message }}
+  </div>
+</template>
 
-# <script>
-# export default {
-#   name: 'Notification',
-#   props: ['message']
-# }
-# </script>
-# ~
-# EOF
+<script>
+export default {
+  name: 'Notification',
+  props: ['message']
+}
+</script>
+~
+EOF
 
-# echo -e "\n\n🦄 Login & Signup Pages\n\n"
-# cat <<'EOF' | puravida pages/log-in.vue ~
-# <template>
-#   <main class="container">
-#     <h2>Log In</h2>
-#     <Notification :message="error" v-if="error"/>
-#     <form method="post" @submit.prevent="login">
-#       <div>
-#         <label>Email</label>
-#         <div>
-#           <input
-#             type="email"
-#             name="email"
-#             v-model="email"
-#           />
-#         </div>
-#       </div>
-#       <div>
-#         <label>Password</label>
-#         <div>
-#           <input
-#             type="password"
-#             name="password"
-#             v-model="password"
-#           />
-#         </div>
-#       </div>
-#       <div>
-#         <button type="submit">Log In</button>
-#       </div>
-#     </form>
-#     <div>
-#       <p>
-#         Don't have an account? <NuxtLink to="/sign-up">Sign up</NuxtLink>
-#       </p>
-#     </div>
-#   </main>
-# </template>
+echo -e "\n\n🦄 Login & Signup Pages\n\n"
+cat <<'EOF' | puravida pages/log-in.vue ~
+<template>
+  <main class="container">
+    <h2>Log In</h2>
+    <Notification :message="error" v-if="error"/>
+    <form method="post" @submit.prevent="login">
+      <div>
+        <label>Email</label>
+        <div>
+          <input
+            type="email"
+            name="email"
+            v-model="email"
+          />
+        </div>
+      </div>
+      <div>
+        <label>Password</label>
+        <div>
+          <input
+            type="password"
+            name="password"
+            v-model="password"
+          />
+        </div>
+      </div>
+      <div>
+        <button type="submit">Log In</button>
+      </div>
+    </form>
+    <div>
+      <p>
+        Don't have an account? <NuxtLink to="/sign-up">Sign up</NuxtLink>
+      </p>
+    </div>
+  </main>
+</template>
 
-# <script>
-# import Notification from '~/components/Notification'
-# export default {
-#   auth: false,
-#   components: {
-#     Notification,
-#   },
-#   data() {
-#     return {
-#       email: '',
-#       password: '',
-#       error: null
-#     }
-#   },
-#   methods: {
-#     async login() {
-#       this.$auth.loginWith('local', {
-#         data: {
-#           email: this.email,
-#           password: this.password
-#         }
-#       }).then (() => {
-#         const id = this.$auth.$state.user.id
-#         this.$router.push(`/users/${id}`)
-#       })
-#     }
-#   }
-# }
-# </script>
-# ~
-# EOF
-# cat <<'EOF' | puravida pages/sign-up.vue ~
-# <template>
-#   <main class="container">
-#     <UserForm />      
-#   </main>
-# </template>
+<script>
+import Notification from '~/components/Notification'
+export default {
+  auth: false,
+  components: {
+    Notification,
+  },
+  data() {
+    return {
+      email: '',
+      password: '',
+      error: null
+    }
+  },
+  methods: {
+    async login() {
+      this.$auth.loginWith('local', {
+        data: {
+          email: this.email,
+          password: this.password
+        }
+      }).then (() => {
+        const id = this.$auth.$state.user.id
+        this.$router.push(`/users/${id}`)
+      })
+    }
+  }
+}
+</script>
+~
+EOF
+cat <<'EOF' | puravida pages/sign-up.vue ~
+<template>
+  <main class="container">
+    <UserForm />      
+  </main>
+</template>
 
-# <script>
-# export default { auth: false }
-# </script>
-# ~
-# EOF
-# cat <<'EOF' | puravida store/index.js ~
-# export const getters = {
-#   isAuthenticated(state) {
-#     return state.auth.loggedIn
-#   },
+<script>
+export default { auth: false }
+</script>
+~
+EOF
+cat <<'EOF' | puravida store/index.js ~
+export const getters = {
+  isAuthenticated(state) {
+    return state.auth.loggedIn
+  },
 
-#   isAdmin(state) {
-#     if (state.auth.user && state.auth.user.admin !== null && state.auth.user.admin == true) { 
-#         return true
-#     } else {
-#       return false
-#     } 
-#   },
+  isAdmin(state) {
+    if (state.auth.user && state.auth.user.admin !== null && state.auth.user.admin == true) { 
+        return true
+    } else {
+      return false
+    } 
+  },
 
-#   loggedInUser(state) {
-#     return state.auth.user
-#   }
-# }
-# ~
-# EOF
+  loggedInUser(state) {
+    return state.auth.user
+  }
+}
+~
+EOF
 
-# echo -e "\n\n🦄 Admin Page\n\n"
+echo -e "\n\n🦄 Admin Page\n\n"
 
-# cat <<'EOF' | puravida pages/admin/index.vue ~
-# <template>
-#   <main class="container">
-#     <h1>Admin</h1>
-#     <p>Number of users: {{ this.users.length }}</p>
-#     <p>Number of admins: {{ (this.users.filter((obj) => obj.admin === true)).length }}</p>
-#     <p><NuxtLink to="/users">Users</NuxtLink></p>
-#     <p><NuxtLink to="/cars?admin=true">Cars</NuxtLink></p>
-#   </main>
-# </template>
+cat <<'EOF' | puravida pages/admin/index.vue ~
+<template>
+  <main class="container">
+    <h1>Admin</h1>
+    <p>Number of users: {{ this.users.length }}</p>
+    <p>Number of admins: {{ (this.users.filter((obj) => obj.admin === true)).length }}</p>
+    <p><NuxtLink to="/users">Users</NuxtLink></p>
+    <p><NuxtLink to="/cars?admin=true">Cars</NuxtLink></p>
+  </main>
+</template>
 
-# <script>
-# export default { 
-#   middleware: 'adminOnly',
-#   layout: 'admin',
-#   data: () => ({ users: [] }),
-#   async fetch() { this.users = await this.$axios.$get('users') }
-# }
-# </script>
-# ~
-# EOF
+<script>
+export default { 
+  middleware: 'adminOnly',
+  layout: 'admin',
+  data: () => ({ users: [] }),
+  async fetch() { this.users = await this.$axios.$get('users') }
+}
+</script>
+~
+EOF
 
 
 # echo -e "\n\n🦄 Cypress\n\n"

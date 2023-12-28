@@ -2485,6 +2485,7 @@ class ApplicationController < ActionController::API
   def prep_raw_car(car)
     user_id = car.user_id
     user_name = User.find(car.user_id).name
+    maintenances = Maintenance.where(car_id: car.id).map { |maintenance| prep_raw_maintenance(maintenance) }
     # documents = Document.where(car_id: car.id)
     # documents = documents.map { |document| document.slice(:id,:name,:description,:car_id) }
     image = car.image.present? ? url_for(car.image) : nil
@@ -2492,6 +2493,7 @@ class ApplicationController < ActionController::API
     car['userId'] = user_id
     car['userName'] = user_name
     car['image'] = image
+    car['maintenances'] = maintenances
     # car['documents'] = documents
     car
   end
@@ -3212,6 +3214,7 @@ class ApplicationController < ActionController::API
   def prep_raw_car(car)
     user_id = car.user_id
     user_name = User.find(car.user_id).name
+    maintenances = Maintenance.where(car_id: car.id).map { |maintenance| prep_raw_maintenance(maintenance) }
     # documents = Document.where(car_id: car.id)
     # documents = documents.map { |document| document.slice(:id,:name,:description,:car_id) }
     image = car.image.present? ? url_for(car.image) : nil
@@ -3219,6 +3222,7 @@ class ApplicationController < ActionController::API
     car['userId'] = user_id
     car['userName'] = user_name
     car['image'] = image
+    car['maintenances'] = maintenances
     # car['documents'] = documents
     car
   end
