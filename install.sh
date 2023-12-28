@@ -2738,12 +2738,18 @@ class ApplicationController < ActionController::API
     avatar = user.avatar.present? ? url_for(user.avatar) : nil
     car_ids = Car.where(user_id: user.id).map { |car| car.id }
     cars = Car.where(user_id: user.id).map { |car| prep_raw_car(car) }
-    # documents = Document.where(car_id: cars).map { |document| document.id }
+    maintenances_ids = Maintenance.where(car_id: car_ids).map { |maintenance| maintenance.id }
+    maintenances = Maintenance.where(car_id: car_ids).map { |maintenance| prep_raw_maintenance(maintenance) }
+    documents_ids = Document.where(documentable_id: car_ids, documentable_type: "Car").map { |document| document.id }
+    documents = Document.where(documentable_id: car_ids, documentable_type: "Car").map { |document| prep_raw_document(document) }
     user = user.admin ? user.slice(:id,:email,:name,:admin) : user.slice(:id,:email,:name)
     user['avatar'] = avatar
     user['car_ids'] = car_ids
     user['cars'] = cars
-    # user['document_ids'] = documents
+    user['maintenances_ids'] = maintenances_ids
+    user['maintenances'] = maintenances
+    user['documents_ids'] = documents_ids
+    user['documents'] = documents
     user
   end
 
@@ -2751,22 +2757,22 @@ class ApplicationController < ActionController::API
     user_id = car.user_id
     user_name = User.find(car.user_id).name
     maintenances = Maintenance.where(car_id: car.id).map { |maintenance| prep_raw_maintenance(maintenance) }
-    # documents = Document.where(car_id: car.id)
-    # documents = documents.map { |document| document.slice(:id,:name,:description,:car_id) }
+    # documents_ids = Document.where(documentable_id: car_ids, documentable_type: "Car").map { |document| document.id }
+    documents = Document.where(documentable_id: car.id, documentable_type: "Car").map { |document| prep_raw_document(document) }
     image = car.image.present? ? url_for(car.image) : nil
     car = car.slice(:id,:name,:year,:make,:model,:trim,:body,:color,:plate,:vin,:cost,:initial_mileage,:purchase_date,:purchase_vendor)
     car['userId'] = user_id
     car['userName'] = user_name
     car['image'] = image
     car['maintenances'] = maintenances
-    # car['documents'] = documents
+    car['documents'] = documents
     car
   end
 
   def prep_raw_maintenance(maintenance)
     car = Car.find(maintenance.car_id)
     user = User.find(car.user_id)
-    images = maintenance.images.map { |image| url_for(image) }
+    images = maintenance.images.present? ? maintenance.images.map { |image| url_for(image) } : nil
     maintenance = maintenance.slice(:id,:date,:description,:vendor,:cost,:car_id)
     maintenance['carId'] = car.id
     maintenance['carName'] = car.name
