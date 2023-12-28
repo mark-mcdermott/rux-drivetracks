@@ -3042,20 +3042,16 @@ RSpec.describe "/documents", type: :request do
       get documents_url, headers: valid_headers
       documents = JSON.parse(response.body)
       fiat_title = documents.select{|document| document['name'] == "Fiat title"}[0]
+      michael = User.find_by(name: "Michael Scott")
+      fiat = Car.find_by(name: "Michael's Fiat 500")
       expect(fiat_title['date']).to be_nil
       expect(fiat_title['name']).to eq "Fiat title"
       expect(fiat_title['notes']).to be_nil
-      # michael = User.find_by(name: "Michael Scott")
-      # alignment = maintenances.find { |maintenance| maintenance['car_id'] == fiat.id and maintenance['cost'] == "350.0"}
-      # expect(alignment['carId']).to eq fiat.id
-      # expect(alignment['carName']).to eq fiat.name
-      # expect(fiat_title['description']).to eq "Alignment"
-      # expect(fiat_title['vendor']).to eq "Pep Boys"
-      # expect(fiat_title['cost']).to eq "350.0"
-      # expect(fiat_title['carId']).to eq fiat.id
-      # expect(fiat_title['carName']).to eq fiat.name
-      # expect(fiat_title['userId']).to eq michael.id
-      # expect(fiat_title['userName']).to eq michael.name
+      expect(fiat_title['attachment']).to match(/http.*title-scion\.jpg/)
+      expect(fiat_title['carId']).to eq fiat.id
+      expect(fiat_title['carName']).to eq fiat.name
+      expect(fiat_title['userId'].class).to eq Integer
+      expect(fiat_title['userName']).to eq michael.name
     end
   end
 
