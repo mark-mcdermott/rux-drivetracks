@@ -3194,6 +3194,7 @@ RSpec.describe "/documents", type: :request do
 end
 ~
 EOF
+rspec
 
 # echo -e "\n\n🦄 FRONTEND\n\n"
 
