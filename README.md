@@ -3206,7 +3206,16 @@ class DocumentsController < ApplicationController
 
   # GET /documents
   def index
-    @documents = Document.all.map { |document| prep_raw_document(document) }
+    if params['user_id'].present?
+      car_ids = Car.where(user_id: params['user_id']).map { |car| car.id }
+      maintenance_ids = Maintenance.where(car_id: car_ids).map { |maintenance| maintenance.id }
+      car_documents = Document.where(documentable_type: "Car", documentable_id: car_ids)
+      maintenance_documents = Document.where(documentable_type: "Maintenance", documentable_id: maintenance_ids)
+      all_documents = car_documents + maintenance_documents
+      @documents = all_documents.map { |document| prep_raw_document(document) }
+    else
+      @documents = Document.all.map { |document| prep_raw_document(document) }
+    end
     render json: @documents
   end
 
