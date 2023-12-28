@@ -4096,7 +4096,7 @@ export default { middleware: 'currentOrAdmin-showEdit' }
     <h4 v-if="car.maintenances !== null">Maintenances</h4>
     <ul v-if="car.maintenances !== null">
       <li v-for="maintenance in car.maintenances" :key="maintenance.id">
-        <NuxtLink :to="`/maintenances/${maintenance.id}`">{{ maintenance.name }} - {{ maintenance.description }}</NuxtLink>
+        <NuxtLink :to="`/maintenances/${maintenance.id}`">{{ maintenance.description }}</NuxtLink>
       </li>
     </ul>
   </article>
