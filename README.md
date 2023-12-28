@@ -2905,6 +2905,33 @@ maintenance = Maintenance.create(date: Date.parse("20230601"), description: "Rep
 maintenance.images.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/camry-replaced-radiator-1.jpg"), filename: "camry-replaced-radiator-1.jpg")
 maintenance.images.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/camry-replaced-radiator-2.jpg"), filename: "camry-replaced-radiator-2.jpg")
 maintenance.save!
+
+document = Document.create(name: "title-fiat-500", documentable_type: "Car",documentable_id: 1)
+document.attachment.attach(io: URI.open("#{Rails.root}/app/assets/images/documents/car-documents/titles/title-fiat-500.gif"), filename: "title-fiat-500.gif")
+document = Document.create(name: "contract-fiat-500", documentable_type: "Car",documentable_id: 1)
+document.attachment.attach(io: URI.open("#{Rails.root}/app/assets/images/documents/car-documents/contracts/contract-fiat-500.webp"), filename: "contract-fiat-500.webp")
+document = Document.create(name: "title-honda-civic", documentable_type: "Car",documentable_id: 2)
+document.attachment.attach(io: URI.open("#{Rails.root}/app/assets/images/documents/car-documents/titles/title-honda-civic.png"), filename: "title-honda-civic.png")
+document = Document.create(name: "contract-honda-civic", documentable_type: "Car",documentable_id: 2)
+document.attachment.attach(io: URI.open("#{Rails.root}/app/assets/images/documents/car-documents/contracts/contract-honda-civic.png"), filename: "contract-honda-civic.png")
+document = Document.create(name: "title-hyundai-elantra", documentable_type: "Car",documentable_id: 3)
+document.attachment.attach(io: URI.open("#{Rails.root}/app/assets/images/documents/car-documents/titles/title-hyundai-elantra.pdf"), filename: "title-hyundai-elantra.pdf")
+document = Document.create(name: "contract-hyundai-elantra", documentable_type: "Car",documentable_id: 3)
+document.attachment.attach(io: URI.open("#{Rails.root}/app/assets/images/documents/car-documents/contracts/contract-hyundai-elantra.jpg"), filename: "contract-hyundai-elantra.jpg")
+document = Document.create(name: "title-nissan-leaf", documentable_type: "Car",documentable_id: 4)
+document.attachment.attach(io: URI.open("#{Rails.root}/app/assets/images/documents/car-documents/titles/title-nissan-leaf.png"), filename: "title-nissan-leaf.png")
+document = Document.create(name: "contract-nissan-leaf", documentable_type: "Car",documentable_id: 4)
+document.attachment.attach(io: URI.open("#{Rails.root}/app/assets/images/documents/car-documents/contracts/contract-nissan-leaf.png"), filename: "contract-nissan-leaf.png")
+document = Document.create(name: "title-scion", documentable_type: "Car",documentable_id: 5)
+document.attachment.attach(io: URI.open("#{Rails.root}/app/assets/images/documents/car-documents/titles/title-scion.jpg"), filename: "title-scion.jpg")
+document = Document.create(name: "contract-scion", documentable_type: "Car",documentable_id: 5)
+document.attachment.attach(io: URI.open("#{Rails.root}/app/assets/images/documents/car-documents/contracts/contract-scion.pdf"), filename: "contract-scion.pdf")
+document = Document.create(name: "title-toyota-camry", documentable_type: "Car",documentable_id: 6)
+document.attachment.attach(io: URI.open("#{Rails.root}/app/assets/images/documents/car-documents/titles/title-toyota-camry.jpg"), filename: "title-toyota-camry.jpg")
+document = Document.create(name: "contract-toyota-camry.jpg", documentable_type: "Car",documentable_id: 6)
+document.attachment.attach(io: URI.open("#{Rails.root}/app/assets/images/documents/car-documents/contracts/contract-toyota-camry.jpg"), filename: "contract-toyota-camry.jpg")
+# document = Document.create(name: "contract-toyota-camry.jpg", documentable_type: "Maintenance",documentable_id: 6)
+# document.attachment.attach(io: URI.open("#{Rails.root}/app/assets/images/documents/car-documents/contracts/contract-toyota-camry.jpg"), filename: "contract-toyota-camry.jpg")
 ~
 ```
 - `rails db:seed`
