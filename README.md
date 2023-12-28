@@ -3419,30 +3419,29 @@ RSpec.describe "/documents", type: :request do
       get documents_url, headers: valid_headers
       expect(response).to be_successful
     end
-    # it "gets twelve documents" do
-    #   get documents_url, headers: valid_headers
-    #   expect(JSON.parse(response.body).length).to eq 12
-    # end
-    # it "first document has correct properties" do
-    #   get documents_url, headers: valid_headers
-    #   documents = JSON.parse(response.body)
-    #   fiat_title = documents.select{|document| document['name'] == "Fiat title"}[0]
-    #   expect(fiat_title['date']).to be_nil
-    #   expect(fiat_title['name']).to eq "Fiat title"
-    #   expect(fiat_title['notes']).to be_nil
-    #   # michael = User.find_by(name: "Michael Scott")
-    #   # alignment = maintenances.find { |maintenance| maintenance['car_id'] == fiat.id and maintenance['cost'] == "350.0"}
-    #   # expect(alignment['carId']).to eq fiat.id
-    #   # expect(alignment['carName']).to eq fiat.name
-    #   # expect(fiat_title['description']).to eq "Alignment"
-    #   # expect(fiat_title['vendor']).to eq "Pep Boys"
-    #   # expect(fiat_title['cost']).to eq "350.0"
-    #   # expect(fiat_title['carId']).to eq fiat.id
-    #   # expect(fiat_title['carName']).to eq fiat.name
-    #   # expect(fiat_title['userId']).to eq michael.id
-    #   # expect(fiat_title['userName']).to eq michael.name
-    # end
-
+    it "gets 36 documents" do
+      get documents_url, headers: valid_headers
+      expect(JSON.parse(response.body).length).to eq 36
+    end
+    it "first document has correct properties" do
+      get documents_url, headers: valid_headers
+      documents = JSON.parse(response.body)
+      fiat_title = documents.select{|document| document['name'] == "Fiat title"}[0]
+      expect(fiat_title['date']).to be_nil
+      expect(fiat_title['name']).to eq "Fiat title"
+      expect(fiat_title['notes']).to be_nil
+      # michael = User.find_by(name: "Michael Scott")
+      # alignment = maintenances.find { |maintenance| maintenance['car_id'] == fiat.id and maintenance['cost'] == "350.0"}
+      # expect(alignment['carId']).to eq fiat.id
+      # expect(alignment['carName']).to eq fiat.name
+      # expect(fiat_title['description']).to eq "Alignment"
+      # expect(fiat_title['vendor']).to eq "Pep Boys"
+      # expect(fiat_title['cost']).to eq "350.0"
+      # expect(fiat_title['carId']).to eq fiat.id
+      # expect(fiat_title['carName']).to eq fiat.name
+      # expect(fiat_title['userId']).to eq michael.id
+      # expect(fiat_title['userName']).to eq michael.name
+    end
   end
 
 
