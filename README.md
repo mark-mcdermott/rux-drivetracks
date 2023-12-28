@@ -4684,15 +4684,18 @@ export default { middleware: 'currentOrAdmin-showEdit' }
 <template>
   <article>
     <h2>
-      <NuxtLink :to="`/documents/${document.id}`">{{ document.description }}</NuxtLink> 
+      <NuxtLink :to="`/documents/${document.id}`">{{ document.name }}</NuxtLink> 
       <NuxtLink :to="`/documents/${document.id}/edit`"><font-awesome-icon icon="pencil" /></NuxtLink>
       <a @click.prevent=deleteCar(document.id) href="#"><font-awesome-icon icon="trash" /></a>
     </h2>
     <p>id: {{ document.id }}</p>
+    <p>date: {{ document.date }}</p>
+    <p>notes: {{ document.notes }}</p>
     <p>description: {{ document.description }}</p>
     <p v-if="document.attachment !== null" class="no-margin">attachment:</p>
-    <img v-if="document.attachment !== null" :src="document.image" />
-    <p>car:</p>
+    <img v-if="document.attachment !== null" :src="document.attachment" />
+    <p v-if="document.hasOwnProperty('maintenanceDescription')">maintenance: <NuxtLink :to="`/maintenances/${document.maintenanceId}`">{{ document.maintenanceDescription }}</NuxtLink></p>
+    <p>car: <NuxtLink :to="`/cars/${document.carId}`">{{ document.carName }}</NuxtLink></p>
   </article>
 </template>
 
