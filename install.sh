@@ -2948,8 +2948,22 @@ cat <<'EOF' | puravida spec/requests/documents_spec.rb ~
 require 'rails_helper'
 
 RSpec.describe "/documents", type: :request do
-  let(:valid_headers) {{ Authorization: "Bearer " + @michael_token }}
   fixtures :users, :cars, :maintenances, :documents
+  let(:valid_headers) {{ Authorization: "Bearer " + @michael_token }}
+  let(:valid_attributes) {{ 
+    date: Date.parse("20200713"),
+    name: "name",
+    notes: "notes",
+    documentable_type: "Maintenance",
+    documentable_id: maintenances(:fiat_alignment).id
+  }}
+  let(:invalid_attributes) {{ 
+    date: Date.parse("20200713"),
+    name: "name",
+    notes: "notes",
+    documentable_type: "Maintenance",
+    documentable_id: 0
+  }}
 
   before :all do
     @michael_token = token_from_email_password("michaelscott@dundermifflin.com", "password")
@@ -3074,7 +3088,7 @@ RSpec.describe "/documents", type: :request do
   describe "GET /show" do
     it "renders a successful response" do
       document = documents(:fiat_title)
-      get documents_url(document), headers: valid_headers
+      get document_url(document), headers: valid_headers
       expect(response).to be_successful
     end
     it "document has correct properties" do
@@ -3092,6 +3106,88 @@ RSpec.describe "/documents", type: :request do
       expect(fiat_title['userId']).to eq michael.id
       expect(fiat_title['userName']).to eq michael.name
     end
+  end
+
+  describe "POST /create" do
+    context "with valid parameters" do
+      it "creates a new document" do
+        expect { post documents_url, params: valid_attributes, headers: valid_headers, as: :json
+        }.to change(Document, :count).by(1)
+      end
+      it "renders a JSON response with the new document" do
+        post documents_url, params: valid_attributes, headers: valid_headers, as: :json
+        expect(response).to have_http_status(:created)
+        expect(response.content_type).to match(a_string_including("application/json"))
+      end
+    end
+
+    context "with invalid parameters" do
+      it "does not create new document" do
+        expect {
+          post documents_url, params: invalid_attributes, headers: valid_headers, as: :json
+        }.to change(Document, :count).by(0)
+      end
+      it "renders a JSON response with errors for the new document" do
+        post documents_url, params: invalid_attributes, headers: valid_headers, as: :json
+        expect(response).to have_http_status(:unprocessable_entity)
+        expect(response.content_type).to match(a_string_including("application/json"))
+      end
+    end
+  end
+
+  describe "PATCH /update" do
+    context "with valid parameters" do
+      let(:new_attributes) {{ name: "UpdatedName"}}
+
+      it "updates document's description" do
+        document = documents(:fiat_title)
+        patch document_url(document), params: new_attributes, headers: valid_headers, as: :json
+        document.reload
+        expect(document.name).to eq("UpdatedName")
+      end
+
+      it "renders a JSON response with the document" do
+        document = documents(:fiat_title)
+        patch document_url(document), params: new_attributes, headers: valid_headers, as: :json
+        expect(response).to have_http_status(:ok)
+        expect(response.content_type).to match(a_string_including("application/json"))
+      end
+
+      it "document's other properties are still correct" do
+        fiat = cars(:fiat)
+        michael = users(:michael)
+        document = documents(:fiat_title)
+        patch document_url(document), params: new_attributes, headers: valid_headers, as: :json
+        fiat_title = JSON.parse(response.body)
+        fiat_title = JSON.parse(response.body)
+        expect(fiat_title['date']).to be_nil
+        expect(fiat_title['notes']).to be_nil
+        expect(fiat_title['attachment']).to match(/http.*title-fiat-500\.gif/)
+        expect(fiat_title['carId']).to eq fiat.id
+        expect(fiat_title['carName']).to eq fiat.name
+        expect(fiat_title['userId']).to eq michael.id
+        expect(fiat_title['userName']).to eq michael.name
+      end
+
+      context "with invalid parameters" do
+        it "renders a JSON response with errors for the document" do
+          document = documents(:fiat_title)
+          patch document_url(document), params: invalid_attributes, headers: valid_headers, as: :json
+          expect(response).to have_http_status(:unprocessable_entity)
+          expect(response.content_type).to match(a_string_including("application/json"))
+        end
+      end
+
+    end
+
+    describe "DELETE /destroy" do
+      it "destroys the requested document" do
+        document = Document.create! valid_attributes
+        expect { delete document_url(document), headers: valid_headers, as: :json
+        }.to change(Document, :count).by(-1)
+      end
+    end
+
   end
 
 
