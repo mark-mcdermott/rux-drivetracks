@@ -3346,7 +3346,7 @@ RSpec.describe "/documents", type: :request do
     name: "name",
     notes: "notes",
     documentable_type: "Maintenance",
-    documentable_id: 0
+    documentable_id: -1
   }}
 
   before :all do
