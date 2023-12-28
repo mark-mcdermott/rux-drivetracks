@@ -2900,7 +2900,7 @@ class DocumentsController < ApplicationController
 
   # GET /documents/1
   def show
-    render json: @document
+    render json: prep_raw_document(@document)
   end
 
   # POST /documents
@@ -2956,7 +2956,7 @@ RSpec.describe "/documents", type: :request do
 
   before :each do
     @fiat_title = documents(:fiat_title)
-    @fiat_title.attachment.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'scion-engine-overhaul-2.jpg'),'image/jpeg'))
+    @fiat_title.attachment.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'title-fiat-500.gif'),'image/gif'))
     @fiat_contract = documents(:fiat_contract)
     @fiat_contract.attachment.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'contract-fiat-500.webp'),'image/webp'))
     @civic_title = documents(:civic_title)
@@ -3047,10 +3047,48 @@ RSpec.describe "/documents", type: :request do
       expect(fiat_title['date']).to be_nil
       expect(fiat_title['name']).to eq "Fiat title"
       expect(fiat_title['notes']).to be_nil
-      expect(fiat_title['attachment']).to match(/http.*title-scion\.jpg/)
+      expect(fiat_title['attachment']).to match(/http.*title-fiat-500\.gif/)
       expect(fiat_title['carId']).to eq fiat.id
       expect(fiat_title['carName']).to eq fiat.name
-      expect(fiat_title['userId'].class).to eq Integer
+      expect(fiat_title['userId']).to eq michael.id
+      expect(fiat_title['userName']).to eq michael.name
+    end
+    it "second document has correct properties" do
+      get documents_url, headers: valid_headers
+      documents = JSON.parse(response.body)
+      elantra_tires = documents.select{|document| document['name'] == "elantra_new_tires_document_1"}[0]
+      jim = User.find_by(name: "Jim Halpert")
+      elantra = Car.find_by(name: "Jim's Hyundai Elantra")
+      expect(elantra_tires['date']).to be_nil
+      expect(elantra_tires['name']).to eq "elantra_new_tires_document_1"
+      expect(elantra_tires['notes']).to be_nil
+      expect(elantra_tires['attachment']).to match(/http.*elantra-new-tires-1\.pdf/)
+      expect(elantra_tires['carId']).to eq elantra.id
+      expect(elantra_tires['carName']).to eq elantra.name
+      expect(elantra_tires['userId']).to eq jim.id
+      expect(elantra_tires['userName']).to eq jim.name
+    end
+  end
+
+  describe "GET /show" do
+    it "renders a successful response" do
+      document = documents(:fiat_title)
+      get documents_url(document), headers: valid_headers
+      expect(response).to be_successful
+    end
+    it "document has correct properties" do
+      document = documents(:fiat_title)
+      fiat = cars(:fiat)
+      michael = users(:michael)
+      get document_url(document), headers: valid_headers
+      fiat_title = JSON.parse(response.body)
+      expect(fiat_title['date']).to be_nil
+      expect(fiat_title['name']).to eq "Fiat title"
+      expect(fiat_title['notes']).to be_nil
+      expect(fiat_title['attachment']).to match(/http.*title-fiat-500\.gif/)
+      expect(fiat_title['carId']).to eq fiat.id
+      expect(fiat_title['carName']).to eq fiat.name
+      expect(fiat_title['userId']).to eq michael.id
       expect(fiat_title['userName']).to eq michael.name
     end
   end
