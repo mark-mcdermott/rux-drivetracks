@@ -3828,7 +3828,7 @@ export default function ({ route, store, redirect }) {
   let isMaintenance = false;
   let isUser = false;
   const userCars = loggedInUser.car_ids
-  const userMaintenances = loggedInUser.maintenance_ids
+  const userMaintenances = loggedInUser.maintenances_ids
 
   if (url.includes("maintenance")) {
     isMaintenance = true
