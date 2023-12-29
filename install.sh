@@ -3441,11 +3441,15 @@ export default function ({ route, store, redirect }) {
   let isElemUsers = false
   let isCar = false;
   let isMaintenance = false;
+  let isDocument = false;
   let isUser = false;
   const userCars = loggedInUser.car_ids
   const userMaintenances = loggedInUser.maintenances_ids
+  const userDocuments = loggedInUser.documents_ids
 
-  if (url.includes("maintenance")) {
+  if (url.includes("document")) {
+    isDocument = true
+  } else if (url.includes("maintenance")) { 
     isMaintenance = true
   } else if (url.includes("car")) {
     isCar = true
@@ -3463,6 +3467,8 @@ export default function ({ route, store, redirect }) {
     isElemUsers = userCars.includes(elemId) ? true : false
   } else if (isMaintenance) {
     isElemUsers = userMaintenances.includes(elemId) ? true : false
+  } else if (isDocument) {
+    isElemUsers = userDocuments.includes(elemId) ? true : false
   } else if (isUser) {
     isElemUsers = loggedInUser.id === elemId ? true : false
   }
