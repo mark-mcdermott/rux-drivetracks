@@ -4707,15 +4707,9 @@ export default { middleware: 'currentOrAdmin-showEdit' }
     <p>date: {{ document.date }}</p>
     <p>notes: {{ document.notes }}</p>
     <p>description: {{ document.description }}</p>
-    <p v-if="!isImage">attachment: <a :href="document.attachment">{{ attachedFile }}</a></p>
-    <div v-else>
-      <p>attachment:</p> 
-      <a :href="document.attachment"><img :src="document.attachment" /></a>
-    </div>
-    
+    <p>attachment: <a :href="document.attachment">{{ document.attachment }}</a></p>
     <p v-if="document.hasOwnProperty('maintenanceDescription')">maintenance: <NuxtLink :to="`/maintenances/${document.maintenanceId}`">{{ document.maintenanceDescription }}</NuxtLink></p>
     <p>car: <NuxtLink :to="`/cars/${document.carId}`">{{ document.carName }}</NuxtLink></p>
-    
   </article>
 </template>
 
@@ -4733,18 +4727,7 @@ export default {
       default: () => ([]),
     },
   },
-  computed: { 
-    ...mapGetters(['isAdmin']) ,
-    attachedFile: function() {
-      return this.document.attachment.split('/').pop()
-    },
-    attachedFileExtension: function() {
-      return this.attachedFile.split('.').pop()
-    },
-    isImage: function() {
-      return ['jpg','png','gif'].includes(this.attachedFileExtension)
-    }
-  },
+  computed: { ...mapGetters(['isAdmin']) },
   methods: {
     uploadImage: function() {
       this.image = this.$refs.inputFile.files[0];
