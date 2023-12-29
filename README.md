@@ -4804,8 +4804,8 @@ export default {
           <option value=""></option>
           <option v-for="car in cars" :key="car.id" :value="car.id">{{ car.name }} - {{ car.description }}</option>
         </select>
-        <button v-if="editOrNew !== 'edit'" @click.prevent=createMaintenance>Create Document</button>
-        <button v-else-if="editOrNew == 'edit'" @click.prevent=editMaintenance>Edit Document</button>
+        <button v-if="editOrNew !== 'edit'" @click.prevent=createDocument>Create Document</button>
+        <button v-else-if="editOrNew == 'edit'" @click.prevent=editDocument>Edit Document</button>
       </form>
     </article>
   </section>
