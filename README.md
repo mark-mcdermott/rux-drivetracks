@@ -3226,6 +3226,7 @@ class DocumentsController < ApplicationController
     render json: prep_raw_document(@document)
   end
 
+  # POST /documents
   def create
     create_params = document_params
     create_params['attachment'] = params['attachment'].blank? ? nil : params['attachment'] # if no image is chosen on new maintenance page, params['image'] comes in as a blank string, which throws a 500 error at Maintenance.new(create_params). This changes any params['image'] blank string to nil, which is fine in Maintenance.new(create_params).
@@ -3259,7 +3260,7 @@ class DocumentsController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def document_params
-      params.require(:document).permit(:date, :name, :notes, :attachment, :documentable_id, :documentable_type)
+      params.permit(:date, :name, :notes, :attachment, :documentable_id, :documentable_type)
     end
 end
 ~
@@ -4795,15 +4796,29 @@ export default {
       <form enctype="multipart/form-data">
         <p v-if="editOrNew === 'edit'">id: {{ $route.params.id }}</p>
         <p>Name: </p><input v-model="name">
-        <p>Description: </p><input v-model="description">
+        <p>Notes: </p><textarea v-model="notes"></textarea>
         <p class="no-margin">Image: </p>
-        <img v-if="!hideImage && editOrNew === 'edit'" :src="image" />    
-        <input type="file" ref="inputFile" @change=uploadImage()>
-        <p>Car: </p>
-        <select v-if="editOrNew === 'new'" name="car" @change="selectCar($event)">
-          <option value=""></option>
-          <option v-for="car in cars" :key="car.id" :value="car.id">{{ car.name }} - {{ car.description }}</option>
-        </select>
+        <!-- <img v-if="!hideImage && editOrNew === 'edit'" :src="image" />     -->
+        <input type="file" ref="inputFile" @change=uploadFile()>
+        <p>Car or Maintenance Document: </p>
+        <div>
+          <input type="radio" id="car" value="Car" v-model="carOrMaintenance">
+          <label for="car">Car</label>
+        </div>
+        <div>
+          <input type="radio" id="maintenance" value="Maintenance" v-model="carOrMaintenance">
+          <label for="maintenance">Maintenance</label>
+        </div>
+        <div v-if="editOrNew === 'new'">
+          <select v-if="carOrMaintenance === 'Car'" name="Car" @change="selectCar($event)">
+            <option value=""></option>
+            <option v-for="car in cars" :key="car.id" :value="car.id">{{ car.name }}</option>
+          </select>
+          <select v-if="carOrMaintenance === 'Maintenance'" name="maintenance" @change="selectMaintenance($event)">
+            <option value=""></option>
+            <option v-for="maintenance in maintenances" :key="maintenance.id" :value="maintenance.id">{{ maintenance.description }} ({{ maintenance.carName }})</option>
+          </select>
+        </div>
         <button v-if="editOrNew !== 'edit'" @click.prevent=createDocument>Create Document</button>
         <button v-else-if="editOrNew == 'edit'" @click.prevent=editDocument>Edit Document</button>
       </form>
@@ -4817,17 +4832,29 @@ export default {
   data () {
     return {
       name: "",
-      description: "",
-      image: "",
+      notes: "",
+      attachment: "",
       editOrNew: "",
-      hideImage: false,
+      carOrMaintenance: "",
+      userId: "",
+      // hideImage: false,
       cars: [],
-      carId: ""
+      carId: "",
+      carIds: [],
+      maintenances: [],
+      maintenanceIds: "",
+      maintenanceId: "",
+      documents: [],
+      documentIds: [],
+      documentableId: ""
     }
   },
   mounted() {
     const splitPath = $nuxt.$route.path.split('/')
     this.editOrNew = splitPath[splitPath.length-1]
+    this.getUserId()
+    this.getCarsMaintsAndDocIds()
+    
   },
   computed: {
     ...mapGetters(['isAuthenticated', 'isAdmin', 'loggedInUser`']),
@@ -4839,26 +4866,40 @@ export default {
       const document = await this.$axios.$get(`documents/${this.$route.params.id}`)
       this.name = document.name
       this.description = document.description,
-      this.image = document.image  
+      this.attachment = document.image  
     }
     if (this.editOrNew == 'new') {
-      this.cars = await this.$axios.$get('/cars', {
-        params: { user_id: this.$auth.$state.user.id }
-      })
+      this.maintenanceIds = 
+      this.cars = await this.$axios.$get('/cars', { params: { user_id: this.$auth.$state.user.id } })
+      this.maintenances = await this.$axios.$get('/maintenances', { params: { user_id: this.$auth.$state.user.id } })
     }
   },
   methods: {
-    uploadImage: function() {
-      this.image = this.$refs.inputFile.files[0]
-      this.hideImage = true
+    uploadFile: function() {
+      this.attachment = this.$refs.inputFile.files[0]
+      // this.hideImage = true
+    },
+    getUserId() {
+      const userIdQuery = $nuxt.$route.query.user_id
+      this.userId = userIdQuery ? userIdQuery : null
+    },
+    getCarsMaintsAndDocIds() {
+      const user = this.$auth.user
+      this.cars = user.cars
+      this.maintenances = user.maintenances
+      this.documents = user.documents
+      console.log(this.maintenances)
     },
     createDocument: function() {
       const params = {
         'name': this.name,
-        'description': this.description,
-        'image': this.image,
-        'car_id': this.carId
+        'notes': this.notes,
+        // 'attachment': this.attachment,
+        'documentable_type': this.carOrMaintenance,
+        'documentable_id': parseInt(this.documentableId)
       }
+      console.log("params")
+      console.log(params)
       let payload = new FormData()
       Object.entries(params).forEach(
         ([key, value]) => payload.append(key, value)
@@ -4888,6 +4929,11 @@ export default {
     },
     selectCar: function(event) {
       this.carId = event.target.value
+      this.documentableId = event.target.value
+    },
+    selectMaintenance: function(event) {
+      this.maintenanceId = event.target.value
+      this.documentableId = event.target.value
     }
   }
 }
