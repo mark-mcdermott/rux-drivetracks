@@ -4284,10 +4284,15 @@ cat <<'EOF' | puravida components/document/Card.vue ~
     <p>date: {{ document.date }}</p>
     <p>notes: {{ document.notes }}</p>
     <p>description: {{ document.description }}</p>
-    <p v-if="document.attachment !== null" class="no-margin">attachment:</p>
-    <img v-if="document.attachment !== null" :src="document.attachment" />
+    <p v-if="!isImage">attachment: <a :href="document.attachment">{{ attachedFile }}</a></p>
+    <div v-else>
+      <p>attachment:</p> 
+      <a :href="document.attachment"><img :src="document.attachment" /></a>
+    </div>
+    
     <p v-if="document.hasOwnProperty('maintenanceDescription')">maintenance: <NuxtLink :to="`/maintenances/${document.maintenanceId}`">{{ document.maintenanceDescription }}</NuxtLink></p>
     <p>car: <NuxtLink :to="`/cars/${document.carId}`">{{ document.carName }}</NuxtLink></p>
+    
   </article>
 </template>
 
@@ -4295,7 +4300,6 @@ cat <<'EOF' | puravida components/document/Card.vue ~
 import { mapGetters } from 'vuex'
 export default {
   name: 'DocumentCard',
-  computed: { ...mapGetters(['isAdmin']) },
   props: {
     document: {
       type: Object,
@@ -4306,6 +4310,18 @@ export default {
       default: () => ([]),
     },
   },
+  computed: { 
+    ...mapGetters(['isAdmin']) ,
+    attachedFile: function() {
+      return this.document.attachment.split('/').pop()
+    },
+    attachedFileExtension: function() {
+      return this.attachedFile.split('.').pop()
+    },
+    isImage: function() {
+      return ['jpg','png','gif'].includes(this.attachedFileExtension)
+    }
+  },
   methods: {
     uploadImage: function() {
       this.image = this.$refs.inputFile.files[0];
@@ -4315,6 +4331,7 @@ export default {
       const index = this.documents.findIndex((i) => { return i.id === id })
       this.documents.splice(index, 1);
     }
+    
   }
 }
 </script>
