@@ -3165,7 +3165,7 @@ class ApplicationController < ActionController::API
 
   def prep_raw_document(document)
     attachment_path = document.attachment.present? ? url_for(document.attachment) : nil
-    attachment_file = File.basename(attachment_path)
+    attachment_file = attachment_path.present? ? File.basename(attachment_path) : nil
     documentable_type = document.documentable_type
     documentable_id = document.documentable_id
     document = document.slice(:id,:date,:name,:notes)
