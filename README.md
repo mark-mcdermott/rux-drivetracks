@@ -3164,11 +3164,13 @@ class ApplicationController < ActionController::API
   end
 
   def prep_raw_document(document)
-    attachment = document.attachment.present? ? url_for(document.attachment) : nil
+    attachment_path = document.attachment.present? ? url_for(document.attachment) : nil
+    attachment_file = File.basename(attachment_path)
     documentable_type = document.documentable_type
     documentable_id = document.documentable_id
     document = document.slice(:id,:date,:name,:notes)
-    document['attachment'] = attachment
+    document['attachment'] = attachment_path
+    document['attachmentFile'] = attachment_file
     car_id = nil
     if documentable_type == "Car"
       car_id = documentable_id
@@ -4707,7 +4709,7 @@ export default { middleware: 'currentOrAdmin-showEdit' }
     <p>date: {{ document.date }}</p>
     <p>notes: {{ document.notes }}</p>
     <p>description: {{ document.description }}</p>
-    <p>attachment: <a :href="document.attachment">{{ document.attachment }}</a></p>
+    <p>attachment: <a :href="document.attachment">{{ document.attachmentFile }}</a></p>
     <p v-if="document.hasOwnProperty('maintenanceDescription')">maintenance: <NuxtLink :to="`/maintenances/${document.maintenanceId}`">{{ document.maintenanceDescription }}</NuxtLink></p>
     <p>car: <NuxtLink :to="`/cars/${document.carId}`">{{ document.carName }}</NuxtLink></p>
   </article>
