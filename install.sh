@@ -3773,6 +3773,18 @@ cat <<'EOF' | puravida components/car/Card.vue ~
     </h2>
     <p>id: {{ car.id }}</p>
     <p v-if="car.image !== null" class="no-margin">image:</p>
+    <p>year: {{ car.year }}</p>
+    <p>make: {{ car.make }}</p>
+    <p>model: {{ car.model }}</p>
+    <p>trim: {{ car.trim }}</p>
+    <p>body: {{ car.body }}</p>
+    <p>color: {{ car.color }}</p>
+    <p>plate: {{ car.plate }}</p>
+    <p>vin: {{ car.vin }}</p>
+    <p>cost: {{ car.cost }}</p>
+    <p>initial_mileage: {{ car.initial_mileage }}</p>
+    <p>purchase_date: {{ car.purchase_date }}</p>
+    <p>purchase_vendor: {{ car.purchase_vendor }}</p>
     <img v-if="car.image !== null" :src="car.image" />
     <h4 v-if="car.maintenances !== null">Maintenances</h4>
     <ul v-if="car.maintenances !== null">
