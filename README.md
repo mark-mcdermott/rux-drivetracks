@@ -4658,13 +4658,12 @@ export default {
     },
     createMaintenance: function() {
       const params = {
-        'name': this.name,
         'date': this.date,
         'description': this.description,
         'vendor': this.vendor,
         'cost': this.cost,
         'image': this.image,
-        // 'car_id': this.carId
+        'car_id': this.carId
       }
       let payload = new FormData()
       Object.entries(params).forEach(
