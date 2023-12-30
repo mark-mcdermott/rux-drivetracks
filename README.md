@@ -4188,7 +4188,6 @@ export default { middleware: 'currentOrAdmin-showEdit' }
       <a @click.prevent=deleteCar(car.id) href="#"><font-awesome-icon icon="trash" /></a>
     </h2>
     <p>id: {{ car.id }}</p>
-    <p>description: {{ car.description }}</p>
     <p v-if="car.image !== null" class="no-margin">image:</p>
     <img v-if="car.image !== null" :src="car.image" />
     <h4 v-if="car.maintenances !== null">Maintenances</h4>
@@ -4284,7 +4283,6 @@ export default {
       <form enctype="multipart/form-data">
         <p v-if="editOrNew === 'edit'">id: {{ $route.params.id }}</p>
         <p>Name: </p><input v-model="name">
-        <p>Description: </p><input v-model="description">
         <p class="no-margin">Image: </p>
         <img v-if="!hideImage && editOrNew === 'edit'" :src="image" />    
         <input type="file" ref="inputFile" @change=uploadImage()>
