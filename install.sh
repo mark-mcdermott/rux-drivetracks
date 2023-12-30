@@ -4437,6 +4437,7 @@ cat <<'EOF' | puravida components/document/Form.vue ~
     <article>
       <form enctype="multipart/form-data">
         <p v-if="editOrNew === 'edit'">id: {{ $route.params.id }}</p>
+        <p>Date: </p><input v-model="date">
         <p>Name: </p><input v-model="name">
         <p>Notes: </p><textarea v-model="notes"></textarea>
         <p class="no-margin">Image: </p>
@@ -4473,6 +4474,7 @@ import { mapGetters } from 'vuex'
 export default {
   data () {
     return {
+      date: "",
       name: "",
       notes: "",
       attachment: "",
@@ -4506,7 +4508,9 @@ export default {
     this.editOrNew = $nuxt.$route.path.split('/')[$nuxt.$route.path.split('/').length-1]
     if ($nuxt.$route.path.split('/')[$nuxt.$route.path.split('/').length-1]=='edit') {
       const document = await this.$axios.$get(`documents/${this.$route.params.id}`)
+      this.date = document.date
       this.name = document.name
+      this.notes = document.notes
       this.description = document.description,
       this.attachment = document.image  
     }
@@ -4534,6 +4538,7 @@ export default {
     },
     createDocument: function() {
       const params = {
+        'date': this.date,
         'name': this.name,
         'notes': this.notes,
         // 'attachment': this.attachment,
@@ -4556,9 +4561,9 @@ export default {
       let params = {}
       const filePickerFile = this.$refs.inputFile.files[0]
       if (!filePickerFile) {
-        params = { 'name': this.name, 'description': this.description }
+        params = { 'date': this.date, 'name': this.name, 'notes': this.notes, 'description': this.description }
       } else {
-        params = { 'name': this.name, 'description': this.description, 'image': this.image }
+        params = { 'date': this.date, 'name': this.name, 'notes': this.notes, 'description': this.description, 'image': this.image }
       } 
       let payload = new FormData()
       Object.entries(params).forEach(
