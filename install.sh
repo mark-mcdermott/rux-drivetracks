@@ -3936,8 +3936,19 @@ export default {
     if ($nuxt.$route.path.split('/')[$nuxt.$route.path.split('/').length-1]=='edit') {
       const car = await this.$axios.$get(`cars/${this.$route.params.id}`)
       this.name = car.name
-      this.description = car.description,
-      this.image = car.image  
+      this.image = car.image
+      this.year = car.year
+      this.make = car.make
+      this.model = car.model
+      this.trim = car.trim
+      this.body = car.body
+      this.color = car.color
+      this.plate = car.plate
+      this.vin = car.vin
+      this.cost = car.cost
+      this.initial_mileage = car.initial_mileage
+      this.purchase_date = car.purchase_date
+      this.purchase_vendor = car.purchase_vendor
     }
   },
   methods: {
