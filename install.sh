@@ -4319,7 +4319,7 @@ EOF
 cat <<'EOF' | puravida pages/maintenances/_id/edit.vue ~
 <template>
   <main class="container">
-    <CarForm />
+    <MaintenanceForm />
   </main>
 </template>
 
