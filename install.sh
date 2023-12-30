@@ -4354,6 +4354,7 @@ cat <<'EOF' | puravida components/document/Card.vue ~
     </h2>
     <p>id: {{ document.id }}</p>
     <p>date: {{ document.date }}</p>
+    <p>name: {{ document.name }}</p>
     <p>notes: {{ document.notes }}</p>
     <p>attachment: <a :href="document.attachment">{{ document.attachmentFile }}</a></p>
     <p v-if="document.hasOwnProperty('maintenanceDescription')">maintenance: <NuxtLink :to="`/maintenances/${document.maintenanceId}`">{{ document.maintenanceDescription }}</NuxtLink></p>
@@ -4441,17 +4442,18 @@ cat <<'EOF' | puravida components/document/Form.vue ~
         <p>Date: </p><input v-model="date">
         <p>Name: </p><input v-model="name">
         <p>Notes: </p><textarea v-model="notes"></textarea>
-        <p class="no-margin">Image: </p>
-        <!-- <img v-if="!hideImage && editOrNew === 'edit'" :src="image" />     -->
+        <p v-if="!hideFile && editOrNew === 'edit'">File: <a :href="attachment">{{ attachmentFile }}</a></p>
         <input type="file" ref="inputFile" @change=uploadFile()>
-        <p>Car or Maintenance Document: </p>
-        <div>
-          <input type="radio" id="car" value="Car" v-model="carOrMaintenance">
-          <label for="car">Car</label>
-        </div>
-        <div>
-          <input type="radio" id="maintenance" value="Maintenance" v-model="carOrMaintenance">
-          <label for="maintenance">Maintenance</label>
+        <div v-if="editOrNew === 'new'">
+          <p>Car or Maintenance Document: </p>
+          <div>
+            <input type="radio" id="car" value="Car" v-model="carOrMaintenance">
+            <label for="car">Car</label>
+          </div>
+          <div>
+            <input type="radio" id="maintenance" value="Maintenance" v-model="carOrMaintenance">
+            <label for="maintenance">Maintenance</label>
+          </div>
         </div>
         <div v-if="editOrNew === 'new'">
           <select v-if="carOrMaintenance === 'Car'" name="Car" @change="selectCar($event)">
@@ -4479,10 +4481,11 @@ export default {
       name: "",
       notes: "",
       attachment: "",
+      attachmentFile: "",
       editOrNew: "",
       carOrMaintenance: "",
       userId: "",
-      // hideImage: false,
+      hideFile: false,
       cars: [],
       carId: "",
       carIds: [],
@@ -4513,7 +4516,15 @@ export default {
       this.name = document.name
       this.notes = document.notes
       this.description = document.description,
-      this.attachment = document.image  
+      this.attachment = document.attachment  
+      this.attachmentFile = document.attachmentFile
+      if (document.carId) {
+        this.documentable_type = 'Car'
+        this.documentable_id = document.carId
+      } else if (document.maintenanceId) {
+        this.documentable_type = 'Maintenance'
+        this.documentable_id = document.maintenanceId
+      }
     }
     if (this.editOrNew == 'new') {
       this.maintenanceIds = 
@@ -4524,7 +4535,8 @@ export default {
   methods: {
     uploadFile: function() {
       this.attachment = this.$refs.inputFile.files[0]
-      // this.hideImage = true
+      this.attachmentFile = this.$refs.inputFile.files[0].name
+      this.hideFile = true
     },
     getUserId() {
       const userIdQuery = $nuxt.$route.query.user_id
@@ -4535,14 +4547,13 @@ export default {
       this.cars = user.cars
       this.maintenances = user.maintenances
       this.documents = user.documents
-      console.log(this.maintenances)
     },
     createDocument: function() {
       const params = {
         'date': this.date,
         'name': this.name,
         'notes': this.notes,
-        // 'attachment': this.attachment,
+        'attachment': this.attachment,
         'documentable_type': this.carOrMaintenance,
         'documentable_id': parseInt(this.documentableId)
       }
