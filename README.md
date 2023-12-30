@@ -4500,7 +4500,10 @@ export default { middleware: 'currentOrAdmin-showEdit' }
       <a @click.prevent=deleteCar(maintenance.id) href="#"><font-awesome-icon icon="trash" /></a>
     </h2>
     <p>id: {{ maintenance.id }}</p>
+    <p>date: {{ maintenance.date }}</p>
     <p>description: {{ maintenance.description }}</p>
+    <p>vendor: {{ maintenance.vendor }}</p>
+    <p>cost: {{ maintenance.cost }}</p>
     <p v-if="maintenance.images !== null" class="no-margin">images:</p>
     <div v-if="maintenance.images !== null" :src="maintenance.image">
       <div v-for="image in maintenance.images" :key="image">
