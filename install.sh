@@ -653,14 +653,14 @@ class ApplicationController < ActionController::API
     car_id = maintenance.car_id
     car = Car.find(car_id)
     user = User.find(car.user_id)
-    image = maintenance.image.present? ? url_for(maintenance.image) : nil
+    # image = maintenance.image.present? ? url_for(maintenance.image) : nil
     maintenance = maintenance.slice(:id,:name,:description)
     maintenance['carId'] = car_id
     maintenance['carName'] = car.name
     maintenance['carDescription'] = car.description
     maintenance['userId'] = user.id
     maintenance['userName'] = user.name
-    maintenance['image'] = image
+    # maintenance['image'] = image
     maintenance
   end
   
@@ -1066,13 +1066,13 @@ class ApplicationController < ActionController::API
     car = Car.find(car_id)
     user = User.find(car.user_id)
     image = maintenance.image.present? ? url_for(maintenance.image) : nil
-    maintenance = maintenance.slice(:id,:name,:description)
+    # maintenance = maintenance.slice(:id,:name,:description)
     maintenance['carId'] = car_id
     maintenance['carName'] = car.name
     maintenance['carDescription'] = car.description
     maintenance['userId'] = user.id
     maintenance['userName'] = user.name
-    maintenance['image'] = image
+    # maintenance['image'] = image
     maintenance
   end
   
@@ -1924,7 +1924,8 @@ rspec
 
 
 echo -e "\n\n🦄  Maintenances (Backend)\n\n"
-rails g scaffold maintenance date:date description vendor cost:decimal images:attachments car:references
+# rails g scaffold maintenance date:date description vendor cost:decimal images:attachments car:references
+rails g scaffold maintenance date:date description vendor cost:decimal car:references
 MIGRATION_FILE=$(find /Users/mmcdermott/Desktop/back/db/migrate -name "*_create_maintenances.rb")
 sed -i '' 3,11d $MIGRATION_FILE
 awk 'NR==3 {print "\t\tcreate_table :maintenances do |t|\n\t\t\tt.date :date\n\t\t\tt.string :description\n\t\t\tt.string :vendor\n\t\t\tt.decimal :cost, precision: 10, scale: 2\n\t\t\tt.references :car, null: false, foreign_key: {on_delete: :cascade}\n\t\t\tt.timestamps\n\t\tend"} 1' $MIGRATION_FILE > temp.txt
@@ -1934,7 +1935,7 @@ rails db:migrate
 cat <<'EOF' | puravida app/models/maintenance.rb ~
 class Maintenance < ApplicationRecord
   belongs_to :car
-  has_many_attached :images
+  # has_many_attached :images
   validates :date, presence: true
   validates :description, presence: true
 end
@@ -2127,13 +2128,13 @@ class ApplicationController < ActionController::API
   def prep_raw_maintenance(maintenance)
     car = Car.find(maintenance.car_id)
     user = User.find(car.user_id)
-    images = maintenance.images.map { |image| url_for(image) }
+    # images = maintenance.images.map { |image| url_for(image) }
     maintenance = maintenance.slice(:id,:date,:description,:vendor,:cost,:car_id)
     maintenance['carId'] = car.id
     maintenance['carName'] = car.name
     maintenance['userId'] = user.id
     maintenance['userName'] = user.name
-    maintenance['images'] = images
+    # maintenance['images'] = images
     maintenance
   end
 
@@ -2674,7 +2675,7 @@ EOF
 cat <<'EOF' | puravida app/models/maintenance.rb ~
 class Maintenance < ApplicationRecord
   belongs_to :car
-  has_many_attached :images
+  # has_many_attached :images
   has_many :documents, :as => :documentable
   validates :date, presence: true
   validates :description, presence: true
@@ -2772,13 +2773,13 @@ class ApplicationController < ActionController::API
   def prep_raw_maintenance(maintenance)
     car = Car.find(maintenance.car_id)
     user = User.find(car.user_id)
-    images = maintenance.images.present? ? maintenance.images.map { |image| url_for(image) } : nil
+    # images = maintenance.images.present? ? maintenance.images.map { |image| url_for(image) } : nil
     maintenance = maintenance.slice(:id,:date,:description,:vendor,:cost,:car_id)
     maintenance['carId'] = car.id
     maintenance['carName'] = car.name
     maintenance['userId'] = user.id
     maintenance['userName'] = user.name
-    maintenance['images'] = images
+    # maintenance['images'] = images
     maintenance
   end
 
@@ -3196,52 +3197,52 @@ car = Car.create(name: "Pam's Toyota Camry", make: "Toyota", model: "Camry", tri
 car.image.attach(io: URI.open("#{Rails.root}/app/assets/images/cars/toyota-camry.jpg"), filename: "toyota-camry.jpg")
 car.save!
 maintenance = Maintenance.create(date: Date.parse("20200713"), description: "Alignment", vendor: "Pep Boys", cost: "350.00", car_id: 1)
-maintenance.images.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/fiat-alignment-1.jpg"), filename: "fiat-alignment-1.jpg")
-maintenance.images.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/fiat-alignment-2.jpg"), filename: "fiat-alignment-2.jpg")
+# maintenance.images.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/fiat-alignment-1.jpg"), filename: "fiat-alignment-1.jpg")
+# maintenance.images.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/fiat-alignment-2.jpg"), filename: "fiat-alignment-2.jpg")
 maintenance.save!
 maintenance = Maintenance.create(date: Date.parse("20210812"), description: "Oil Change", vendor: "Jiffy Lube", cost: "78.00", car_id: 1)
-maintenance.images.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/fiat-oil-change-1.jpg"), filename: "fiat-oil-change-1.jpg")
-maintenance.images.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/fiat-oil-change-2.jpg"), filename: "fiat-oil-change-2.jpg")
+# maintenance.images.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/fiat-oil-change-1.jpg"), filename: "fiat-oil-change-1.jpg")
+# maintenance.images.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/fiat-oil-change-2.jpg"), filename: "fiat-oil-change-2.jpg")
 maintenance.save!
 maintenance = Maintenance.create(date: Date.parse("20170123"), description: "Brake Repair", vendor: "WalMart", cost: "400.00", car_id: 2)
-maintenance.images.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/civic-brake-repair-1.jpg"), filename: "civic-brake-repair-1.jpg")
-maintenance.images.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/civic-brake-repair-2.jpg"), filename: "civic-brake-repair-2.jpg")
+# maintenance.images.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/civic-brake-repair-1.jpg"), filename: "civic-brake-repair-1.jpg")
+# maintenance.images.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/civic-brake-repair-2.jpg"), filename: "civic-brake-repair-2.jpg")
 maintenance.save!
 maintenance = Maintenance.create(date: Date.parse("20200311"), description: "Tire Rotation", vendor: "Goodyear", cost: "105.00", car_id: 2)
-maintenance.images.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/civic-tire-rotation-1.jpg"), filename: "civic-tire-rotation-1.jpg")
-maintenance.images.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/civic-tire-rotation-2.jpg"), filename: "civic-tire-rotation-2.jpg")
+# maintenance.images.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/civic-tire-rotation-1.jpg"), filename: "civic-tire-rotation-1.jpg")
+# maintenance.images.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/civic-tire-rotation-2.jpg"), filename: "civic-tire-rotation-2.jpg")
 maintenance.save!
 maintenance = Maintenance.create(date: Date.parse("20200111"), description: "New Tires", vendor: "Scott's", cost: "812.00", car_id: 3)
-maintenance.images.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/elantra-new-tires-1.jpg"), filename: "elantra-new-tires-1.jpg")
-maintenance.images.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/elantra-new-tires-2.jpg"), filename: "elantra-new-tires-2.jpg")
+# maintenance.images.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/elantra-new-tires-1.jpg"), filename: "elantra-new-tires-1.jpg")
+# maintenance.images.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/elantra-new-tires-2.jpg"), filename: "elantra-new-tires-2.jpg")
 maintenance.save!
 maintenance = Maintenance.create(date: Date.parse("20230627"), description: "Repaired Body Dents", vendor: "Tenede Auto", cost: "1343.00", car_id: 3)
-maintenance.images.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/elantra-repaired-body-1.jpg"), filename: "elantra-repaired-body-1.jpg")
-maintenance.images.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/elantra-repaired-body-2.jpg"), filename: "elantra-repaired-body-2.jpg")
+# maintenance.images.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/elantra-repaired-body-1.jpg"), filename: "elantra-repaired-body-1.jpg")
+# maintenance.images.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/elantra-repaired-body-2.jpg"), filename: "elantra-repaired-body-2.jpg")
 maintenance.save!
 maintenance = Maintenance.create(date: Date.parse("20150614"), description: "Windshield Replacement", vendor: "45th St. Car Repair", cost: "800.00", car_id: 4)
-maintenance.images.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/leaf-windshield-replacement-1.jpg"), filename: "leaf-windshield-replacement-1.jpg")
-maintenance.images.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/leaf-windshield-replacement-2.jpg"), filename: "leaf-windshield-replacement-2.jpg")
+# maintenance.images.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/leaf-windshield-replacement-1.jpg"), filename: "leaf-windshield-replacement-1.jpg")
+# maintenance.images.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/leaf-windshield-replacement-2.jpg"), filename: "leaf-windshield-replacement-2.jpg")
 maintenance.save!
 maintenance = Maintenance.create(date: Date.parse("20170811"), description: "New Spark Plugs", vendor: "Jim & Tony's Automotive Service", cost: "5.00", car_id: 4)
-maintenance.images.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/leaf-new-spark-plugs-1.jpg"), filename: "leaf-new-spark-plugs-1.jpg")
-maintenance.images.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/leaf-new-spark-plugs-2.jpg"), filename: "leaf-new-spark-plugs-2.jpg")
+# maintenance.images.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/leaf-new-spark-plugs-1.jpg"), filename: "leaf-new-spark-plugs-1.jpg")
+# maintenance.images.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/leaf-new-spark-plugs-2.jpg"), filename: "leaf-new-spark-plugs-2.jpg")
 maintenance.save!
 maintenance = Maintenance.create(date: Date.parse("20200909"), description: "Engine Overhaul", vendor: "Auto Stoppe", cost: "5932.00", car_id: 5)
-maintenance.images.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/scion-engine-overhaul-1.jpg"), filename: "scion-engine-overhaul-1.jpg")
-maintenance.images.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/scion-engine-overhaul-2.jpg"), filename: "scion-engine-overhaul-2.jpg")
+# maintenance.images.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/scion-engine-overhaul-1.jpg"), filename: "scion-engine-overhaul-1.jpg")
+# maintenance.images.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/scion-engine-overhaul-2.jpg"), filename: "scion-engine-overhaul-2.jpg")
 maintenance.save!
 maintenance = Maintenance.create(date: Date.parse("20201030"), description: "50,000 Mile Maintenance", vendor: "Dealership", cost: "0", car_id: 5)
-maintenance.images.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/scion-5k-mile-maintenance-1.jpg"), filename: "scion-5k-mile-maintenance-1.jpg")
-maintenance.images.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/scion-5k-mile-maintenance-2.jpg"), filename: "scion-5k-mile-maintenance-2.jpg")
+# maintenance.images.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/scion-5k-mile-maintenance-1.jpg"), filename: "scion-5k-mile-maintenance-1.jpg")
+# maintenance.images.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/scion-5k-mile-maintenance-2.jpg"), filename: "scion-5k-mile-maintenance-2.jpg")
 maintenance.save!
 maintenance = Maintenance.create(date: Date.parse("20220903"), description: "Fuel Line Replacement", vendor: "Foreign Auto Austin", cost: "37.00", car_id: 6)
-maintenance.images.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/camry-fuel-line-1.jpg"), filename: "camry-fuel-line-1.jpg")
-maintenance.images.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/camry-fuel-line-2.jpg"), filename: "camry-fuel-line-2.jpg")
+# maintenance.images.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/camry-fuel-line-1.jpg"), filename: "camry-fuel-line-1.jpg")
+# maintenance.images.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/camry-fuel-line-2.jpg"), filename: "camry-fuel-line-2.jpg")
 maintenance.save!
 maintenance = Maintenance.create(date: Date.parse("20230601"), description: "Replaced Radiator", vendor: "Blan's Auto Repair", cost: "400.00", car_id: 6)
-maintenance.images.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/camry-replaced-radiator-1.jpg"), filename: "camry-replaced-radiator-1.jpg")
-maintenance.images.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/camry-replaced-radiator-2.jpg"), filename: "camry-replaced-radiator-2.jpg")
+# maintenance.images.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/camry-replaced-radiator-1.jpg"), filename: "camry-replaced-radiator-1.jpg")
+# maintenance.images.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/camry-replaced-radiator-2.jpg"), filename: "camry-replaced-radiator-2.jpg")
 maintenance.save!
 document = Document.create(name: "title-fiat-500", date: Date.parse("20200909"), notes: "notes", documentable_type: "Car",documentable_id: 1)
 document.attachment.attach(io: URI.open("#{Rails.root}/app/assets/images/documents/car-documents/titles/title-fiat-500.gif"), filename: "title-fiat-500.gif")
@@ -4086,12 +4087,12 @@ cat <<'EOF' | puravida components/maintenance/Card.vue ~
     <p>description: {{ maintenance.description }}</p>
     <p>vendor: {{ maintenance.vendor }}</p>
     <p>cost: {{ maintenance.cost }}</p>
-    <p v-if="maintenance.images !== null" class="no-margin">images:</p>
+    <!-- <p v-if="maintenance.images !== null" class="no-margin">images:</p>
     <div v-if="maintenance.images !== null" :src="maintenance.image">
       <div v-for="image in maintenance.images" :key="image">
         <img :src="image" />
       </div>
-    </div>
+    </div> -->
     <p>car: <NuxtLink :to="`/cars/${maintenance.carId}`">{{ maintenance.carName }}</NuxtLink></p>
   </article>
 </template>
@@ -4112,9 +4113,9 @@ export default {
     },
   },
   methods: {
-    uploadImage: function() {
-      this.image = this.$refs.inputFile.files[0];
-    },
+    // uploadImage: function() {
+    //   this.image = this.$refs.inputFile.files[0];
+    // },
     deleteMaintenance: function(id) {
       this.$axios.$delete(`maintenances/${id}`)
       const index = this.maintenances.findIndex((i) => { return i.id === id })
@@ -4175,7 +4176,7 @@ cat <<'EOF' | puravida components/maintenance/Form.vue ~
         <p>Vendor: </p><input v-model="vendor">
         <p>Cost: </p><input v-model="cost">
         <p class="no-margin">Image: </p>
-        <img v-if="!hideImage && editOrNew === 'edit'" :src="image" />    
+        <!-- <img v-if="!hideImage && editOrNew === 'edit'" :src="image" />     -->
         <input type="file" ref="inputFile" @change=uploadImage()>
         <p>Car Id: {{ carId }}</p>
         <select v-if="editOrNew === 'new'" name="car" @change="selectCar($event)">
@@ -4198,7 +4199,7 @@ export default {
       description: "",
       vendor: "",
       cost: "",
-      image: "",
+      // image: "",
       editOrNew: "",
       hideImage: false,
       cars: [],
@@ -4217,12 +4218,11 @@ export default {
     this.editOrNew = $nuxt.$route.path.split('/')[$nuxt.$route.path.split('/').length-1]
     if ($nuxt.$route.path.split('/')[$nuxt.$route.path.split('/').length-1]=='edit') {
       const maintenance = await this.$axios.$get(`maintenances/${this.$route.params.id}`)
-      console.log(maintenance)
       this.date = maintenance.date
       this.description = maintenance.description,
       this.vendor = maintenance.vendor
       this.cost = maintenance.cost
-      this.image = maintenance.image
+      // this.image = maintenance.image
       this.carId = maintenance.carId 
     }
     if (this.editOrNew == 'new') {
@@ -4232,17 +4232,17 @@ export default {
     }
   },
   methods: {
-    uploadImage: function() {
-      this.image = this.$refs.inputFile.files[0]
-      this.hideImage = true
-    },
+    // uploadImage: function() {
+    //   this.image = this.$refs.inputFile.files[0]
+    //   this.hideImage = true
+    // },
     createMaintenance: function() {
       const params = {
         'date': this.date,
         'description': this.description,
         'vendor': this.vendor,
         'cost': this.cost,
-        'image': this.image,
+        // 'image': this.image,
         'car_id': this.carId
       }
       let payload = new FormData()
@@ -4256,13 +4256,14 @@ export default {
         })
     },
     editMaintenance: function() {
-      let params = {}
-      const filePickerFile = this.$refs.inputFile.files[0]
-      if (!filePickerFile) {
-        params = { 'name': this.name, 'date': this.date, 'description': this.description, 'vendor': this.vendor, 'cost': this.cost }
-      } else {
-        params = { 'name': this.name, 'date': this.date, 'description': this.description, 'vendor': this.vendor, 'cost': this.cost, 'image': this.image }
-      } 
+      // let params = {}
+      // const filePickerFile = this.$refs.inputFile.files[0]
+      // if (!filePickerFile) {
+      //   params = { 'name': this.name, 'date': this.date, 'description': this.description, 'vendor': this.vendor, 'cost': this.cost }
+      // } else {
+      //   params = { 'name': this.name, 'date': this.date, 'description': this.description, 'vendor': this.vendor, 'cost': this.cost, 'image': this.image }
+      // } 
+      const params = { 'name': this.name, 'date': this.date, 'description': this.description, 'vendor': this.vendor, 'cost': this.cost }
       let payload = new FormData()
       Object.entries(params).forEach(
         ([key, value]) => payload.append(key, value)
