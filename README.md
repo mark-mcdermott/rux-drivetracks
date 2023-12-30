@@ -1503,7 +1503,7 @@ class CarsController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def car_params
-      params.permit(:id, :name, :description, :image, :user_id)
+      params.permit(:id, :name, :image, :year, :make, :model, :trim, :body, :color, :plate, :vin, :cost, :initial_mileage, :purchase_date, :purchase_vendor, :user_id)
     end
 end
 ~
@@ -4298,6 +4298,18 @@ export default {
         <p class="no-margin">Image: </p>
         <img v-if="!hideImage && editOrNew === 'edit'" :src="image" />    
         <input type="file" ref="inputFile" @change=uploadImage()>
+        <p>year: </p><input v-model="year">
+        <p>make: </p><input v-model="make">
+        <p>model: </p><input v-model="model">
+        <p>trim: </p><input v-model="trim">
+        <p>body: </p><input v-model="body">
+        <p>color: </p><input v-model="color">
+        <p>plate: </p><input v-model="plate">
+        <p>vin: </p><input v-model="vin">
+        <p>cost: </p><input v-model="cost">
+        <p>initial_mileage: </p><input v-model="initial_mileage">
+        <p>purchase_date: </p><input v-model="purchase_date">
+        <p>purchase_vendor: </p><input v-model="purchase_vendor">
         <button v-if="editOrNew !== 'edit'" @click.prevent=createCar>Create Car</button>
         <button v-else-if="editOrNew == 'edit'" @click.prevent=editCar>Edit Car</button>
       </form>
@@ -4313,6 +4325,18 @@ export default {
       name: "",
       description: "",
       image: "",
+      year: "",
+      make: "",
+      model: "",
+      trim: "",
+      body: "",
+      color: "",
+      plate: "",
+      vin: "",
+      cost: "",
+      initial_mileage: "",
+      purchase_date: "",
+      purchase_vendor: "",
       editOrNew: "",
       hideImage: false
     }
@@ -4343,8 +4367,19 @@ export default {
       const userId = this.$auth.$state.user.id
       const params = {
         'name': this.name,
-        'description': this.description,
         'image': this.image,
+        'year': this.year,
+        'make': this.make,
+        'model': this.model,
+        'trim': this.trim,
+        'body': this.body,
+        'color': this.color,
+        'plate': this.plate,
+        'vin': this.vin,
+        'cost': this.cost,
+        'initial_mileage': this.initial_mileage,
+        'purchase_date': this.purchase_date,
+        'purchase_vendor': this.purchase_vendor,
         'user_id': userId
       }
       let payload = new FormData()
