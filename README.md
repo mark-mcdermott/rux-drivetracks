@@ -4189,6 +4189,7 @@ export default { middleware: 'currentOrAdmin-showEdit' }
     </h2>
     <p>id: {{ car.id }}</p>
     <p v-if="car.image !== null" class="no-margin">image:</p>
+    <img v-if="car.image !== null" :src="car.image" />
     <p>year: {{ car.year }}</p>
     <p>make: {{ car.make }}</p>
     <p>model: {{ car.model }}</p>
@@ -4201,7 +4202,6 @@ export default { middleware: 'currentOrAdmin-showEdit' }
     <p>initial_mileage: {{ car.initial_mileage }}</p>
     <p>purchase_date: {{ car.purchase_date }}</p>
     <p>purchase_vendor: {{ car.purchase_vendor }}</p>
-    <img v-if="car.image !== null" :src="car.image" />
     <h4 v-if="car.maintenances !== null">Maintenances</h4>
     <ul v-if="car.maintenances !== null">
       <li v-for="maintenance in car.maintenances" :key="maintenance.id">
