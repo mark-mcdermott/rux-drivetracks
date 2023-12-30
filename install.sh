@@ -4170,12 +4170,14 @@ cat <<'EOF' | puravida components/maintenance/Form.vue ~
     <article>
       <form enctype="multipart/form-data">
         <p v-if="editOrNew === 'edit'">id: {{ $route.params.id }}</p>
-        <p>Name: </p><input v-model="name">
+        <p>Date: </p><input v-model="date">
         <p>Description: </p><input v-model="description">
+        <p>Vendor: </p><input v-model="vendor">
+        <p>Cost: </p><input v-model="cost">
         <p class="no-margin">Image: </p>
         <img v-if="!hideImage && editOrNew === 'edit'" :src="image" />    
         <input type="file" ref="inputFile" @change=uploadImage()>
-        <p>Car: </p>
+        <p>Car Id: {{ carId }}</p>
         <select v-if="editOrNew === 'new'" name="car" @change="selectCar($event)">
           <option value=""></option>
           <option v-for="car in cars" :key="car.id" :value="car.id">{{ car.name }} - {{ car.description }}</option>
@@ -4192,8 +4194,10 @@ import { mapGetters } from 'vuex'
 export default {
   data () {
     return {
-      name: "",
+      date: "",
       description: "",
+      vendor: "",
+      cost: "",
       image: "",
       editOrNew: "",
       hideImage: false,
@@ -4213,9 +4217,13 @@ export default {
     this.editOrNew = $nuxt.$route.path.split('/')[$nuxt.$route.path.split('/').length-1]
     if ($nuxt.$route.path.split('/')[$nuxt.$route.path.split('/').length-1]=='edit') {
       const maintenance = await this.$axios.$get(`maintenances/${this.$route.params.id}`)
-      this.name = maintenance.name
+      console.log(maintenance)
+      this.date = maintenance.date
       this.description = maintenance.description,
-      this.image = maintenance.image  
+      this.vendor = maintenance.vendor
+      this.cost = maintenance.cost
+      this.image = maintenance.image
+      this.carId = maintenance.carId 
     }
     if (this.editOrNew == 'new') {
       this.cars = await this.$axios.$get('/cars', {
@@ -4231,9 +4239,12 @@ export default {
     createMaintenance: function() {
       const params = {
         'name': this.name,
+        'date': this.date,
         'description': this.description,
+        'vendor': this.vendor,
+        'cost': this.cost,
         'image': this.image,
-        'car_id': this.carId
+        // 'car_id': this.carId
       }
       let payload = new FormData()
       Object.entries(params).forEach(
@@ -4249,9 +4260,9 @@ export default {
       let params = {}
       const filePickerFile = this.$refs.inputFile.files[0]
       if (!filePickerFile) {
-        params = { 'name': this.name, 'description': this.description }
+        params = { 'name': this.name, 'date': this.date, 'description': this.description, 'vendor': this.vendor, 'cost': this.cost }
       } else {
-        params = { 'name': this.name, 'description': this.description, 'image': this.image }
+        params = { 'name': this.name, 'date': this.date, 'description': this.description, 'vendor': this.vendor, 'cost': this.cost, 'image': this.image }
       } 
       let payload = new FormData()
       Object.entries(params).forEach(
