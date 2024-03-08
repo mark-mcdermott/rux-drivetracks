@@ -3760,7 +3760,7 @@ h1 {
 nav img {
   width: 40px;
   border-radius: 50%;
-  border: 3px solid var(--primary);
+  border: 3px solid var(--pico-primary);
 }
 
 article img {
@@ -5126,13 +5126,13 @@ export default { middleware: 'currentOrAdmin-showEdit' }
       <li v-if="isAuthenticated"><strong><NuxtLink :to="`/maintenances?user_id=${loggedInUser.id}`">Maintenances</NuxtLink></strong></li>
       <li v-if="isAuthenticated"><strong><NuxtLink :to="`/documents?user_id=${loggedInUser.id}`">Documents</NuxtLink></strong></li>
       <li v-if="isAdmin"><strong><NuxtLink to="/admin">Admin</NuxtLink></strong></li>
-      <li v-if="isAuthenticated" class='dropdown'>
-        <details role="list" dir="rtl">
+      <li v-if="isAuthenticated">
+        <details role="list" dir="rtl" class='dropdown'>
           <summary class='summary' aria-haspopup="listbox" role="link">
             <img v-if="loggedInUser.avatar" :src="loggedInUser.avatar" />
             <font-awesome-icon v-else icon="circle-user" />
           </summary>
-          <ul role="listbox">
+          <ul>
             <li><NuxtLink :to="`/users/${loggedInUser.id}`">Profile</NuxtLink></li>
             <li><NuxtLink :to="`/users/${loggedInUser.id}/edit`">Settings</NuxtLink></li>
             <li><a @click="logOut">Log Out</a></li>
@@ -5166,16 +5166,7 @@ html, body
   height: 100%
 
 .top-nav 
-  // display: flex
-  // flex-direction: row
-  // align-items: center
-  // justify-content: space-between
-  // background-color: #00BAF0
-  // background: linear-gradient(to left, #f46b45, #eea849)
-  /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
-  // color: #FFF
   height: 50px
-  // padding: 1em
 
 .top-nav > ul 
   margin-top: 15px
@@ -5233,12 +5224,12 @@ html, body
   > li 
     overflow: visible
 
-  > li.dropdown
+  > li details.dropdown
     background: none
 
     .summary
       margin: 0
-      padding: 1rem 0
+      padding: 1rem 0 0
       font-size: 1.5rem
 
       &:focus
