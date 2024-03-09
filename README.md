@@ -3789,6 +3789,18 @@ ul.features {
     }
   }
 }
+
+main {
+
+  > a {
+    margin: 0 0 3rem;
+  }
+
+  > section > div {
+    margin: 0 0 4rem;
+  }
+  
+}
 ~
 ```
 - `puravida nuxt.config.js ~`
