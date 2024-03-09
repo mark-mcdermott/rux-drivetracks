@@ -5596,7 +5596,7 @@ Cypress.Commands.add('logoutAdmin', (admin) => {
 })
 
 Cypress.Commands.add('logout', (admin) => { 
-  const num = admin ? 3 : 2
+  const num = admin ? 4 : 2
   cy.get('nav ul.menu').find('li').eq(num).click()
     .then(() => { cy.get('nav details ul').find('li').eq(2).click() })
 })
