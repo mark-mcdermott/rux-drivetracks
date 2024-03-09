@@ -684,17 +684,15 @@ class ApplicationController < ActionController::API
   end
 
   def prep_raw_maintenance(maintenance)
-    car_id = maintenance.car_id
-    car = Car.find(car_id)
+    car = Car.find(maintenance.car_id)
     user = User.find(car.user_id)
-    image = maintenance.image.present? ? url_for(maintenance.image) : nil
-    maintenance = maintenance.slice(:id,:name,:description)
-    maintenance['carId'] = car_id
+    # images = maintenance.images.present? ? maintenance.images.map { |image| url_for(image) } : nil
+    maintenance = maintenance.slice(:id,:date,:description,:vendor,:cost,:car_id)
+    maintenance['carId'] = car.id
     maintenance['carName'] = car.name
-    maintenance['carDescription'] = car.description
     maintenance['userId'] = user.id
     maintenance['userName'] = user.name
-    maintenance['image'] = image
+    # maintenance['images'] = images
     maintenance
   end
   
@@ -1426,17 +1424,15 @@ class ApplicationController < ActionController::API
   end
 
   def prep_raw_maintenance(maintenance)
-    car_id = maintenance.car_id
-    car = Car.find(car_id)
+    car = Car.find(maintenance.car_id)
     user = User.find(car.user_id)
-    image = maintenance.image.present? ? url_for(maintenance.image) : nil
-    maintenance = maintenance.slice(:id,:name,:description)
-    maintenance['carId'] = car_id
+    # images = maintenance.images.present? ? maintenance.images.map { |image| url_for(image) } : nil
+    maintenance = maintenance.slice(:id,:date,:description,:vendor,:cost,:car_id)
+    maintenance['carId'] = car.id
     maintenance['carName'] = car.name
-    maintenance['carDescription'] = car.description
     maintenance['userId'] = user.id
     maintenance['userName'] = user.name
-    maintenance['image'] = image
+    # maintenance['images'] = images
     maintenance
   end
   
@@ -2379,11 +2375,12 @@ class MaintenancesController < ApplicationController
   # POST /maintenances
   def create
     create_params = maintenance_params
-    create_params['images'] = params['images'].blank? ? nil : params['images'] # if no image is chosen on new maintenance page, params['image'] comes in as a blank string, which throws a 500 error at Maintenance.new(create_params). This changes any params['image'] blank string to nil, which is fine in Maintenance.new(create_params).
+    # create_params['images'] = params['images'].blank? ? nil : params['images'] # if no image is chosen on new maintenance page, params['image'] comes in as a blank string, which throws a 500 error at Maintenance.new(create_params). This changes any params['image'] blank string to nil, which is fine in Maintenance.new(create_params).
     create_params['car_id'] = create_params['car_id'].to_i
     @maintenance = Maintenance.new(create_params)
     if @maintenance.save
-      render json: prep_raw_maintenance(@maintenance), status: :created, location: @maintenance
+      prepped_maintenance = prep_raw_maintenance(@maintenance)
+      render json: prepped_maintenance, status: :created, location: @maintenance
     else
       render json: @maintenance.errors, status: :unprocessable_entity
     end
@@ -2411,7 +2408,8 @@ class MaintenancesController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def maintenance_params
-      params.permit(:id, :date, :description, :vendor, :cost, :images, :car_id)
+      # params.permit(:id, :date, :description, :vendor, :cost, :images, :car_id)
+      params.permit(:id, :date, :description, :vendor, :cost, :car_id)
     end
 end
 ~
@@ -2505,13 +2503,13 @@ class ApplicationController < ActionController::API
   def prep_raw_maintenance(maintenance)
     car = Car.find(maintenance.car_id)
     user = User.find(car.user_id)
-    images = maintenance.images.map { |image| url_for(image) }
+    # images = maintenance.images.present? ? maintenance.images.map { |image| url_for(image) } : nil
     maintenance = maintenance.slice(:id,:date,:description,:vendor,:cost,:car_id)
     maintenance['carId'] = car.id
     maintenance['carName'] = car.name
     maintenance['userId'] = user.id
     maintenance['userName'] = user.name
-    maintenance['images'] = images
+    # maintenance['images'] = images
     maintenance
   end
 
@@ -3153,13 +3151,13 @@ class ApplicationController < ActionController::API
   def prep_raw_maintenance(maintenance)
     car = Car.find(maintenance.car_id)
     user = User.find(car.user_id)
-    images = maintenance.images.present? ? maintenance.images.map { |image| url_for(image) } : nil
+    # images = maintenance.images.present? ? maintenance.images.map { |image| url_for(image) } : nil
     maintenance = maintenance.slice(:id,:date,:description,:vendor,:cost,:car_id)
     maintenance['carId'] = car.id
     maintenance['carName'] = car.name
     maintenance['userId'] = user.id
     maintenance['userName'] = user.name
-    maintenance['images'] = images
+    # maintenance['images'] = images
     maintenance
   end
 
@@ -4516,12 +4514,12 @@ export default { middleware: 'currentOrAdmin-showEdit' }
     <p>description: {{ maintenance.description }}</p>
     <p>vendor: {{ maintenance.vendor }}</p>
     <p>cost: {{ maintenance.cost }}</p>
-    <p v-if="maintenance.images !== null" class="no-margin">images:</p>
+    <!-- <p v-if="maintenance.images !== null" class="no-margin">images:</p>
     <div v-if="maintenance.images !== null" :src="maintenance.image">
       <div v-for="image in maintenance.images" :key="image">
         <img :src="image" />
       </div>
-    </div>
+    </div> -->
     <p>car: <NuxtLink :to="`/cars/${maintenance.carId}`">{{ maintenance.carName }}</NuxtLink></p>
   </article>
 </template>
