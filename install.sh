@@ -3129,2500 +3129,2501 @@ RSpec.describe "/documents", type: :request do
 end
 ~
 EOF
-cat <<'EOF' | puravida spec/models/document_spec.rb ~
-require 'rails_helper'
 
-RSpec.describe Document, type: :model do
-  fixtures :users, :cars, :maintenances, :documents
-  let(:valid_attributes) {{ 
-    date: Date.parse("20200713"),
-    name: "name",
-    notes: "notes",
-    documentable_type: "Maintenance",
-    documentable_id: maintenances(:fiat_alignment).id
-  }}
-  let(:invalid_attributes) {{ 
-    date: Date.parse("20200713"),
-    name: "name",
-    notes: "notes",
-    documentable_type: "Maintenance",
-    documentable_id: -1
-  }}
+# cat <<'EOF' | puravida spec/models/document_spec.rb ~
+# require 'rails_helper'
 
-  it "is valid with valid attributes" do
-    expect(Document.new(valid_attributes)).to be_valid
-  end
-  it "is not valid width poorly formed email" do
-    expect(Document.new(invalid_attributes)).to_not be_valid
-  end
-end
-~
-EOF
-rspec
+# RSpec.describe Document, type: :model do
+#   fixtures :users, :cars, :maintenances, :documents
+#   let(:valid_attributes) {{ 
+#     date: Date.parse("20200713"),
+#     name: "name",
+#     notes: "notes",
+#     documentable_type: "Maintenance",
+#     documentable_id: maintenances(:fiat_alignment).id
+#   }}
+#   let(:invalid_attributes) {{ 
+#     date: Date.parse("20200713"),
+#     name: "name",
+#     notes: "notes",
+#     documentable_type: "Maintenance",
+#     documentable_id: -1
+#   }}
 
-echo -e "\n\n🦄  Seeds\n\n"
-cat <<'EOF' | puravida db/seeds.rb ~
-user = User.create(name: "Michael Scott", email: "michaelscott@dundermifflin.com", admin: "true", password: "password")
-user.avatar.attach(io: URI.open("#{Rails.root}/app/assets/images/office-avatars/michael-scott.png"), filename: "michael-scott.png")
-user.save!
-user = User.create(name: "Jim Halpert", email: "jimhalpert@dundermifflin.com", admin: "false", password: "password")
-user.avatar.attach(io: URI.open("#{Rails.root}/app/assets/images/office-avatars/jim-halpert.png"), filename: "jim-halpert.png")
-user.save!
-user = User.create(name: "Pam Beesly", email: "pambeesly@dundermifflin.com", admin: "false", password: "password")
-user.avatar.attach(io: URI.open("#{Rails.root}/app/assets/images/office-avatars/pam-beesly.png"), filename: "jim-halpert.png")
-user.save!
-car = Car.create(name: "Michael's Fiat 500", make: "Fiat", model: "500", trim: "Sport", color: "Yellow", body: "Hatchback", plate: "6XYK922", vin: "3C3CFFBR0CT382584", year: 2012, cost: "10235.00", purchase_vendor: "Ted Fleid", initial_mileage: 47361, purchase_date: Date.parse("20180606"), user_id: 1)
-car.image.attach(io: URI.open("#{Rails.root}/app/assets/images/cars/fiat-500.jpg"), filename: "fiat-500.jpg")
-car.save!
-car = Car.create(name: "Michael's Honda Civic", make: "Honda", model: "Civic", trim: "Vp", color: "Blue", body: "Sedan", plate: "4HGJ708", vin: "2HGEJ6618XH589506", year: 1999, cost: "10352", purchase_vendor: "Howdy Honda", initial_mileage: 78032, purchase_date: Date.parse("20160713"), user_id: 1)
-car.image.attach(io: URI.open("#{Rails.root}/app/assets/images/cars/honda-civic.jpg"), filename: "honda-civic.jpg")
-car.save!
-car = Car.create(name: "Jim's Hyundai Elantra", make: "Hyundai", model: "Elantra", trim: "GLS", color: "Black", body: "Sedan", plate: "8CEU662", vin: "KMHDU46D17U090264", year: 2007, cost: "15000.00", purchase_vendor: "Feit Hyundai", initial_mileage: 53032, purchase_date: Date.parse("20200115"), user_id: 2)
-car.image.attach(io: URI.open("#{Rails.root}/app/assets/images/cars/hyundai-elantra.jpg"), filename: "hyundai-elantra.jpg")
-car.save!
-car = Car.create(name: "Jim's Nissan Leaf", make: "Nissan", model: "Leaf", trim: "SV", color: "Silver", body: "Hatchback", plate: "ABC123", vin: "1N4AZ1CP8LC310110", year: 2020, cost: "22590.00", purchase_vendor: "Carvana", initial_mileage: 21440, purchase_date: Date.parse("20230429"), user_id: 2)
-car.image.attach(io: URI.open("#{Rails.root}/app/assets/images/cars/nissan-leaf.jpg"), filename: "nissan-leaf.jpg")
-car.save!
-car = Car.create(name: "Pam's Scion Xb", make: "Scion", model: "Xb", trim: "Base / Parklan Edition", color: "Gray", body: "Wagon", plate: "7MBE060", vin: "JTLZE4FE0FJ074884", year: 2015, cost: "25867.00", purchase_vendor: "Craigslist", initial_mileage: 35631, purchase_date: Date.parse("20201109"), user_id: 3)
-car.image.attach(io: URI.open("#{Rails.root}/app/assets/images/cars/scion.jpg"), filename: "scion.jpg")
-car.save!
-car = Car.create(name: "Pam's Toyota Camry", make: "Toyota", model: "Camry", trim: "LE", color: "Black", body: "Sedan", plate: "HDH1439", vin: "4T1BE46K49U358097", year: 2009, cost: "7300", purchase_vendor: "Tanne Toyota", initial_mileage: 134087, purchase_date: Date.parse("20100513"), user_id: 3)
-car.image.attach(io: URI.open("#{Rails.root}/app/assets/images/cars/toyota-camry.jpg"), filename: "toyota-camry.jpg")
-car.save!
-maintenance = Maintenance.create(date: Date.parse("20200713"), description: "Alignment", vendor: "Pep Boys", cost: "350.00", car_id: 1)
-maintenance.images.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/fiat-alignment-1.jpg"), filename: "fiat-alignment-1.jpg")
-maintenance.images.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/fiat-alignment-2.jpg"), filename: "fiat-alignment-2.jpg")
-maintenance.save!
-maintenance = Maintenance.create(date: Date.parse("20210812"), description: "Oil Change", vendor: "Jiffy Lube", cost: "78.00", car_id: 1)
-maintenance.images.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/fiat-oil-change-1.jpg"), filename: "fiat-oil-change-1.jpg")
-maintenance.images.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/fiat-oil-change-2.jpg"), filename: "fiat-oil-change-2.jpg")
-maintenance.save!
-maintenance = Maintenance.create(date: Date.parse("20170123"), description: "Brake Repair", vendor: "WalMart", cost: "400.00", car_id: 2)
-maintenance.images.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/civic-brake-repair-1.jpg"), filename: "civic-brake-repair-1.jpg")
-maintenance.images.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/civic-brake-repair-2.jpg"), filename: "civic-brake-repair-2.jpg")
-maintenance.save!
-maintenance = Maintenance.create(date: Date.parse("20200311"), description: "Tire Rotation", vendor: "Goodyear", cost: "105.00", car_id: 2)
-maintenance.images.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/civic-tire-rotation-1.jpg"), filename: "civic-tire-rotation-1.jpg")
-maintenance.images.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/civic-tire-rotation-2.jpg"), filename: "civic-tire-rotation-2.jpg")
-maintenance.save!
-maintenance = Maintenance.create(date: Date.parse("20200111"), description: "New Tires", vendor: "Scott's", cost: "812.00", car_id: 3)
-maintenance.images.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/elantra-new-tires-1.jpg"), filename: "elantra-new-tires-1.jpg")
-maintenance.images.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/elantra-new-tires-2.jpg"), filename: "elantra-new-tires-2.jpg")
-maintenance.save!
-maintenance = Maintenance.create(date: Date.parse("20230627"), description: "Repaired Body Dents", vendor: "Tenede Auto", cost: "1343.00", car_id: 3)
-maintenance.images.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/elantra-repaired-body-1.jpg"), filename: "elantra-repaired-body-1.jpg")
-maintenance.images.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/elantra-repaired-body-2.jpg"), filename: "elantra-repaired-body-2.jpg")
-maintenance.save!
-maintenance = Maintenance.create(date: Date.parse("20150614"), description: "Windshield Replacement", vendor: "45th St. Car Repair", cost: "800.00", car_id: 4)
-maintenance.images.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/leaf-windshield-replacement-1.jpg"), filename: "leaf-windshield-replacement-1.jpg")
-maintenance.images.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/leaf-windshield-replacement-2.jpg"), filename: "leaf-windshield-replacement-2.jpg")
-maintenance.save!
-maintenance = Maintenance.create(date: Date.parse("20170811"), description: "New Spark Plugs", vendor: "Jim & Tony's Automotive Service", cost: "5.00", car_id: 4)
-maintenance.images.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/leaf-new-spark-plugs-1.jpg"), filename: "leaf-new-spark-plugs-1.jpg")
-maintenance.images.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/leaf-new-spark-plugs-2.jpg"), filename: "leaf-new-spark-plugs-2.jpg")
-maintenance.save!
-maintenance = Maintenance.create(date: Date.parse("20200909"), description: "Engine Overhaul", vendor: "Auto Stoppe", cost: "5932.00", car_id: 5)
-maintenance.images.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/scion-engine-overhaul-1.jpg"), filename: "scion-engine-overhaul-1.jpg")
-maintenance.images.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/scion-engine-overhaul-2.jpg"), filename: "scion-engine-overhaul-2.jpg")
-maintenance.save!
-maintenance = Maintenance.create(date: Date.parse("20201030"), description: "50,000 Mile Maintenance", vendor: "Dealership", cost: "0", car_id: 5)
-maintenance.images.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/scion-5k-mile-maintenance-1.jpg"), filename: "scion-5k-mile-maintenance-1.jpg")
-maintenance.images.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/scion-5k-mile-maintenance-2.jpg"), filename: "scion-5k-mile-maintenance-2.jpg")
-maintenance.save!
-maintenance = Maintenance.create(date: Date.parse("20220903"), description: "Fuel Line Replacement", vendor: "Foreign Auto Austin", cost: "37.00", car_id: 6)
-maintenance.images.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/camry-fuel-line-1.jpg"), filename: "camry-fuel-line-1.jpg")
-maintenance.images.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/camry-fuel-line-2.jpg"), filename: "camry-fuel-line-2.jpg")
-maintenance.save!
-maintenance = Maintenance.create(date: Date.parse("20230601"), description: "Replaced Radiator", vendor: "Blan's Auto Repair", cost: "400.00", car_id: 6)
-maintenance.images.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/camry-replaced-radiator-1.jpg"), filename: "camry-replaced-radiator-1.jpg")
-maintenance.images.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/camry-replaced-radiator-2.jpg"), filename: "camry-replaced-radiator-2.jpg")
-maintenance.save!
-document = Document.create(name: "title-fiat-500", date: Date.parse("20200909"), notes: "notes", documentable_type: "Car",documentable_id: 1)
-document.attachment.attach(io: URI.open("#{Rails.root}/app/assets/images/documents/car-documents/titles/title-fiat-500.gif"), filename: "title-fiat-500.gif")
-document = Document.create(name: "contract-fiat-500", date: Date.parse("20200909"), notes: "notes", documentable_type: "Car",documentable_id: 1)
-document.attachment.attach(io: URI.open("#{Rails.root}/app/assets/images/documents/car-documents/contracts/contract-fiat-500.webp"), filename: "contract-fiat-500.webp")
-document = Document.create(name: "title-honda-civic", date: Date.parse("20200909"), notes: "notes", documentable_type: "Car",documentable_id: 2)
-document.attachment.attach(io: URI.open("#{Rails.root}/app/assets/images/documents/car-documents/titles/title-honda-civic.png"), filename: "title-honda-civic.png")
-document = Document.create(name: "contract-honda-civic", date: Date.parse("20200909"), notes: "notes", documentable_type: "Car",documentable_id: 2)
-document.attachment.attach(io: URI.open("#{Rails.root}/app/assets/images/documents/car-documents/contracts/contract-honda-civic.png"), filename: "contract-honda-civic.png")
-document = Document.create(name: "title-hyundai-elantra", date: Date.parse("20200909"), notes: "notes", documentable_type: "Car",documentable_id: 3)
-document.attachment.attach(io: URI.open("#{Rails.root}/app/assets/images/documents/car-documents/titles/title-hyundai-elantra.pdf"), filename: "title-hyundai-elantra.pdf")
-document = Document.create(name: "contract-hyundai-elantra", date: Date.parse("20200909"), notes: "notes", documentable_type: "Car",documentable_id: 3)
-document.attachment.attach(io: URI.open("#{Rails.root}/app/assets/images/documents/car-documents/contracts/contract-hyundai-elantra.jpg"), filename: "contract-hyundai-elantra.jpg")
-document = Document.create(name: "title-nissan-leaf", date: Date.parse("20200909"), notes: "notes", documentable_type: "Car",documentable_id: 4)
-document.attachment.attach(io: URI.open("#{Rails.root}/app/assets/images/documents/car-documents/titles/title-nissan-leaf.png"), filename: "title-nissan-leaf.png")
-document = Document.create(name: "contract-nissan-leaf", date: Date.parse("20200909"), notes: "notes", documentable_type: "Car",documentable_id: 4)
-document.attachment.attach(io: URI.open("#{Rails.root}/app/assets/images/documents/car-documents/contracts/contract-nissan-leaf.png"), filename: "contract-nissan-leaf.png")
-document = Document.create(name: "title-scion", date: Date.parse("20200909"), notes: "notes", documentable_type: "Car",documentable_id: 5)
-document.attachment.attach(io: URI.open("#{Rails.root}/app/assets/images/documents/car-documents/titles/title-scion.jpg"), filename: "title-scion.jpg")
-document = Document.create(name: "contract-scion", date: Date.parse("20200909"), notes: "notes", documentable_type: "Car",documentable_id: 5)
-document.attachment.attach(io: URI.open("#{Rails.root}/app/assets/images/documents/car-documents/contracts/contract-scion.pdf"), filename: "contract-scion.pdf")
-document = Document.create(name: "title-toyota-camry", date: Date.parse("20200909"), notes: "notes", documentable_type: "Car",documentable_id: 6)
-document.attachment.attach(io: URI.open("#{Rails.root}/app/assets/images/documents/car-documents/titles/title-toyota-camry.jpg"), filename: "title-toyota-camry.jpg")
-document = Document.create(name: "contract-toyota-camry", date: Date.parse("20200909"), notes: "notes", documentable_type: "Car",documentable_id: 6)
-document.attachment.attach(io: URI.open("#{Rails.root}/app/assets/images/documents/car-documents/contracts/contract-toyota-camry.jpg"), filename: "contract-toyota-camry.jpg")
-document = Document.create(name: "fiat-alignment-1.png", date: Date.parse("20200909"), notes: "notes", documentable_type: "Maintenance",documentable_id: 1)
-document.attachment.attach(io: URI.open("#{Rails.root}/app/assets/images/documents/maintenance-documents/fiat-alignment-1.png"), filename: "fiat-alignment-1.png")
-document = Document.create(name: "fiat-alignment-2.txt", date: Date.parse("20200909"), notes: "notes", documentable_type: "Maintenance",documentable_id: 1)
-document.attachment.attach(io: URI.open("#{Rails.root}/app/assets/images/documents/maintenance-documents/fiat-alignment-2.txt"), filename: "fiat-alignment-2.txt")
-document = Document.create(name: "fiat-oil-change-1.txt", date: Date.parse("20200909"), notes: "notes", documentable_type: "Maintenance",documentable_id: 2)
-document.attachment.attach(io: URI.open("#{Rails.root}/app/assets/images/documents/maintenance-documents/fiat-oil-change-1.txt"), filename: "fiat-oil-change-1.txt")
-document = Document.create(name: "fiat-oil-change-2.txt", date: Date.parse("20200909"), notes: "notes", documentable_type: "Maintenance",documentable_id: 2)
-document.attachment.attach(io: URI.open("#{Rails.root}/app/assets/images/documents/maintenance-documents/fiat-oil-change-1.txt"), filename: "fiat-oil-change-1.txt")
-document = Document.create(name: "civic-brake-repair-1.jpg", date: Date.parse("20200909"), notes: "notes", documentable_type: "Maintenance",documentable_id: 3)
-document.attachment.attach(io: URI.open("#{Rails.root}/app/assets/images/documents/maintenance-documents/civic-brake-repair-1.jpg"), filename: "civic-brake-repair-1.jpg")
-document = Document.create(name: "civic-brake-repair-2.pdf", date: Date.parse("20200909"), notes: "notes", documentable_type: "Maintenance",documentable_id: 3)
-document.attachment.attach(io: URI.open("#{Rails.root}/app/assets/images/documents/maintenance-documents/civic-brake-repair-2.pdf"), filename: "civic-brake-repair-2.pdf")
-document = Document.create(name: "civic-tire-rotation-1.pdf", date: Date.parse("20200909"), notes: "notes", documentable_type: "Maintenance",documentable_id: 4)
-document.attachment.attach(io: URI.open("#{Rails.root}/app/assets/images/documents/maintenance-documents/civic-tire-rotation-1.pdf"), filename: "civic-tire-rotation-1.pdf")
-document = Document.create(name: "civic-tire-rotation-2.png", date: Date.parse("20200909"), notes: "notes", documentable_type: "Maintenance",documentable_id: 4)
-document.attachment.attach(io: URI.open("#{Rails.root}/app/assets/images/documents/maintenance-documents/civic-tire-rotation-2.png"), filename: "civic-tire-rotation-2.png")
-document = Document.create(name: "elantra-new-tires-1.pdf", date: Date.parse("20200909"), notes: "notes", documentable_type: "Maintenance",documentable_id: 5)
-document.attachment.attach(io: URI.open("#{Rails.root}/app/assets/images/documents/maintenance-documents/elantra-new-tires-1.pdf"), filename: "elantra-new-tires-1.pdf")
-document = Document.create(name: "elantra-new-tires-2.pdf", date: Date.parse("20200909"), notes: "notes", documentable_type: "Maintenance",documentable_id: 5)
-document.attachment.attach(io: URI.open("#{Rails.root}/app/assets/images/documents/maintenance-documents/elantra-new-tires-2.pdf"), filename: "elantra-new-tires-2.pdf")
-document = Document.create(name: "elantra-repaired-body-1.png", date: Date.parse("20200909"), notes: "notes", documentable_type: "Maintenance",documentable_id: 6)
-document.attachment.attach(io: URI.open("#{Rails.root}/app/assets/images/documents/maintenance-documents/elantra-repaired-body-1.png"), filename: "elantra-repaired-body-1.png")
-document = Document.create(name: "elantra-repaired-body-2.pdf", date: Date.parse("20200909"), notes: "notes", documentable_type: "Maintenance",documentable_id: 6)
-document.attachment.attach(io: URI.open("#{Rails.root}/app/assets/images/documents/maintenance-documents/elantra-repaired-body-2.pdf"), filename: "elantra-repaired-body-2.pdf")
-document = Document.create(name: "leaf-windshield-replacement-1.webp", date: Date.parse("20200909"), notes: "notes", documentable_type: "Maintenance",documentable_id: 7)
-document.attachment.attach(io: URI.open("#{Rails.root}/app/assets/images/documents/maintenance-documents/leaf-windshield-replacement-1.webp"), filename: "leaf-windshield-replacement-1.webp")
-document = Document.create(name: "leaf-windshield-replacement-2.webp", date: Date.parse("20200909"), notes: "notes", documentable_type: "Maintenance",documentable_id: 7)
-document.attachment.attach(io: URI.open("#{Rails.root}/app/assets/images/documents/maintenance-documents/leaf-windshield-replacement-2.webp"), filename: "leaf-windshield-replacement-2.webp")
-document = Document.create(name: "leaf-new-spark-plugs-1.txt", date: Date.parse("20200909"), notes: "notes", documentable_type: "Maintenance",documentable_id: 8)
-document.attachment.attach(io: URI.open("#{Rails.root}/app/assets/images/documents/maintenance-documents/leaf-new-spark-plugs-1.txt"), filename: "leaf-new-spark-plugs-1.txt")
-document = Document.create(name: "leaf-new-spark-plugs-2.png", date: Date.parse("20200909"), notes: "notes", documentable_type: "Maintenance",documentable_id: 8)
-document.attachment.attach(io: URI.open("#{Rails.root}/app/assets/images/documents/maintenance-documents/leaf-new-spark-plugs-2.png"), filename: "leaf-new-spark-plugs-2.png")
-document = Document.create(name: "scion-engine-overhaul-1.png", date: Date.parse("20200909"), notes: "notes", documentable_type: "Maintenance",documentable_id: 9)
-document.attachment.attach(io: URI.open("#{Rails.root}/app/assets/images/documents/maintenance-documents/scion-engine-overhaul-1.png"), filename: "scion-engine-overhaul-1.png")
-document = Document.create(name: "scion-engine-overhaul-2.jpg", date: Date.parse("20200909"), notes: "notes", documentable_type: "Maintenance",documentable_id: 9)
-document.attachment.attach(io: URI.open("#{Rails.root}/app/assets/images/documents/maintenance-documents/scion-engine-overhaul-2.jpg"), filename: "scion-engine-overhaul-2.jpg")
-document = Document.create(name: "scion-5k-mile-maintenance-1.jpg", date: Date.parse("20200909"), notes: "notes", documentable_type: "Maintenance",documentable_id: 10)
-document.attachment.attach(io: URI.open("#{Rails.root}/app/assets/images/documents/maintenance-documents/scion-5k-mile-maintenance-1.jpg"), filename: "scion-5k-mile-maintenance-1.jpg")
-document = Document.create(name: "scion-5k-mile-maintenance-2.png", date: Date.parse("20200909"), notes: "notes", documentable_type: "Maintenance",documentable_id: 10)
-document.attachment.attach(io: URI.open("#{Rails.root}/app/assets/images/documents/maintenance-documents/scion-5k-mile-maintenance-2.png"), filename: "scion-5k-mile-maintenance-2.png")
-document = Document.create(name: "camry-fuel-line-1.txt", date: Date.parse("20200909"), notes: "notes", documentable_type: "Maintenance",documentable_id: 11)
-document.attachment.attach(io: URI.open("#{Rails.root}/app/assets/images/documents/maintenance-documents/camry-fuel-line-1.txt"), filename: "camry-fuel-line-1.txt")
-document = Document.create(name: "camry-fuel-line-2.webp", date: Date.parse("20200909"), notes: "notes", documentable_type: "Maintenance",documentable_id: 11)
-document.attachment.attach(io: URI.open("#{Rails.root}/app/assets/images/documents/maintenance-documents/camry-fuel-line-2.webp"), filename: "camry-fuel-line-2.webp")
-document = Document.create(name: "camry-replaced-radiator-1.png", date: Date.parse("20200909"), notes: "notes", documentable_type: "Maintenance",documentable_id: 12)
-document.attachment.attach(io: URI.open("#{Rails.root}/app/assets/images/documents/maintenance-documents/camry-replaced-radiator-1.png"), filename: "camry-replaced-radiator-1.png")
-document = Document.create(name: "camry-replaced-radiator-2.webp", date: Date.parse("20200909"), notes: "notes", documentable_type: "Maintenance",documentable_id: 12)
-document.attachment.attach(io: URI.open("#{Rails.root}/app/assets/images/documents/maintenance-documents/camry-replaced-radiator-2.webp"), filename: "camry-replaced-radiator-2.webp")
-~
-EOF
-rails db:seed
-rm -rf spec/factories
-rm -rf spec/routing
+#   it "is valid with valid attributes" do
+#     expect(Document.new(valid_attributes)).to be_valid
+#   end
+#   it "is not valid width poorly formed email" do
+#     expect(Document.new(invalid_attributes)).to_not be_valid
+#   end
+# end
+# ~
+# EOF
+# rspec
 
-echo -e "\n\n🦄 FRONTEND\n\n"
+# echo -e "\n\n🦄  Seeds\n\n"
+# cat <<'EOF' | puravida db/seeds.rb ~
+# user = User.create(name: "Michael Scott", email: "michaelscott@dundermifflin.com", admin: "true", password: "password")
+# user.avatar.attach(io: URI.open("#{Rails.root}/app/assets/images/office-avatars/michael-scott.png"), filename: "michael-scott.png")
+# user.save!
+# user = User.create(name: "Jim Halpert", email: "jimhalpert@dundermifflin.com", admin: "false", password: "password")
+# user.avatar.attach(io: URI.open("#{Rails.root}/app/assets/images/office-avatars/jim-halpert.png"), filename: "jim-halpert.png")
+# user.save!
+# user = User.create(name: "Pam Beesly", email: "pambeesly@dundermifflin.com", admin: "false", password: "password")
+# user.avatar.attach(io: URI.open("#{Rails.root}/app/assets/images/office-avatars/pam-beesly.png"), filename: "jim-halpert.png")
+# user.save!
+# car = Car.create(name: "Michael's Fiat 500", make: "Fiat", model: "500", trim: "Sport", color: "Yellow", body: "Hatchback", plate: "6XYK922", vin: "3C3CFFBR0CT382584", year: 2012, cost: "10235.00", purchase_vendor: "Ted Fleid", initial_mileage: 47361, purchase_date: Date.parse("20180606"), user_id: 1)
+# car.image.attach(io: URI.open("#{Rails.root}/app/assets/images/cars/fiat-500.jpg"), filename: "fiat-500.jpg")
+# car.save!
+# car = Car.create(name: "Michael's Honda Civic", make: "Honda", model: "Civic", trim: "Vp", color: "Blue", body: "Sedan", plate: "4HGJ708", vin: "2HGEJ6618XH589506", year: 1999, cost: "10352", purchase_vendor: "Howdy Honda", initial_mileage: 78032, purchase_date: Date.parse("20160713"), user_id: 1)
+# car.image.attach(io: URI.open("#{Rails.root}/app/assets/images/cars/honda-civic.jpg"), filename: "honda-civic.jpg")
+# car.save!
+# car = Car.create(name: "Jim's Hyundai Elantra", make: "Hyundai", model: "Elantra", trim: "GLS", color: "Black", body: "Sedan", plate: "8CEU662", vin: "KMHDU46D17U090264", year: 2007, cost: "15000.00", purchase_vendor: "Feit Hyundai", initial_mileage: 53032, purchase_date: Date.parse("20200115"), user_id: 2)
+# car.image.attach(io: URI.open("#{Rails.root}/app/assets/images/cars/hyundai-elantra.jpg"), filename: "hyundai-elantra.jpg")
+# car.save!
+# car = Car.create(name: "Jim's Nissan Leaf", make: "Nissan", model: "Leaf", trim: "SV", color: "Silver", body: "Hatchback", plate: "ABC123", vin: "1N4AZ1CP8LC310110", year: 2020, cost: "22590.00", purchase_vendor: "Carvana", initial_mileage: 21440, purchase_date: Date.parse("20230429"), user_id: 2)
+# car.image.attach(io: URI.open("#{Rails.root}/app/assets/images/cars/nissan-leaf.jpg"), filename: "nissan-leaf.jpg")
+# car.save!
+# car = Car.create(name: "Pam's Scion Xb", make: "Scion", model: "Xb", trim: "Base / Parklan Edition", color: "Gray", body: "Wagon", plate: "7MBE060", vin: "JTLZE4FE0FJ074884", year: 2015, cost: "25867.00", purchase_vendor: "Craigslist", initial_mileage: 35631, purchase_date: Date.parse("20201109"), user_id: 3)
+# car.image.attach(io: URI.open("#{Rails.root}/app/assets/images/cars/scion.jpg"), filename: "scion.jpg")
+# car.save!
+# car = Car.create(name: "Pam's Toyota Camry", make: "Toyota", model: "Camry", trim: "LE", color: "Black", body: "Sedan", plate: "HDH1439", vin: "4T1BE46K49U358097", year: 2009, cost: "7300", purchase_vendor: "Tanne Toyota", initial_mileage: 134087, purchase_date: Date.parse("20100513"), user_id: 3)
+# car.image.attach(io: URI.open("#{Rails.root}/app/assets/images/cars/toyota-camry.jpg"), filename: "toyota-camry.jpg")
+# car.save!
+# maintenance = Maintenance.create(date: Date.parse("20200713"), description: "Alignment", vendor: "Pep Boys", cost: "350.00", car_id: 1)
+# maintenance.images.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/fiat-alignment-1.jpg"), filename: "fiat-alignment-1.jpg")
+# maintenance.images.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/fiat-alignment-2.jpg"), filename: "fiat-alignment-2.jpg")
+# maintenance.save!
+# maintenance = Maintenance.create(date: Date.parse("20210812"), description: "Oil Change", vendor: "Jiffy Lube", cost: "78.00", car_id: 1)
+# maintenance.images.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/fiat-oil-change-1.jpg"), filename: "fiat-oil-change-1.jpg")
+# maintenance.images.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/fiat-oil-change-2.jpg"), filename: "fiat-oil-change-2.jpg")
+# maintenance.save!
+# maintenance = Maintenance.create(date: Date.parse("20170123"), description: "Brake Repair", vendor: "WalMart", cost: "400.00", car_id: 2)
+# maintenance.images.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/civic-brake-repair-1.jpg"), filename: "civic-brake-repair-1.jpg")
+# maintenance.images.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/civic-brake-repair-2.jpg"), filename: "civic-brake-repair-2.jpg")
+# maintenance.save!
+# maintenance = Maintenance.create(date: Date.parse("20200311"), description: "Tire Rotation", vendor: "Goodyear", cost: "105.00", car_id: 2)
+# maintenance.images.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/civic-tire-rotation-1.jpg"), filename: "civic-tire-rotation-1.jpg")
+# maintenance.images.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/civic-tire-rotation-2.jpg"), filename: "civic-tire-rotation-2.jpg")
+# maintenance.save!
+# maintenance = Maintenance.create(date: Date.parse("20200111"), description: "New Tires", vendor: "Scott's", cost: "812.00", car_id: 3)
+# maintenance.images.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/elantra-new-tires-1.jpg"), filename: "elantra-new-tires-1.jpg")
+# maintenance.images.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/elantra-new-tires-2.jpg"), filename: "elantra-new-tires-2.jpg")
+# maintenance.save!
+# maintenance = Maintenance.create(date: Date.parse("20230627"), description: "Repaired Body Dents", vendor: "Tenede Auto", cost: "1343.00", car_id: 3)
+# maintenance.images.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/elantra-repaired-body-1.jpg"), filename: "elantra-repaired-body-1.jpg")
+# maintenance.images.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/elantra-repaired-body-2.jpg"), filename: "elantra-repaired-body-2.jpg")
+# maintenance.save!
+# maintenance = Maintenance.create(date: Date.parse("20150614"), description: "Windshield Replacement", vendor: "45th St. Car Repair", cost: "800.00", car_id: 4)
+# maintenance.images.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/leaf-windshield-replacement-1.jpg"), filename: "leaf-windshield-replacement-1.jpg")
+# maintenance.images.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/leaf-windshield-replacement-2.jpg"), filename: "leaf-windshield-replacement-2.jpg")
+# maintenance.save!
+# maintenance = Maintenance.create(date: Date.parse("20170811"), description: "New Spark Plugs", vendor: "Jim & Tony's Automotive Service", cost: "5.00", car_id: 4)
+# maintenance.images.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/leaf-new-spark-plugs-1.jpg"), filename: "leaf-new-spark-plugs-1.jpg")
+# maintenance.images.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/leaf-new-spark-plugs-2.jpg"), filename: "leaf-new-spark-plugs-2.jpg")
+# maintenance.save!
+# maintenance = Maintenance.create(date: Date.parse("20200909"), description: "Engine Overhaul", vendor: "Auto Stoppe", cost: "5932.00", car_id: 5)
+# maintenance.images.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/scion-engine-overhaul-1.jpg"), filename: "scion-engine-overhaul-1.jpg")
+# maintenance.images.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/scion-engine-overhaul-2.jpg"), filename: "scion-engine-overhaul-2.jpg")
+# maintenance.save!
+# maintenance = Maintenance.create(date: Date.parse("20201030"), description: "50,000 Mile Maintenance", vendor: "Dealership", cost: "0", car_id: 5)
+# maintenance.images.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/scion-5k-mile-maintenance-1.jpg"), filename: "scion-5k-mile-maintenance-1.jpg")
+# maintenance.images.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/scion-5k-mile-maintenance-2.jpg"), filename: "scion-5k-mile-maintenance-2.jpg")
+# maintenance.save!
+# maintenance = Maintenance.create(date: Date.parse("20220903"), description: "Fuel Line Replacement", vendor: "Foreign Auto Austin", cost: "37.00", car_id: 6)
+# maintenance.images.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/camry-fuel-line-1.jpg"), filename: "camry-fuel-line-1.jpg")
+# maintenance.images.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/camry-fuel-line-2.jpg"), filename: "camry-fuel-line-2.jpg")
+# maintenance.save!
+# maintenance = Maintenance.create(date: Date.parse("20230601"), description: "Replaced Radiator", vendor: "Blan's Auto Repair", cost: "400.00", car_id: 6)
+# maintenance.images.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/camry-replaced-radiator-1.jpg"), filename: "camry-replaced-radiator-1.jpg")
+# maintenance.images.attach(io: URI.open("#{Rails.root}/app/assets/images/maintenances/camry-replaced-radiator-2.jpg"), filename: "camry-replaced-radiator-2.jpg")
+# maintenance.save!
+# document = Document.create(name: "title-fiat-500", date: Date.parse("20200909"), notes: "notes", documentable_type: "Car",documentable_id: 1)
+# document.attachment.attach(io: URI.open("#{Rails.root}/app/assets/images/documents/car-documents/titles/title-fiat-500.gif"), filename: "title-fiat-500.gif")
+# document = Document.create(name: "contract-fiat-500", date: Date.parse("20200909"), notes: "notes", documentable_type: "Car",documentable_id: 1)
+# document.attachment.attach(io: URI.open("#{Rails.root}/app/assets/images/documents/car-documents/contracts/contract-fiat-500.webp"), filename: "contract-fiat-500.webp")
+# document = Document.create(name: "title-honda-civic", date: Date.parse("20200909"), notes: "notes", documentable_type: "Car",documentable_id: 2)
+# document.attachment.attach(io: URI.open("#{Rails.root}/app/assets/images/documents/car-documents/titles/title-honda-civic.png"), filename: "title-honda-civic.png")
+# document = Document.create(name: "contract-honda-civic", date: Date.parse("20200909"), notes: "notes", documentable_type: "Car",documentable_id: 2)
+# document.attachment.attach(io: URI.open("#{Rails.root}/app/assets/images/documents/car-documents/contracts/contract-honda-civic.png"), filename: "contract-honda-civic.png")
+# document = Document.create(name: "title-hyundai-elantra", date: Date.parse("20200909"), notes: "notes", documentable_type: "Car",documentable_id: 3)
+# document.attachment.attach(io: URI.open("#{Rails.root}/app/assets/images/documents/car-documents/titles/title-hyundai-elantra.pdf"), filename: "title-hyundai-elantra.pdf")
+# document = Document.create(name: "contract-hyundai-elantra", date: Date.parse("20200909"), notes: "notes", documentable_type: "Car",documentable_id: 3)
+# document.attachment.attach(io: URI.open("#{Rails.root}/app/assets/images/documents/car-documents/contracts/contract-hyundai-elantra.jpg"), filename: "contract-hyundai-elantra.jpg")
+# document = Document.create(name: "title-nissan-leaf", date: Date.parse("20200909"), notes: "notes", documentable_type: "Car",documentable_id: 4)
+# document.attachment.attach(io: URI.open("#{Rails.root}/app/assets/images/documents/car-documents/titles/title-nissan-leaf.png"), filename: "title-nissan-leaf.png")
+# document = Document.create(name: "contract-nissan-leaf", date: Date.parse("20200909"), notes: "notes", documentable_type: "Car",documentable_id: 4)
+# document.attachment.attach(io: URI.open("#{Rails.root}/app/assets/images/documents/car-documents/contracts/contract-nissan-leaf.png"), filename: "contract-nissan-leaf.png")
+# document = Document.create(name: "title-scion", date: Date.parse("20200909"), notes: "notes", documentable_type: "Car",documentable_id: 5)
+# document.attachment.attach(io: URI.open("#{Rails.root}/app/assets/images/documents/car-documents/titles/title-scion.jpg"), filename: "title-scion.jpg")
+# document = Document.create(name: "contract-scion", date: Date.parse("20200909"), notes: "notes", documentable_type: "Car",documentable_id: 5)
+# document.attachment.attach(io: URI.open("#{Rails.root}/app/assets/images/documents/car-documents/contracts/contract-scion.pdf"), filename: "contract-scion.pdf")
+# document = Document.create(name: "title-toyota-camry", date: Date.parse("20200909"), notes: "notes", documentable_type: "Car",documentable_id: 6)
+# document.attachment.attach(io: URI.open("#{Rails.root}/app/assets/images/documents/car-documents/titles/title-toyota-camry.jpg"), filename: "title-toyota-camry.jpg")
+# document = Document.create(name: "contract-toyota-camry", date: Date.parse("20200909"), notes: "notes", documentable_type: "Car",documentable_id: 6)
+# document.attachment.attach(io: URI.open("#{Rails.root}/app/assets/images/documents/car-documents/contracts/contract-toyota-camry.jpg"), filename: "contract-toyota-camry.jpg")
+# document = Document.create(name: "fiat-alignment-1.png", date: Date.parse("20200909"), notes: "notes", documentable_type: "Maintenance",documentable_id: 1)
+# document.attachment.attach(io: URI.open("#{Rails.root}/app/assets/images/documents/maintenance-documents/fiat-alignment-1.png"), filename: "fiat-alignment-1.png")
+# document = Document.create(name: "fiat-alignment-2.txt", date: Date.parse("20200909"), notes: "notes", documentable_type: "Maintenance",documentable_id: 1)
+# document.attachment.attach(io: URI.open("#{Rails.root}/app/assets/images/documents/maintenance-documents/fiat-alignment-2.txt"), filename: "fiat-alignment-2.txt")
+# document = Document.create(name: "fiat-oil-change-1.txt", date: Date.parse("20200909"), notes: "notes", documentable_type: "Maintenance",documentable_id: 2)
+# document.attachment.attach(io: URI.open("#{Rails.root}/app/assets/images/documents/maintenance-documents/fiat-oil-change-1.txt"), filename: "fiat-oil-change-1.txt")
+# document = Document.create(name: "fiat-oil-change-2.txt", date: Date.parse("20200909"), notes: "notes", documentable_type: "Maintenance",documentable_id: 2)
+# document.attachment.attach(io: URI.open("#{Rails.root}/app/assets/images/documents/maintenance-documents/fiat-oil-change-1.txt"), filename: "fiat-oil-change-1.txt")
+# document = Document.create(name: "civic-brake-repair-1.jpg", date: Date.parse("20200909"), notes: "notes", documentable_type: "Maintenance",documentable_id: 3)
+# document.attachment.attach(io: URI.open("#{Rails.root}/app/assets/images/documents/maintenance-documents/civic-brake-repair-1.jpg"), filename: "civic-brake-repair-1.jpg")
+# document = Document.create(name: "civic-brake-repair-2.pdf", date: Date.parse("20200909"), notes: "notes", documentable_type: "Maintenance",documentable_id: 3)
+# document.attachment.attach(io: URI.open("#{Rails.root}/app/assets/images/documents/maintenance-documents/civic-brake-repair-2.pdf"), filename: "civic-brake-repair-2.pdf")
+# document = Document.create(name: "civic-tire-rotation-1.pdf", date: Date.parse("20200909"), notes: "notes", documentable_type: "Maintenance",documentable_id: 4)
+# document.attachment.attach(io: URI.open("#{Rails.root}/app/assets/images/documents/maintenance-documents/civic-tire-rotation-1.pdf"), filename: "civic-tire-rotation-1.pdf")
+# document = Document.create(name: "civic-tire-rotation-2.png", date: Date.parse("20200909"), notes: "notes", documentable_type: "Maintenance",documentable_id: 4)
+# document.attachment.attach(io: URI.open("#{Rails.root}/app/assets/images/documents/maintenance-documents/civic-tire-rotation-2.png"), filename: "civic-tire-rotation-2.png")
+# document = Document.create(name: "elantra-new-tires-1.pdf", date: Date.parse("20200909"), notes: "notes", documentable_type: "Maintenance",documentable_id: 5)
+# document.attachment.attach(io: URI.open("#{Rails.root}/app/assets/images/documents/maintenance-documents/elantra-new-tires-1.pdf"), filename: "elantra-new-tires-1.pdf")
+# document = Document.create(name: "elantra-new-tires-2.pdf", date: Date.parse("20200909"), notes: "notes", documentable_type: "Maintenance",documentable_id: 5)
+# document.attachment.attach(io: URI.open("#{Rails.root}/app/assets/images/documents/maintenance-documents/elantra-new-tires-2.pdf"), filename: "elantra-new-tires-2.pdf")
+# document = Document.create(name: "elantra-repaired-body-1.png", date: Date.parse("20200909"), notes: "notes", documentable_type: "Maintenance",documentable_id: 6)
+# document.attachment.attach(io: URI.open("#{Rails.root}/app/assets/images/documents/maintenance-documents/elantra-repaired-body-1.png"), filename: "elantra-repaired-body-1.png")
+# document = Document.create(name: "elantra-repaired-body-2.pdf", date: Date.parse("20200909"), notes: "notes", documentable_type: "Maintenance",documentable_id: 6)
+# document.attachment.attach(io: URI.open("#{Rails.root}/app/assets/images/documents/maintenance-documents/elantra-repaired-body-2.pdf"), filename: "elantra-repaired-body-2.pdf")
+# document = Document.create(name: "leaf-windshield-replacement-1.webp", date: Date.parse("20200909"), notes: "notes", documentable_type: "Maintenance",documentable_id: 7)
+# document.attachment.attach(io: URI.open("#{Rails.root}/app/assets/images/documents/maintenance-documents/leaf-windshield-replacement-1.webp"), filename: "leaf-windshield-replacement-1.webp")
+# document = Document.create(name: "leaf-windshield-replacement-2.webp", date: Date.parse("20200909"), notes: "notes", documentable_type: "Maintenance",documentable_id: 7)
+# document.attachment.attach(io: URI.open("#{Rails.root}/app/assets/images/documents/maintenance-documents/leaf-windshield-replacement-2.webp"), filename: "leaf-windshield-replacement-2.webp")
+# document = Document.create(name: "leaf-new-spark-plugs-1.txt", date: Date.parse("20200909"), notes: "notes", documentable_type: "Maintenance",documentable_id: 8)
+# document.attachment.attach(io: URI.open("#{Rails.root}/app/assets/images/documents/maintenance-documents/leaf-new-spark-plugs-1.txt"), filename: "leaf-new-spark-plugs-1.txt")
+# document = Document.create(name: "leaf-new-spark-plugs-2.png", date: Date.parse("20200909"), notes: "notes", documentable_type: "Maintenance",documentable_id: 8)
+# document.attachment.attach(io: URI.open("#{Rails.root}/app/assets/images/documents/maintenance-documents/leaf-new-spark-plugs-2.png"), filename: "leaf-new-spark-plugs-2.png")
+# document = Document.create(name: "scion-engine-overhaul-1.png", date: Date.parse("20200909"), notes: "notes", documentable_type: "Maintenance",documentable_id: 9)
+# document.attachment.attach(io: URI.open("#{Rails.root}/app/assets/images/documents/maintenance-documents/scion-engine-overhaul-1.png"), filename: "scion-engine-overhaul-1.png")
+# document = Document.create(name: "scion-engine-overhaul-2.jpg", date: Date.parse("20200909"), notes: "notes", documentable_type: "Maintenance",documentable_id: 9)
+# document.attachment.attach(io: URI.open("#{Rails.root}/app/assets/images/documents/maintenance-documents/scion-engine-overhaul-2.jpg"), filename: "scion-engine-overhaul-2.jpg")
+# document = Document.create(name: "scion-5k-mile-maintenance-1.jpg", date: Date.parse("20200909"), notes: "notes", documentable_type: "Maintenance",documentable_id: 10)
+# document.attachment.attach(io: URI.open("#{Rails.root}/app/assets/images/documents/maintenance-documents/scion-5k-mile-maintenance-1.jpg"), filename: "scion-5k-mile-maintenance-1.jpg")
+# document = Document.create(name: "scion-5k-mile-maintenance-2.png", date: Date.parse("20200909"), notes: "notes", documentable_type: "Maintenance",documentable_id: 10)
+# document.attachment.attach(io: URI.open("#{Rails.root}/app/assets/images/documents/maintenance-documents/scion-5k-mile-maintenance-2.png"), filename: "scion-5k-mile-maintenance-2.png")
+# document = Document.create(name: "camry-fuel-line-1.txt", date: Date.parse("20200909"), notes: "notes", documentable_type: "Maintenance",documentable_id: 11)
+# document.attachment.attach(io: URI.open("#{Rails.root}/app/assets/images/documents/maintenance-documents/camry-fuel-line-1.txt"), filename: "camry-fuel-line-1.txt")
+# document = Document.create(name: "camry-fuel-line-2.webp", date: Date.parse("20200909"), notes: "notes", documentable_type: "Maintenance",documentable_id: 11)
+# document.attachment.attach(io: URI.open("#{Rails.root}/app/assets/images/documents/maintenance-documents/camry-fuel-line-2.webp"), filename: "camry-fuel-line-2.webp")
+# document = Document.create(name: "camry-replaced-radiator-1.png", date: Date.parse("20200909"), notes: "notes", documentable_type: "Maintenance",documentable_id: 12)
+# document.attachment.attach(io: URI.open("#{Rails.root}/app/assets/images/documents/maintenance-documents/camry-replaced-radiator-1.png"), filename: "camry-replaced-radiator-1.png")
+# document = Document.create(name: "camry-replaced-radiator-2.webp", date: Date.parse("20200909"), notes: "notes", documentable_type: "Maintenance",documentable_id: 12)
+# document.attachment.attach(io: URI.open("#{Rails.root}/app/assets/images/documents/maintenance-documents/camry-replaced-radiator-2.webp"), filename: "camry-replaced-radiator-2.webp")
+# ~
+# EOF
+# rails db:seed
+# rm -rf spec/factories
+# rm -rf spec/routing
 
-echo -e "\n\n🦄 Setup\n\n"
+# echo -e "\n\n🦄 FRONTEND\n\n"
 
-cd ~/Desktop
-npx create-nuxt-app front
-cd front
-npm install @picocss/pico @nuxtjs/auth@4.5.1 @fortawesome/fontawesome-svg-core @fortawesome/free-solid-svg-icons @fortawesome/free-brands-svg-icons @fortawesome/vue-fontawesome@latest-2
-npm install --save-dev sass sass-loader@10
-cat <<'EOF' | puravida assets/scss/main.scss ~
-@import "node_modules/@picocss/pico/scss/pico.scss";
+# echo -e "\n\n🦄 Setup\n\n"
 
-// Pico overrides 
-// $primary-500: #e91e63;
+# cd ~/Desktop
+# npx create-nuxt-app front
+# cd front
+# npm install @picocss/pico @nuxtjs/auth@4.5.1 @fortawesome/fontawesome-svg-core @fortawesome/free-solid-svg-icons @fortawesome/free-brands-svg-icons @fortawesome/vue-fontawesome@latest-2
+# npm install --save-dev sass sass-loader@10
+# cat <<'EOF' | puravida assets/scss/main.scss ~
+# @import "node_modules/@picocss/pico/scss/pico.scss";
 
-h1 {
-  margin: 4rem 0
-}
+# // Pico overrides 
+# // $primary-500: #e91e63;
 
-.no-margin {
-  margin: 0
-}
+# h1 {
+#   margin: 4rem 0
+# }
 
-.small-bottom-margin {
-  margin: 0 0 0.5rem
-}
+# .no-margin {
+#   margin: 0
+# }
 
-.big-bottom-margin {
-  margin: 0 0 8rem
-}
+# .small-bottom-margin {
+#   margin: 0 0 0.5rem
+# }
 
-.half-width {
-  margin: 0 0 4rem;
-  width: 50%;
-}
+# .big-bottom-margin {
+#   margin: 0 0 8rem
+# }
 
-nav img {
-  width: 40px;
-  border-radius: 50%;
-  border: 3px solid var(--pico-primary);
-}
+# .half-width {
+#   margin: 0 0 4rem;
+#   width: 50%;
+# }
 
-article img {
-  margin-bottom: var(--typography-spacing-vertical);
-  width: 250px;
-}
+# nav img {
+#   width: 40px;
+#   border-radius: 50%;
+#   border: 3px solid var(--pico-primary);
+# }
 
-ul.features { 
-  margin: 0 0 2.5rem 1rem;
-  li {
-    margin: 0;
-    padding: 0;
-  }
-}
+# article img {
+#   margin-bottom: var(--typography-spacing-vertical);
+#   width: 250px;
+# }
 
-.aligned-columns {
-  margin: 0 0 2rem;
-  p {
-    margin: 0;
-    span {
-      margin: 0 0.5rem 0 0;
-      display: inline-block;
-      width: 8rem;
-      text-align: right;
-      font-weight: bold;
-    }
-  }
-}
-~
-EOF
-cat <<'EOF' | puravida nuxt.config.js ~
-let development = process.env.NODE_ENV !== 'production'
-export default {
-  ssr: false,
-  head: { title: 'front', htmlAttrs: { lang: 'en' },
-    meta: [ { charset: 'utf-8' },
-      { name: 'viewport', content: 'width=device-width, initial-scale=1' },
-      { hid: 'description', name: 'description', content: '' },
-      { name: 'format-detection', content: 'telephone=no' }
-    ], link: [{ rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }]
-  },
-  css: ['@fortawesome/fontawesome-svg-core/styles.css','@/assets/scss/main.scss'],
-  plugins: [ '~/plugins/fontawesome.js' ],
-  components: true,
-  buildModules: [],
-  router: { middleware: ['auth'] },
-  modules: ['@nuxtjs/axios', '@nuxtjs/auth'],
-  axios: { baseURL: development ? 'http://localhost:3000' : 'https://ruxtmin-back.fly.dev/' },
-  server: { port: development ? 3001 : 3000 },
-  auth: {
-    redirect: { login: '/' },
-    strategies: {
-      local: {
-        endpoints: {
-          login: { url: 'login', method: 'post', propertyName: 'data' },
-          logout: false,
-          user: { url: 'me', method: 'get', propertyName: 'data' }
-        }
-      }
-    }
-  }
-}
-~
-EOF
-cat <<'EOF' | puravida middleware/adminOnly.js ~
-export default function ({ store, redirect }) {
-  if (!store.state.auth.user.admin) {
-    return redirect('/')
-  }
-}
-~
-EOF
-cat <<'EOF' | puravida middleware/currentOrAdmin-showEdit.js ~
-import { mapGetters } from 'vuex'
-export default function ({ route, store, redirect }) {
-  const { isAdmin, loggedInUser } = store.getters
-  const url = route.fullPath;
-  const splitPath = url.split('/')
-  let elemId = null
-  let isElemUsers = false
-  let isCar = false;
-  let isMaintenance = false;
-  let isDocument = false;
-  let isUser = false;
-  const userCars = loggedInUser.car_ids
-  const userMaintenances = loggedInUser.maintenances_ids
-  const userDocuments = loggedInUser.documents_ids
+# ul.features { 
+#   margin: 0 0 2.5rem 1rem;
+#   li {
+#     margin: 0;
+#     padding: 0;
+#   }
+# }
 
-  if (url.includes("document")) {
-    isDocument = true
-  } else if (url.includes("maintenance")) { 
-    isMaintenance = true
-  } else if (url.includes("car")) {
-    isCar = true
-  } else if (url.includes("users")) {
-    isUser = true
-  }
+# .aligned-columns {
+#   margin: 0 0 2rem;
+#   p {
+#     margin: 0;
+#     span {
+#       margin: 0 0.5rem 0 0;
+#       display: inline-block;
+#       width: 8rem;
+#       text-align: right;
+#       font-weight: bold;
+#     }
+#   }
+# }
+# ~
+# EOF
+# cat <<'EOF' | puravida nuxt.config.js ~
+# let development = process.env.NODE_ENV !== 'production'
+# export default {
+#   ssr: false,
+#   head: { title: 'front', htmlAttrs: { lang: 'en' },
+#     meta: [ { charset: 'utf-8' },
+#       { name: 'viewport', content: 'width=device-width, initial-scale=1' },
+#       { hid: 'description', name: 'description', content: '' },
+#       { name: 'format-detection', content: 'telephone=no' }
+#     ], link: [{ rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }]
+#   },
+#   css: ['@fortawesome/fontawesome-svg-core/styles.css','@/assets/scss/main.scss'],
+#   plugins: [ '~/plugins/fontawesome.js' ],
+#   components: true,
+#   buildModules: [],
+#   router: { middleware: ['auth'] },
+#   modules: ['@nuxtjs/axios', '@nuxtjs/auth'],
+#   axios: { baseURL: development ? 'http://localhost:3000' : 'https://ruxtmin-back.fly.dev/' },
+#   server: { port: development ? 3001 : 3000 },
+#   auth: {
+#     redirect: { login: '/' },
+#     strategies: {
+#       local: {
+#         endpoints: {
+#           login: { url: 'login', method: 'post', propertyName: 'data' },
+#           logout: false,
+#           user: { url: 'me', method: 'get', propertyName: 'data' }
+#         }
+#       }
+#     }
+#   }
+# }
+# ~
+# EOF
+# cat <<'EOF' | puravida middleware/adminOnly.js ~
+# export default function ({ store, redirect }) {
+#   if (!store.state.auth.user.admin) {
+#     return redirect('/')
+#   }
+# }
+# ~
+# EOF
+# cat <<'EOF' | puravida middleware/currentOrAdmin-showEdit.js ~
+# import { mapGetters } from 'vuex'
+# export default function ({ route, store, redirect }) {
+#   const { isAdmin, loggedInUser } = store.getters
+#   const url = route.fullPath;
+#   const splitPath = url.split('/')
+#   let elemId = null
+#   let isElemUsers = false
+#   let isCar = false;
+#   let isMaintenance = false;
+#   let isDocument = false;
+#   let isUser = false;
+#   const userCars = loggedInUser.car_ids
+#   const userMaintenances = loggedInUser.maintenances_ids
+#   const userDocuments = loggedInUser.documents_ids
 
-  if (isEditPage(url)) {
-    elemId = parseInt(splitPath[splitPath.length-2])
-  } else if (isShowPage(url)) {
-    elemId = parseInt(splitPath[splitPath.length-1])
-  }
+#   if (url.includes("document")) {
+#     isDocument = true
+#   } else if (url.includes("maintenance")) { 
+#     isMaintenance = true
+#   } else if (url.includes("car")) {
+#     isCar = true
+#   } else if (url.includes("users")) {
+#     isUser = true
+#   }
+
+#   if (isEditPage(url)) {
+#     elemId = parseInt(splitPath[splitPath.length-2])
+#   } else if (isShowPage(url)) {
+#     elemId = parseInt(splitPath[splitPath.length-1])
+#   }
   
-  if (isCar) {
-    isElemUsers = userCars.includes(elemId) ? true : false
-  } else if (isMaintenance) {
-    isElemUsers = userMaintenances.includes(elemId) ? true : false
-  } else if (isDocument) {
-    isElemUsers = userDocuments.includes(elemId) ? true : false
-  } else if (isUser) {
-    isElemUsers = loggedInUser.id === elemId ? true : false
-  }
+#   if (isCar) {
+#     isElemUsers = userCars.includes(elemId) ? true : false
+#   } else if (isMaintenance) {
+#     isElemUsers = userMaintenances.includes(elemId) ? true : false
+#   } else if (isDocument) {
+#     isElemUsers = userDocuments.includes(elemId) ? true : false
+#   } else if (isUser) {
+#     isElemUsers = loggedInUser.id === elemId ? true : false
+#   }
 
-  if (!isAdmin && !isElemUsers) {
-    return redirect('/')
-  }
-}
+#   if (!isAdmin && !isElemUsers) {
+#     return redirect('/')
+#   }
+# }
 
-function isEditPage(url) {
-  return url.includes("edit") ? true : false
-}
+# function isEditPage(url) {
+#   return url.includes("edit") ? true : false
+# }
 
-function isShowPage(url) {
-  const splitUrl = url.split('/')
-  return (!isNaN(splitUrl[splitUrl.length-1]) && !isEditPage(url)) ? true : false
-}
-~
-EOF
-cat <<'EOF' | puravida middleware/currentOrAdmin-index.js ~
-export default function ({ route, store, redirect }) {
-  const { isAdmin, loggedInUser } = store.getters
-  const query = route.query
-  const isAdminRequest = query['admin'] ? true : false
-  const isUserIdRequest = query['user_id'] ? true : false
-  const isQueryEmpty = Object.keys(query).length === 0 ? true : false
-  const userIdRequestButNotAdmin = isUserIdRequest && !isAdmin
-  const requested_user_id = parseInt(query['user_id'])
-  const actual_user_id = loggedInUser.id
-  const allowedAccess = requested_user_id === actual_user_id ? true : false
+# function isShowPage(url) {
+#   const splitUrl = url.split('/')
+#   return (!isNaN(splitUrl[splitUrl.length-1]) && !isEditPage(url)) ? true : false
+# }
+# ~
+# EOF
+# cat <<'EOF' | puravida middleware/currentOrAdmin-index.js ~
+# export default function ({ route, store, redirect }) {
+#   const { isAdmin, loggedInUser } = store.getters
+#   const query = route.query
+#   const isAdminRequest = query['admin'] ? true : false
+#   const isUserIdRequest = query['user_id'] ? true : false
+#   const isQueryEmpty = Object.keys(query).length === 0 ? true : false
+#   const userIdRequestButNotAdmin = isUserIdRequest && !isAdmin
+#   const requested_user_id = parseInt(query['user_id'])
+#   const actual_user_id = loggedInUser.id
+#   const allowedAccess = requested_user_id === actual_user_id ? true : false
 
-  if ((isAdminRequest || isQueryEmpty) && !isAdmin) {
-    return redirect('/')
-  } else if (userIdRequestButNotAdmin && !allowedAccess) {
-    return redirect('/cars?user_id=' + loggedInUser.id)
-  }
-}
-~
-EOF
-cat <<'EOF' | puravida plugins/fontawesome.js ~
-import Vue from 'vue'
-import { library, config } from '@fortawesome/fontawesome-svg-core'
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-import { fas } from '@fortawesome/free-solid-svg-icons'
+#   if ((isAdminRequest || isQueryEmpty) && !isAdmin) {
+#     return redirect('/')
+#   } else if (userIdRequestButNotAdmin && !allowedAccess) {
+#     return redirect('/cars?user_id=' + loggedInUser.id)
+#   }
+# }
+# ~
+# EOF
+# cat <<'EOF' | puravida plugins/fontawesome.js ~
+# import Vue from 'vue'
+# import { library, config } from '@fortawesome/fontawesome-svg-core'
+# import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+# import { fas } from '@fortawesome/free-solid-svg-icons'
 
-config.autoAddCss = false
-library.add(fas)
-Vue.component('font-awesome-icon', FontAwesomeIcon)
-~
-EOF
-rm -f components/*.vue
+# config.autoAddCss = false
+# library.add(fas)
+# Vue.component('font-awesome-icon', FontAwesomeIcon)
+# ~
+# EOF
+# rm -f components/*.vue
 
-echo -e "\n\n🦄 New User Page\n\n"
-cat <<'EOF' | puravida components/user/Form.vue ~
-<template>
-  <section>
-    <h1 v-if="editNewOrSignup === 'edit'">Edit User</h1>
-    <h1 v-else-if="editNewOrSignup === 'new'">Add User</h1>
-    <h1 v-else-if="editNewOrSignup === 'sign-up'">Sign Up</h1>
-    <article>
-      <form enctype="multipart/form-data">
-        <p v-if="editNewOrSignup === 'edit'">id: {{ $route.params.id }}</p>
-        <p>Name: </p><input v-model="name">
-        <p>Email: </p><input v-model="email">
-        <p class="no-margin">Avatar: </p>
-        <img v-if="!hideAvatar && editNewOrSignup === 'edit'" :src="avatar" />    
-        <input type="file" ref="inputFile" @change=uploadAvatar()>
-        <p v-if="editNewOrSignup !== 'edit'">Password: </p>
-        <input v-if="editNewOrSignup !== 'edit'" type="password" v-model="password">
-        <button v-if="editNewOrSignup !== 'edit'" @click.prevent=createUser>Create User</button>
-        <button v-else-if="editNewOrSignup == 'edit'" @click.prevent=editUser>Edit User</button>
-      </form>
-    </article>
-  </section>
-</template>
+# echo -e "\n\n🦄 New User Page\n\n"
+# cat <<'EOF' | puravida components/user/Form.vue ~
+# <template>
+#   <section>
+#     <h1 v-if="editNewOrSignup === 'edit'">Edit User</h1>
+#     <h1 v-else-if="editNewOrSignup === 'new'">Add User</h1>
+#     <h1 v-else-if="editNewOrSignup === 'sign-up'">Sign Up</h1>
+#     <article>
+#       <form enctype="multipart/form-data">
+#         <p v-if="editNewOrSignup === 'edit'">id: {{ $route.params.id }}</p>
+#         <p>Name: </p><input v-model="name">
+#         <p>Email: </p><input v-model="email">
+#         <p class="no-margin">Avatar: </p>
+#         <img v-if="!hideAvatar && editNewOrSignup === 'edit'" :src="avatar" />    
+#         <input type="file" ref="inputFile" @change=uploadAvatar()>
+#         <p v-if="editNewOrSignup !== 'edit'">Password: </p>
+#         <input v-if="editNewOrSignup !== 'edit'" type="password" v-model="password">
+#         <button v-if="editNewOrSignup !== 'edit'" @click.prevent=createUser>Create User</button>
+#         <button v-else-if="editNewOrSignup == 'edit'" @click.prevent=editUser>Edit User</button>
+#       </form>
+#     </article>
+#   </section>
+# </template>
 
-<script>
-import { mapGetters } from 'vuex'
-export default {
-  data () {
-    return {
-      name: "",
-      email: "",
-      avatar: "",
-      password: "",
-      editNewOrSignup: "",
-      hideAvatar: false
-    }
-  },
-  mounted() {
-    const splitPath = $nuxt.$route.path.split('/')
-    this.editNewOrSignup = splitPath[splitPath.length-1]
-  },
-  computed: {
-    ...mapGetters(['isAuthenticated', 'isAdmin', 'loggedInUser`']),
-  },
-  async fetch() {
-    const splitPath = $nuxt.$route.path.split('/')
-    this.editNewOrSignup = $nuxt.$route.path.split('/')[$nuxt.$route.path.split('/').length-1]
-    if ($nuxt.$route.path.split('/')[$nuxt.$route.path.split('/').length-1]=='edit') {
-      const user = await this.$axios.$get(`users/${this.$route.params.id}`)
-      this.name = user.name
-      this.email = user.email,
-      this.avatar = user.avatar  
-    }
-  },
-  methods: {
-    uploadAvatar: function() {
-      this.avatar = this.$refs.inputFile.files[0]
-      this.hideAvatar = true
-    },
-    createUser: function() {
-      const params = {
-        'name': this.name,
-        'email': this.email,
-        'avatar': this.avatar,
-        'password': this.password,
-      }
-      let payload = new FormData()
-      Object.entries(params).forEach(
-        ([key, value]) => payload.append(key, value)
-      )
-      this.$axios.$post('users', payload)
-        .then(() => {
-          this.$auth.loginWith('local', {
-            data: {
-            email: this.email,
-            password: this.password
-            },
-          })
-          .then(() => {
-            const userId = this.$auth.$state.user.id
-            this.$router.push(`/users/${userId}`)
-          })
-        })
-    },
-    editUser: function() {
-      let params = {}
-      const filePickerFile = this.$refs.inputFile.files[0]
-      if (!filePickerFile) {
-        params = { 'name': this.name, 'email': this.email }
-      } else {
-        params = { 'name': this.name, 'email': this.email, 'avatar': this.avatar }
-      }
+# <script>
+# import { mapGetters } from 'vuex'
+# export default {
+#   data () {
+#     return {
+#       name: "",
+#       email: "",
+#       avatar: "",
+#       password: "",
+#       editNewOrSignup: "",
+#       hideAvatar: false
+#     }
+#   },
+#   mounted() {
+#     const splitPath = $nuxt.$route.path.split('/')
+#     this.editNewOrSignup = splitPath[splitPath.length-1]
+#   },
+#   computed: {
+#     ...mapGetters(['isAuthenticated', 'isAdmin', 'loggedInUser`']),
+#   },
+#   async fetch() {
+#     const splitPath = $nuxt.$route.path.split('/')
+#     this.editNewOrSignup = $nuxt.$route.path.split('/')[$nuxt.$route.path.split('/').length-1]
+#     if ($nuxt.$route.path.split('/')[$nuxt.$route.path.split('/').length-1]=='edit') {
+#       const user = await this.$axios.$get(`users/${this.$route.params.id}`)
+#       this.name = user.name
+#       this.email = user.email,
+#       this.avatar = user.avatar  
+#     }
+#   },
+#   methods: {
+#     uploadAvatar: function() {
+#       this.avatar = this.$refs.inputFile.files[0]
+#       this.hideAvatar = true
+#     },
+#     createUser: function() {
+#       const params = {
+#         'name': this.name,
+#         'email': this.email,
+#         'avatar': this.avatar,
+#         'password': this.password,
+#       }
+#       let payload = new FormData()
+#       Object.entries(params).forEach(
+#         ([key, value]) => payload.append(key, value)
+#       )
+#       this.$axios.$post('users', payload)
+#         .then(() => {
+#           this.$auth.loginWith('local', {
+#             data: {
+#             email: this.email,
+#             password: this.password
+#             },
+#           })
+#           .then(() => {
+#             const userId = this.$auth.$state.user.id
+#             this.$router.push(`/users/${userId}`)
+#           })
+#         })
+#     },
+#     editUser: function() {
+#       let params = {}
+#       const filePickerFile = this.$refs.inputFile.files[0]
+#       if (!filePickerFile) {
+#         params = { 'name': this.name, 'email': this.email }
+#       } else {
+#         params = { 'name': this.name, 'email': this.email, 'avatar': this.avatar }
+#       }
     
-      let payload = new FormData()
-      Object.entries(params).forEach(
-        ([key, value]) => payload.append(key, value)
-      )
-      this.$axios.$patch(`/users/${this.$route.params.id}`, payload)
-        .then(() => {
-          this.$router.push(`/users/${this.$route.params.id}`)
-        })
-    },
-  }
-}
-</script>
-~
-EOF
-cat <<'EOF' | puravida pages/users/new.vue ~
-<template>
-  <main class="container">
-    <UserForm />
-  </main>
-</template>
-~
-EOF
+#       let payload = new FormData()
+#       Object.entries(params).forEach(
+#         ([key, value]) => payload.append(key, value)
+#       )
+#       this.$axios.$patch(`/users/${this.$route.params.id}`, payload)
+#         .then(() => {
+#           this.$router.push(`/users/${this.$route.params.id}`)
+#         })
+#     },
+#   }
+# }
+# </script>
+# ~
+# EOF
+# cat <<'EOF' | puravida pages/users/new.vue ~
+# <template>
+#   <main class="container">
+#     <UserForm />
+#   </main>
+# </template>
+# ~
+# EOF
 
-echo -e "\n\n🦄 Users Page\n\n"
-cat <<'EOF' | puravida components/user/Card.vue ~
-<template>
-  <article>
-    <h2>
-      <NuxtLink :to="`/users/${user.id}`">{{ user.name }}</NuxtLink> 
-      <NuxtLink :to="`/users/${user.id}/edit`"><font-awesome-icon icon="pencil" /></NuxtLink>
-      <a @click.prevent=deleteUser(user.id) href="#"><font-awesome-icon icon="trash" /></a>
-    </h2>
-    <p>id: {{ user.id }}</p>
-    <p>email: {{ user.email }}</p>
-    <p v-if="user.avatar !== null" class="no-margin">avatar:</p>
-    <img v-if="user.avatar !== null" :src="user.avatar" />
-    <p v-if="isAdmin">admin: {{ user.admin }}</p>
-  </article>
-</template>
+# echo -e "\n\n🦄 Users Page\n\n"
+# cat <<'EOF' | puravida components/user/Card.vue ~
+# <template>
+#   <article>
+#     <h2>
+#       <NuxtLink :to="`/users/${user.id}`">{{ user.name }}</NuxtLink> 
+#       <NuxtLink :to="`/users/${user.id}/edit`"><font-awesome-icon icon="pencil" /></NuxtLink>
+#       <a @click.prevent=deleteUser(user.id) href="#"><font-awesome-icon icon="trash" /></a>
+#     </h2>
+#     <p>id: {{ user.id }}</p>
+#     <p>email: {{ user.email }}</p>
+#     <p v-if="user.avatar !== null" class="no-margin">avatar:</p>
+#     <img v-if="user.avatar !== null" :src="user.avatar" />
+#     <p v-if="isAdmin">admin: {{ user.admin }}</p>
+#   </article>
+# </template>
 
-<script>
-import { mapGetters } from 'vuex'
-export default {
-  name: 'UserCard',
-  computed: { ...mapGetters(['isAdmin']) },
-  props: {
-    user: {
-      type: Object,
-      default: () => ({}),
-    },
-    users: {
-      type: Array,
-      default: () => ([]),
-    },
-  },
-  methods: {
-    uploadAvatar: function() {
-      this.avatar = this.$refs.inputFile.files[0];
-    },
-    deleteUser: function(id) {
-      this.$axios.$delete(`users/${id}`)
-      const index = this.users.findIndex((i) => { return i.id === id })
-      this.users.splice(index, 1);
-    }
-  }
-}
-</script>
-~
-EOF
-cat <<'EOF' | puravida components/user/Set.vue ~
-<template>
-  <section>
-    <div v-for="user in users" :key="user.id">
-      <UserCard :user="user" :users="users" />
-    </div>
-  </section>
-</template>
+# <script>
+# import { mapGetters } from 'vuex'
+# export default {
+#   name: 'UserCard',
+#   computed: { ...mapGetters(['isAdmin']) },
+#   props: {
+#     user: {
+#       type: Object,
+#       default: () => ({}),
+#     },
+#     users: {
+#       type: Array,
+#       default: () => ([]),
+#     },
+#   },
+#   methods: {
+#     uploadAvatar: function() {
+#       this.avatar = this.$refs.inputFile.files[0];
+#     },
+#     deleteUser: function(id) {
+#       this.$axios.$delete(`users/${id}`)
+#       const index = this.users.findIndex((i) => { return i.id === id })
+#       this.users.splice(index, 1);
+#     }
+#   }
+# }
+# </script>
+# ~
+# EOF
+# cat <<'EOF' | puravida components/user/Set.vue ~
+# <template>
+#   <section>
+#     <div v-for="user in users" :key="user.id">
+#       <UserCard :user="user" :users="users" />
+#     </div>
+#   </section>
+# </template>
 
-<script>
-export default {
-  data: () => ({
-    users: []
-  }),
-  async fetch() {
-    this.users = await this.$axios.$get('users')
-  }
-}
-</script>
-~
-EOF
+# <script>
+# export default {
+#   data: () => ({
+#     users: []
+#   }),
+#   async fetch() {
+#     this.users = await this.$axios.$get('users')
+#   }
+# }
+# </script>
+# ~
+# EOF
 
-cat <<'EOF' | puravida pages/users/index.vue ~
-<template>
-  <main class="container">
-    <h1>Users</h1>
-    <NuxtLink to="/users/new" role="button">Add User</NuxtLink>
-    <UserSet />
-  </main>
-</template>
+# cat <<'EOF' | puravida pages/users/index.vue ~
+# <template>
+#   <main class="container">
+#     <h1>Users</h1>
+#     <NuxtLink to="/users/new" role="button">Add User</NuxtLink>
+#     <UserSet />
+#   </main>
+# </template>
 
-<script>
-export default { middleware: 'adminOnly' }
-</script>
-~
-EOF
+# <script>
+# export default { middleware: 'adminOnly' }
+# </script>
+# ~
+# EOF
 
-echo -e "\n\n🦄 User Page\n\n"
-cat <<'EOF' | puravida pages/users/_id/index.vue ~
-<template>
-  <main class="container">
-    <section>
-      <UserCard :user="user" />
-    </section>
-  </main>
-</template>
+# echo -e "\n\n🦄 User Page\n\n"
+# cat <<'EOF' | puravida pages/users/_id/index.vue ~
+# <template>
+#   <main class="container">
+#     <section>
+#       <UserCard :user="user" />
+#     </section>
+#   </main>
+# </template>
 
-<script>
-export default {
-  middleware: 'currentOrAdmin-showEdit',
-  data: () => ({ user: {} }),
-  async fetch() { this.user = await this.$axios.$get(`users/${this.$route.params.id}`) },
-  methods: {
-    uploadAvatar: function() { this.avatar = this.$refs.inputFile.files[0] },
-    deleteUser: function(id) {
-      this.$axios.$delete(`users/${this.$route.params.id}`)
-      this.$router.push('/users')
-    }
-  }
-}
-</script>
-~
-EOF
+# <script>
+# export default {
+#   middleware: 'currentOrAdmin-showEdit',
+#   data: () => ({ user: {} }),
+#   async fetch() { this.user = await this.$axios.$get(`users/${this.$route.params.id}`) },
+#   methods: {
+#     uploadAvatar: function() { this.avatar = this.$refs.inputFile.files[0] },
+#     deleteUser: function(id) {
+#       this.$axios.$delete(`users/${this.$route.params.id}`)
+#       this.$router.push('/users')
+#     }
+#   }
+# }
+# </script>
+# ~
+# EOF
 
-echo -e "\n\n🦄 User Edit Page\n\n"
-cat <<'EOF' | puravida pages/users/_id/edit.vue ~
-<template>
-  <main class="container">
-    <UserForm />
-  </main>
-</template>
+# echo -e "\n\n🦄 User Edit Page\n\n"
+# cat <<'EOF' | puravida pages/users/_id/edit.vue ~
+# <template>
+#   <main class="container">
+#     <UserForm />
+#   </main>
+# </template>
 
-<script>
-export default { middleware: 'currentOrAdmin-showEdit' }
-</script>
-~
-EOF
+# <script>
+# export default { middleware: 'currentOrAdmin-showEdit' }
+# </script>
+# ~
+# EOF
 
 
-echo -e "\n\n🦄 Cars (frontend)\n\n"
-cat <<'EOF' | puravida components/car/Card.vue ~
-<template>
-  <article>
-    <h2>
-      <NuxtLink :to="`/cars/${car.id}`">{{ car.name }}</NuxtLink> 
-      <NuxtLink :to="`/cars/${car.id}/edit`"><font-awesome-icon icon="pencil" /></NuxtLink>
-      <a @click.prevent=deleteCar(car.id) href="#"><font-awesome-icon icon="trash" /></a>
-    </h2>
-    <p>id: {{ car.id }}</p>
-    <p v-if="car.image !== null" class="no-margin">image:</p>
-    <img v-if="car.image !== null" :src="car.image" />
-    <p>year: {{ car.year }}</p>
-    <p>make: {{ car.make }}</p>
-    <p>model: {{ car.model }}</p>
-    <p>trim: {{ car.trim }}</p>
-    <p>body: {{ car.body }}</p>
-    <p>color: {{ car.color }}</p>
-    <p>plate: {{ car.plate }}</p>
-    <p>vin: {{ car.vin }}</p>
-    <p>cost: {{ car.cost }}</p>
-    <p>initial_mileage: {{ car.initial_mileage }}</p>
-    <p>purchase_date: {{ car.purchase_date }}</p>
-    <p>purchase_vendor: {{ car.purchase_vendor }}</p>
-    <h4 v-if="car.maintenances !== null">Maintenances</h4>
-    <ul v-if="car.maintenances !== null">
-      <li v-for="maintenance in car.maintenances" :key="maintenance.id">
-        <NuxtLink :to="`/maintenances/${maintenance.id}`">{{ maintenance.description }}</NuxtLink>
-      </li>
-    </ul>
-    <h4 v-if="car.documents !== null">Documents</h4>
-    <ul v-if="car.documents !== null">
-      <li v-for="document in car.documents" :key="document.id">
-        <NuxtLink :to="`/documents/${document.id}`">{{ document.name }}</NuxtLink>
-      </li>
-    </ul>
-  </article>
-</template>
+# echo -e "\n\n🦄 Cars (frontend)\n\n"
+# cat <<'EOF' | puravida components/car/Card.vue ~
+# <template>
+#   <article>
+#     <h2>
+#       <NuxtLink :to="`/cars/${car.id}`">{{ car.name }}</NuxtLink> 
+#       <NuxtLink :to="`/cars/${car.id}/edit`"><font-awesome-icon icon="pencil" /></NuxtLink>
+#       <a @click.prevent=deleteCar(car.id) href="#"><font-awesome-icon icon="trash" /></a>
+#     </h2>
+#     <p>id: {{ car.id }}</p>
+#     <p v-if="car.image !== null" class="no-margin">image:</p>
+#     <img v-if="car.image !== null" :src="car.image" />
+#     <p>year: {{ car.year }}</p>
+#     <p>make: {{ car.make }}</p>
+#     <p>model: {{ car.model }}</p>
+#     <p>trim: {{ car.trim }}</p>
+#     <p>body: {{ car.body }}</p>
+#     <p>color: {{ car.color }}</p>
+#     <p>plate: {{ car.plate }}</p>
+#     <p>vin: {{ car.vin }}</p>
+#     <p>cost: {{ car.cost }}</p>
+#     <p>initial_mileage: {{ car.initial_mileage }}</p>
+#     <p>purchase_date: {{ car.purchase_date }}</p>
+#     <p>purchase_vendor: {{ car.purchase_vendor }}</p>
+#     <h4 v-if="car.maintenances !== null">Maintenances</h4>
+#     <ul v-if="car.maintenances !== null">
+#       <li v-for="maintenance in car.maintenances" :key="maintenance.id">
+#         <NuxtLink :to="`/maintenances/${maintenance.id}`">{{ maintenance.description }}</NuxtLink>
+#       </li>
+#     </ul>
+#     <h4 v-if="car.documents !== null">Documents</h4>
+#     <ul v-if="car.documents !== null">
+#       <li v-for="document in car.documents" :key="document.id">
+#         <NuxtLink :to="`/documents/${document.id}`">{{ document.name }}</NuxtLink>
+#       </li>
+#     </ul>
+#   </article>
+# </template>
 
-<script>
-import { mapGetters } from 'vuex'
-export default {
-  name: 'CarCard',
-  computed: { ...mapGetters(['isAdmin']) },
-  props: {
-    car: {
-      type: Object,
-      default: () => ({}),
-    },
-    cars: {
-      type: Array,
-      default: () => ([]),
-    },
-  },
-  methods: {
-    uploadImage: function() {
-      this.image = this.$refs.inputFile.files[0];
-    },
-    deleteCar: function(id) {
-      this.$axios.$delete(`cars/${id}`)
-      const index = this.cars.findIndex((i) => { return i.id === id })
-      this.cars.splice(index, 1);
-    }
-  }
-}
-</script>
-~
-EOF
-cat <<'EOF' | puravida components/car/Set.vue ~
-<template>
-  <section>
-    <div v-for="car in cars" :key="car.id">
-      <CarCard :car="car" :cars="cars" />
-    </div>
-  </section>
-</template>
+# <script>
+# import { mapGetters } from 'vuex'
+# export default {
+#   name: 'CarCard',
+#   computed: { ...mapGetters(['isAdmin']) },
+#   props: {
+#     car: {
+#       type: Object,
+#       default: () => ({}),
+#     },
+#     cars: {
+#       type: Array,
+#       default: () => ([]),
+#     },
+#   },
+#   methods: {
+#     uploadImage: function() {
+#       this.image = this.$refs.inputFile.files[0];
+#     },
+#     deleteCar: function(id) {
+#       this.$axios.$delete(`cars/${id}`)
+#       const index = this.cars.findIndex((i) => { return i.id === id })
+#       this.cars.splice(index, 1);
+#     }
+#   }
+# }
+# </script>
+# ~
+# EOF
+# cat <<'EOF' | puravida components/car/Set.vue ~
+# <template>
+#   <section>
+#     <div v-for="car in cars" :key="car.id">
+#       <CarCard :car="car" :cars="cars" />
+#     </div>
+#   </section>
+# </template>
 
-<script>
-import { mapGetters } from 'vuex'
-export default {
-  computed: { ...mapGetters(['isAuthenticated', 'isAdmin', 'loggedInUser']) }, 
-  data: () => ({
-    cars: []
-  }),
-  async fetch() {
-    const query = this.$store.$auth.ctx.query
-    const adminQuery = query.admin
-    const idQuery = query.user_id
+# <script>
+# import { mapGetters } from 'vuex'
+# export default {
+#   computed: { ...mapGetters(['isAuthenticated', 'isAdmin', 'loggedInUser']) }, 
+#   data: () => ({
+#     cars: []
+#   }),
+#   async fetch() {
+#     const query = this.$store.$auth.ctx.query
+#     const adminQuery = query.admin
+#     const idQuery = query.user_id
     
-    if (this.isAdmin && adminQuery) {
-      this.cars = await this.$axios.$get('cars')
-    } else if (idQuery) {
-      this.cars = await this.$axios.$get('cars', {
-        params: { user_id: idQuery }
-      })
-    } else {
-      this.cars = await this.$axios.$get('cars', {
-        params: { user_id: this.loggedInUser.id }
-      })
-    }
-  }
-}
-</script>
-~
-EOF
+#     if (this.isAdmin && adminQuery) {
+#       this.cars = await this.$axios.$get('cars')
+#     } else if (idQuery) {
+#       this.cars = await this.$axios.$get('cars', {
+#         params: { user_id: idQuery }
+#       })
+#     } else {
+#       this.cars = await this.$axios.$get('cars', {
+#         params: { user_id: this.loggedInUser.id }
+#       })
+#     }
+#   }
+# }
+# </script>
+# ~
+# EOF
 
-cat <<'EOF' | puravida components/car/Form.vue ~
-<template>
-  <section>
-    <h1 v-if="editOrNew === 'edit'">Edit Car</h1>
-    <h1 v-else-if="editOrNew === 'new'">Add Car</h1>
-    <article>
-      <form enctype="multipart/form-data">
-        <p v-if="editOrNew === 'edit'">id: {{ $route.params.id }}</p>
-        <p>Name: </p><input v-model="name">
-        <p class="no-margin">Image: </p>
-        <img v-if="!hideImage && editOrNew === 'edit'" :src="image" />    
-        <input type="file" ref="inputFile" @change=uploadImage()>
-        <p>year: </p><input v-model="year">
-        <p>make: </p><input v-model="make">
-        <p>model: </p><input v-model="model">
-        <p>trim: </p><input v-model="trim">
-        <p>body: </p><input v-model="body">
-        <p>color: </p><input v-model="color">
-        <p>plate: </p><input v-model="plate">
-        <p>vin: </p><input v-model="vin">
-        <p>cost: </p><input v-model="cost">
-        <p>initial_mileage: </p><input v-model="initial_mileage">
-        <p>purchase_date: </p><input v-model="purchase_date">
-        <p>purchase_vendor: </p><input v-model="purchase_vendor">
-        <button v-if="editOrNew !== 'edit'" @click.prevent=createCar>Create Car</button>
-        <button v-else-if="editOrNew == 'edit'" @click.prevent=editCar>Edit Car</button>
-      </form>
-    </article>
-  </section>
-</template>
+# cat <<'EOF' | puravida components/car/Form.vue ~
+# <template>
+#   <section>
+#     <h1 v-if="editOrNew === 'edit'">Edit Car</h1>
+#     <h1 v-else-if="editOrNew === 'new'">Add Car</h1>
+#     <article>
+#       <form enctype="multipart/form-data">
+#         <p v-if="editOrNew === 'edit'">id: {{ $route.params.id }}</p>
+#         <p>Name: </p><input v-model="name">
+#         <p class="no-margin">Image: </p>
+#         <img v-if="!hideImage && editOrNew === 'edit'" :src="image" />    
+#         <input type="file" ref="inputFile" @change=uploadImage()>
+#         <p>year: </p><input v-model="year">
+#         <p>make: </p><input v-model="make">
+#         <p>model: </p><input v-model="model">
+#         <p>trim: </p><input v-model="trim">
+#         <p>body: </p><input v-model="body">
+#         <p>color: </p><input v-model="color">
+#         <p>plate: </p><input v-model="plate">
+#         <p>vin: </p><input v-model="vin">
+#         <p>cost: </p><input v-model="cost">
+#         <p>initial_mileage: </p><input v-model="initial_mileage">
+#         <p>purchase_date: </p><input v-model="purchase_date">
+#         <p>purchase_vendor: </p><input v-model="purchase_vendor">
+#         <button v-if="editOrNew !== 'edit'" @click.prevent=createCar>Create Car</button>
+#         <button v-else-if="editOrNew == 'edit'" @click.prevent=editCar>Edit Car</button>
+#       </form>
+#     </article>
+#   </section>
+# </template>
 
-<script>
-import { mapGetters } from 'vuex'
-export default {
-  data () {
-    return {
-      name: "",
-      description: "",
-      image: "",
-      year: "",
-      make: "",
-      model: "",
-      trim: "",
-      body: "",
-      color: "",
-      plate: "",
-      vin: "",
-      cost: "",
-      initial_mileage: "",
-      purchase_date: "",
-      purchase_vendor: "",
-      editOrNew: "",
-      hideImage: false
-    }
-  },
-  mounted() {
-    const splitPath = $nuxt.$route.path.split('/')
-    this.editOrNew = splitPath[splitPath.length-1]
-  },
-  computed: {
-    ...mapGetters(['isAuthenticated', 'isAdmin', 'loggedInUser`']),
-  },
-  async fetch() {
-    const splitPath = $nuxt.$route.path.split('/')
-    this.editOrNew = $nuxt.$route.path.split('/')[$nuxt.$route.path.split('/').length-1]
-    if ($nuxt.$route.path.split('/')[$nuxt.$route.path.split('/').length-1]=='edit') {
-      const car = await this.$axios.$get(`cars/${this.$route.params.id}`)
-      this.name = car.name
-      this.image = car.image
-      this.year = car.year
-      this.make = car.make
-      this.model = car.model
-      this.trim = car.trim
-      this.body = car.body
-      this.color = car.color
-      this.plate = car.plate
-      this.vin = car.vin
-      this.cost = car.cost
-      this.initial_mileage = car.initial_mileage
-      this.purchase_date = car.purchase_date
-      this.purchase_vendor = car.purchase_vendor
-    }
-  },
-  methods: {
-    uploadImage: function() {
-      this.image = this.$refs.inputFile.files[0]
-      this.hideImage = true
-    },
-    createCar: function() {
-      const userId = this.$auth.$state.user.id
-      const params = {
-        'name': this.name,
-        'image': this.image,
-        'year': this.year,
-        'make': this.make,
-        'model': this.model,
-        'trim': this.trim,
-        'body': this.body,
-        'color': this.color,
-        'plate': this.plate,
-        'vin': this.vin,
-        'cost': this.cost,
-        'initial_mileage': this.initial_mileage,
-        'purchase_date': this.purchase_date,
-        'purchase_vendor': this.purchase_vendor,
-        'user_id': userId
-      }
-      let payload = new FormData()
-      Object.entries(params).forEach(
-        ([key, value]) => payload.append(key, value)
-      )
-      this.$axios.$post('cars', payload)
-        .then((res) => {
-          const carId = res.id
-          this.$router.push(`/cars/${carId}`)
-        })
-    },
-    editCar: function() {
-      let params = {}
-      const filePickerFile = this.$refs.inputFile.files[0]
-      if (!filePickerFile) {
-        params = { 'name': this.name, 'description': this.description }
-      } else {
-        params = { 'name': this.name, 'description': this.description, 'image': this.image }
-      }
+# <script>
+# import { mapGetters } from 'vuex'
+# export default {
+#   data () {
+#     return {
+#       name: "",
+#       description: "",
+#       image: "",
+#       year: "",
+#       make: "",
+#       model: "",
+#       trim: "",
+#       body: "",
+#       color: "",
+#       plate: "",
+#       vin: "",
+#       cost: "",
+#       initial_mileage: "",
+#       purchase_date: "",
+#       purchase_vendor: "",
+#       editOrNew: "",
+#       hideImage: false
+#     }
+#   },
+#   mounted() {
+#     const splitPath = $nuxt.$route.path.split('/')
+#     this.editOrNew = splitPath[splitPath.length-1]
+#   },
+#   computed: {
+#     ...mapGetters(['isAuthenticated', 'isAdmin', 'loggedInUser`']),
+#   },
+#   async fetch() {
+#     const splitPath = $nuxt.$route.path.split('/')
+#     this.editOrNew = $nuxt.$route.path.split('/')[$nuxt.$route.path.split('/').length-1]
+#     if ($nuxt.$route.path.split('/')[$nuxt.$route.path.split('/').length-1]=='edit') {
+#       const car = await this.$axios.$get(`cars/${this.$route.params.id}`)
+#       this.name = car.name
+#       this.image = car.image
+#       this.year = car.year
+#       this.make = car.make
+#       this.model = car.model
+#       this.trim = car.trim
+#       this.body = car.body
+#       this.color = car.color
+#       this.plate = car.plate
+#       this.vin = car.vin
+#       this.cost = car.cost
+#       this.initial_mileage = car.initial_mileage
+#       this.purchase_date = car.purchase_date
+#       this.purchase_vendor = car.purchase_vendor
+#     }
+#   },
+#   methods: {
+#     uploadImage: function() {
+#       this.image = this.$refs.inputFile.files[0]
+#       this.hideImage = true
+#     },
+#     createCar: function() {
+#       const userId = this.$auth.$state.user.id
+#       const params = {
+#         'name': this.name,
+#         'image': this.image,
+#         'year': this.year,
+#         'make': this.make,
+#         'model': this.model,
+#         'trim': this.trim,
+#         'body': this.body,
+#         'color': this.color,
+#         'plate': this.plate,
+#         'vin': this.vin,
+#         'cost': this.cost,
+#         'initial_mileage': this.initial_mileage,
+#         'purchase_date': this.purchase_date,
+#         'purchase_vendor': this.purchase_vendor,
+#         'user_id': userId
+#       }
+#       let payload = new FormData()
+#       Object.entries(params).forEach(
+#         ([key, value]) => payload.append(key, value)
+#       )
+#       this.$axios.$post('cars', payload)
+#         .then((res) => {
+#           const carId = res.id
+#           this.$router.push(`/cars/${carId}`)
+#         })
+#     },
+#     editCar: function() {
+#       let params = {}
+#       const filePickerFile = this.$refs.inputFile.files[0]
+#       if (!filePickerFile) {
+#         params = { 'name': this.name, 'description': this.description }
+#       } else {
+#         params = { 'name': this.name, 'description': this.description, 'image': this.image }
+#       }
     
-      let payload = new FormData()
-      Object.entries(params).forEach(
-        ([key, value]) => payload.append(key, value)
-      )
-      this.$axios.$patch(`/cars/${this.$route.params.id}`, payload)
-        .then(() => {
-          this.$router.push(`/cars/${this.$route.params.id}`)
-        })
-    },
-  }
-}
-</script>
-~
-EOF
+#       let payload = new FormData()
+#       Object.entries(params).forEach(
+#         ([key, value]) => payload.append(key, value)
+#       )
+#       this.$axios.$patch(`/cars/${this.$route.params.id}`, payload)
+#         .then(() => {
+#           this.$router.push(`/cars/${this.$route.params.id}`)
+#         })
+#     },
+#   }
+# }
+# </script>
+# ~
+# EOF
 
 
-cat <<'EOF' | puravida pages/cars/index.vue ~
-<template>
-  <main class="container">
-    <h1>Cars</h1>
-    <NuxtLink to="/cars/new" role="button">Add Car</NuxtLink>
-    <CarSet />
-  </main>
-</template>
-<script>
-export default { middleware: 'currentOrAdmin-index' }
-</script>
-~
-EOF
+# cat <<'EOF' | puravida pages/cars/index.vue ~
+# <template>
+#   <main class="container">
+#     <h1>Cars</h1>
+#     <NuxtLink to="/cars/new" role="button">Add Car</NuxtLink>
+#     <CarSet />
+#   </main>
+# </template>
+# <script>
+# export default { middleware: 'currentOrAdmin-index' }
+# </script>
+# ~
+# EOF
 
-cat <<'EOF' | puravida pages/cars/new.vue ~
-<template>
-  <main class="container">
-    <CarForm />
-  </main>
-</template>
-~
-EOF
+# cat <<'EOF' | puravida pages/cars/new.vue ~
+# <template>
+#   <main class="container">
+#     <CarForm />
+#   </main>
+# </template>
+# ~
+# EOF
 
-cat <<'EOF' | puravida pages/cars/_id/index.vue ~
-<template>
-  <main class="container">
-    <section>
-      <CarCard :car="car" />
-    </section>
-  </main>
-</template>
+# cat <<'EOF' | puravida pages/cars/_id/index.vue ~
+# <template>
+#   <main class="container">
+#     <section>
+#       <CarCard :car="car" />
+#     </section>
+#   </main>
+# </template>
 
-<script>
-export default {
-  middleware: 'currentOrAdmin-showEdit',
-  data: () => ({ car: {} }),
-  async fetch() { this.car = await this.$axios.$get(`cars/${this.$route.params.id}`) },
-  methods: {
-    uploadImage: function() { this.image = this.$refs.inputFile.files[0] },
-    deleteCar: function(id) {
-      this.$axios.$delete(`cars/${this.$route.params.id}`)
-      this.$router.push('/cars')
-    }
-  }
-}
-</script>
-~
-EOF
+# <script>
+# export default {
+#   middleware: 'currentOrAdmin-showEdit',
+#   data: () => ({ car: {} }),
+#   async fetch() { this.car = await this.$axios.$get(`cars/${this.$route.params.id}`) },
+#   methods: {
+#     uploadImage: function() { this.image = this.$refs.inputFile.files[0] },
+#     deleteCar: function(id) {
+#       this.$axios.$delete(`cars/${this.$route.params.id}`)
+#       this.$router.push('/cars')
+#     }
+#   }
+# }
+# </script>
+# ~
+# EOF
 
-cat <<'EOF' | puravida pages/cars/_id/edit.vue ~
-<template>
-  <main class="container">
-    <CarForm />
-  </main>
-</template>
+# cat <<'EOF' | puravida pages/cars/_id/edit.vue ~
+# <template>
+#   <main class="container">
+#     <CarForm />
+#   </main>
+# </template>
 
-<script>
-export default { middleware: 'currentOrAdmin-showEdit' }
-</script>
-~
-EOF
+# <script>
+# export default { middleware: 'currentOrAdmin-showEdit' }
+# </script>
+# ~
+# EOF
 
-echo -e "\n\n🦄 Maintenances (frontend)\n\n"
-cat <<'EOF' | puravida components/maintenance/Card.vue ~
-<template>
-  <article>
-    <h2>
-      <NuxtLink :to="`/maintenances/${maintenance.id}`">{{ maintenance.description }}</NuxtLink> 
-      <NuxtLink :to="`/maintenances/${maintenance.id}/edit`"><font-awesome-icon icon="pencil" /></NuxtLink>
-      <a @click.prevent=deleteCar(maintenance.id) href="#"><font-awesome-icon icon="trash" /></a>
-    </h2>
-    <p>id: {{ maintenance.id }}</p>
-    <p>date: {{ maintenance.date }}</p>
-    <p>description: {{ maintenance.description }}</p>
-    <p>vendor: {{ maintenance.vendor }}</p>
-    <p>cost: {{ maintenance.cost }}</p>
-    <p v-if="maintenance.images !== null" class="no-margin">images:</p>
-    <div v-if="maintenance.images !== null" :src="maintenance.image">
-      <div v-for="image in maintenance.images" :key="image">
-        <img :src="image" />
-      </div>
-    </div>
-    <p>car: <NuxtLink :to="`/cars/${maintenance.carId}`">{{ maintenance.carName }}</NuxtLink></p>
-  </article>
-</template>
+# echo -e "\n\n🦄 Maintenances (frontend)\n\n"
+# cat <<'EOF' | puravida components/maintenance/Card.vue ~
+# <template>
+#   <article>
+#     <h2>
+#       <NuxtLink :to="`/maintenances/${maintenance.id}`">{{ maintenance.description }}</NuxtLink> 
+#       <NuxtLink :to="`/maintenances/${maintenance.id}/edit`"><font-awesome-icon icon="pencil" /></NuxtLink>
+#       <a @click.prevent=deleteCar(maintenance.id) href="#"><font-awesome-icon icon="trash" /></a>
+#     </h2>
+#     <p>id: {{ maintenance.id }}</p>
+#     <p>date: {{ maintenance.date }}</p>
+#     <p>description: {{ maintenance.description }}</p>
+#     <p>vendor: {{ maintenance.vendor }}</p>
+#     <p>cost: {{ maintenance.cost }}</p>
+#     <p v-if="maintenance.images !== null" class="no-margin">images:</p>
+#     <div v-if="maintenance.images !== null" :src="maintenance.image">
+#       <div v-for="image in maintenance.images" :key="image">
+#         <img :src="image" />
+#       </div>
+#     </div>
+#     <p>car: <NuxtLink :to="`/cars/${maintenance.carId}`">{{ maintenance.carName }}</NuxtLink></p>
+#   </article>
+# </template>
 
-<script>
-import { mapGetters } from 'vuex'
-export default {
-  name: 'MaintenanceCard',
-  computed: { ...mapGetters(['isAdmin']) },
-  props: {
-    maintenance: {
-      type: Object,
-      default: () => ({}),
-    },
-    maintenances: {
-      type: Array,
-      default: () => ([]),
-    },
-  },
-  methods: {
-    uploadImage: function() {
-      this.image = this.$refs.inputFile.files[0];
-    },
-    deleteMaintenance: function(id) {
-      this.$axios.$delete(`maintenances/${id}`)
-      const index = this.maintenances.findIndex((i) => { return i.id === id })
-      this.maintenances.splice(index, 1);
-    }
-  }
-}
-</script>
-~
-EOF
-cat <<'EOF' | puravida components/maintenance/Set.vue ~
-<template>
-  <section>
-    <div v-for="maintenance in maintenances" :key="maintenance.id">
-      <MaintenanceCard :maintenance="maintenance" :maintenances= "maintenances" />
-    </div>
-  </section>
-</template>
+# <script>
+# import { mapGetters } from 'vuex'
+# export default {
+#   name: 'MaintenanceCard',
+#   computed: { ...mapGetters(['isAdmin']) },
+#   props: {
+#     maintenance: {
+#       type: Object,
+#       default: () => ({}),
+#     },
+#     maintenances: {
+#       type: Array,
+#       default: () => ([]),
+#     },
+#   },
+#   methods: {
+#     uploadImage: function() {
+#       this.image = this.$refs.inputFile.files[0];
+#     },
+#     deleteMaintenance: function(id) {
+#       this.$axios.$delete(`maintenances/${id}`)
+#       const index = this.maintenances.findIndex((i) => { return i.id === id })
+#       this.maintenances.splice(index, 1);
+#     }
+#   }
+# }
+# </script>
+# ~
+# EOF
+# cat <<'EOF' | puravida components/maintenance/Set.vue ~
+# <template>
+#   <section>
+#     <div v-for="maintenance in maintenances" :key="maintenance.id">
+#       <MaintenanceCard :maintenance="maintenance" :maintenances= "maintenances" />
+#     </div>
+#   </section>
+# </template>
 
-<script>
-import { mapGetters } from 'vuex'
-export default {
-  computed: { ...mapGetters(['isAuthenticated', 'isAdmin', 'loggedInUser']) }, 
-  data: () => ({
-    maintenances: []
-  }),
-  async fetch() {
-    const query = this.$store.$auth.ctx.query
-    const adminQuery = query.admin
-    const idQuery = query.user_id
+# <script>
+# import { mapGetters } from 'vuex'
+# export default {
+#   computed: { ...mapGetters(['isAuthenticated', 'isAdmin', 'loggedInUser']) }, 
+#   data: () => ({
+#     maintenances: []
+#   }),
+#   async fetch() {
+#     const query = this.$store.$auth.ctx.query
+#     const adminQuery = query.admin
+#     const idQuery = query.user_id
     
-    if (this.isAdmin && adminQuery) {
-      this.maintenances = await this.$axios.$get('maintenances')
-    } else if (idQuery) {
-      this.maintenances = await this.$axios.$get('maintenances', {
-        params: { user_id: idQuery }
-      })
-    } else {
-      this.maintenances = await this.$axios.$get('maintenances', {
-        params: { user_id: this.loggedInUser.id }
-      })
-    }
-  }
-}
-</script>
-~
-EOF
-cat <<'EOF' | puravida components/maintenance/Form.vue ~
-<template>
-  <section>
-    <h1 v-if="editOrNew === 'edit'">Edit Maintenance</h1>
-    <h1 v-else-if="editOrNew === 'new'">Add Maintenance</h1>
-    <article>
-      <form enctype="multipart/form-data">
-        <p v-if="editOrNew === 'edit'">id: {{ $route.params.id }}</p>
-        <p>Date: </p><input v-model="date">
-        <p>Description: </p><input v-model="description">
-        <p>Vendor: </p><input v-model="vendor">
-        <p>Cost: </p><input v-model="cost">
-        <p class="no-margin">Image: </p>
-        <img v-if="!hideImage && editOrNew === 'edit'" :src="image" />    
-        <input type="file" ref="inputFile" @change=uploadImage()>
-        <p>Car Id: {{ carId }}</p>
-        <select v-if="editOrNew === 'new'" name="car" @change="selectCar($event)">
-          <option value=""></option>
-          <option v-for="car in cars" :key="car.id" :value="car.id">{{ car.name }} - {{ car.description }}</option>
-        </select>
-        <button v-if="editOrNew !== 'edit'" @click.prevent=createMaintenance>Create Maintenance</button>
-        <button v-else-if="editOrNew == 'edit'" @click.prevent=editMaintenance>Edit Maintenance</button>
-      </form>
-    </article>
-  </section>
-</template>
+#     if (this.isAdmin && adminQuery) {
+#       this.maintenances = await this.$axios.$get('maintenances')
+#     } else if (idQuery) {
+#       this.maintenances = await this.$axios.$get('maintenances', {
+#         params: { user_id: idQuery }
+#       })
+#     } else {
+#       this.maintenances = await this.$axios.$get('maintenances', {
+#         params: { user_id: this.loggedInUser.id }
+#       })
+#     }
+#   }
+# }
+# </script>
+# ~
+# EOF
+# cat <<'EOF' | puravida components/maintenance/Form.vue ~
+# <template>
+#   <section>
+#     <h1 v-if="editOrNew === 'edit'">Edit Maintenance</h1>
+#     <h1 v-else-if="editOrNew === 'new'">Add Maintenance</h1>
+#     <article>
+#       <form enctype="multipart/form-data">
+#         <p v-if="editOrNew === 'edit'">id: {{ $route.params.id }}</p>
+#         <p>Date: </p><input v-model="date">
+#         <p>Description: </p><input v-model="description">
+#         <p>Vendor: </p><input v-model="vendor">
+#         <p>Cost: </p><input v-model="cost">
+#         <p class="no-margin">Image: </p>
+#         <img v-if="!hideImage && editOrNew === 'edit'" :src="image" />    
+#         <input type="file" ref="inputFile" @change=uploadImage()>
+#         <p>Car Id: {{ carId }}</p>
+#         <select v-if="editOrNew === 'new'" name="car" @change="selectCar($event)">
+#           <option value=""></option>
+#           <option v-for="car in cars" :key="car.id" :value="car.id">{{ car.name }} - {{ car.description }}</option>
+#         </select>
+#         <button v-if="editOrNew !== 'edit'" @click.prevent=createMaintenance>Create Maintenance</button>
+#         <button v-else-if="editOrNew == 'edit'" @click.prevent=editMaintenance>Edit Maintenance</button>
+#       </form>
+#     </article>
+#   </section>
+# </template>
 
-<script>
-import { mapGetters } from 'vuex'
-export default {
-  data () {
-    return {
-      date: "",
-      description: "",
-      vendor: "",
-      cost: "",
-      image: "",
-      editOrNew: "",
-      hideImage: false,
-      cars: [],
-      carId: ""
-    }
-  },
-  mounted() {
-    const splitPath = $nuxt.$route.path.split('/')
-    this.editOrNew = splitPath[splitPath.length-1]
-  },
-  computed: {
-    ...mapGetters(['isAuthenticated', 'isAdmin', 'loggedInUser`']),
-  },
-  async fetch() {
-    const splitPath = $nuxt.$route.path.split('/')
-    this.editOrNew = $nuxt.$route.path.split('/')[$nuxt.$route.path.split('/').length-1]
-    if ($nuxt.$route.path.split('/')[$nuxt.$route.path.split('/').length-1]=='edit') {
-      const maintenance = await this.$axios.$get(`maintenances/${this.$route.params.id}`)
-      console.log(maintenance)
-      this.date = maintenance.date
-      this.description = maintenance.description,
-      this.vendor = maintenance.vendor
-      this.cost = maintenance.cost
-      this.image = maintenance.image
-      this.carId = maintenance.carId 
-    }
-    if (this.editOrNew == 'new') {
-      this.cars = await this.$axios.$get('/cars', {
-        params: { user_id: this.$auth.$state.user.id }
-      })
-    }
-  },
-  methods: {
-    uploadImage: function() {
-      this.image = this.$refs.inputFile.files[0]
-      this.hideImage = true
-    },
-    createMaintenance: function() {
-      const params = {
-        'date': this.date,
-        'description': this.description,
-        'vendor': this.vendor,
-        'cost': this.cost,
-        'image': this.image,
-        'car_id': this.carId
-      }
-      let payload = new FormData()
-      Object.entries(params).forEach(
-        ([key, value]) => payload.append(key, value)
-      )
-      this.$axios.$post('maintenances', payload)
-        .then((res) => {
-          const maintenanceId = res.id
-          this.$router.push(`/maintenances/${maintenanceId}`)
-        })
-    },
-    editMaintenance: function() {
-      let params = {}
-      const filePickerFile = this.$refs.inputFile.files[0]
-      if (!filePickerFile) {
-        params = { 'name': this.name, 'date': this.date, 'description': this.description, 'vendor': this.vendor, 'cost': this.cost }
-      } else {
-        params = { 'name': this.name, 'date': this.date, 'description': this.description, 'vendor': this.vendor, 'cost': this.cost, 'image': this.image }
-      } 
-      let payload = new FormData()
-      Object.entries(params).forEach(
-        ([key, value]) => payload.append(key, value)
-      )
-      this.$axios.$patch(`/maintenances/${this.$route.params.id}`, payload)
-        .then(() => {
-          this.$router.push(`/maintenances/${this.$route.params.id}`)
-        })
-    },
-    selectCar: function(event) {
-      this.carId = event.target.value
-    }
-  }
-}
-</script>
-~
-EOF
-cat <<'EOF' | puravida pages/maintenances/index.vue ~
-<template>
-  <main class="container">
-    <h1>Maintenances</h1>
-    <NuxtLink to="/maintenances/new" role="button">Add Maintenance</NuxtLink>
-    <MaintenanceSet />
-  </main>
-</template>
-<script>
-export default { middleware: 'currentOrAdmin-index' }
-</script>
-~
-EOF
-cat <<'EOF' | puravida pages/maintenances/new.vue ~
-<template>
-  <main class="container">
-    <MaintenanceForm />
-  </main>
-</template>
-~
-EOF
-cat <<'EOF' | puravida pages/maintenances/_id/index.vue ~
-<template>
-  <main class="container">
-    <section>
-      <MaintenanceCard :maintenance="maintenance" />
-    </section>
-  </main>
-</template>
+# <script>
+# import { mapGetters } from 'vuex'
+# export default {
+#   data () {
+#     return {
+#       date: "",
+#       description: "",
+#       vendor: "",
+#       cost: "",
+#       image: "",
+#       editOrNew: "",
+#       hideImage: false,
+#       cars: [],
+#       carId: ""
+#     }
+#   },
+#   mounted() {
+#     const splitPath = $nuxt.$route.path.split('/')
+#     this.editOrNew = splitPath[splitPath.length-1]
+#   },
+#   computed: {
+#     ...mapGetters(['isAuthenticated', 'isAdmin', 'loggedInUser`']),
+#   },
+#   async fetch() {
+#     const splitPath = $nuxt.$route.path.split('/')
+#     this.editOrNew = $nuxt.$route.path.split('/')[$nuxt.$route.path.split('/').length-1]
+#     if ($nuxt.$route.path.split('/')[$nuxt.$route.path.split('/').length-1]=='edit') {
+#       const maintenance = await this.$axios.$get(`maintenances/${this.$route.params.id}`)
+#       console.log(maintenance)
+#       this.date = maintenance.date
+#       this.description = maintenance.description,
+#       this.vendor = maintenance.vendor
+#       this.cost = maintenance.cost
+#       this.image = maintenance.image
+#       this.carId = maintenance.carId 
+#     }
+#     if (this.editOrNew == 'new') {
+#       this.cars = await this.$axios.$get('/cars', {
+#         params: { user_id: this.$auth.$state.user.id }
+#       })
+#     }
+#   },
+#   methods: {
+#     uploadImage: function() {
+#       this.image = this.$refs.inputFile.files[0]
+#       this.hideImage = true
+#     },
+#     createMaintenance: function() {
+#       const params = {
+#         'date': this.date,
+#         'description': this.description,
+#         'vendor': this.vendor,
+#         'cost': this.cost,
+#         'image': this.image,
+#         'car_id': this.carId
+#       }
+#       let payload = new FormData()
+#       Object.entries(params).forEach(
+#         ([key, value]) => payload.append(key, value)
+#       )
+#       this.$axios.$post('maintenances', payload)
+#         .then((res) => {
+#           const maintenanceId = res.id
+#           this.$router.push(`/maintenances/${maintenanceId}`)
+#         })
+#     },
+#     editMaintenance: function() {
+#       let params = {}
+#       const filePickerFile = this.$refs.inputFile.files[0]
+#       if (!filePickerFile) {
+#         params = { 'name': this.name, 'date': this.date, 'description': this.description, 'vendor': this.vendor, 'cost': this.cost }
+#       } else {
+#         params = { 'name': this.name, 'date': this.date, 'description': this.description, 'vendor': this.vendor, 'cost': this.cost, 'image': this.image }
+#       } 
+#       let payload = new FormData()
+#       Object.entries(params).forEach(
+#         ([key, value]) => payload.append(key, value)
+#       )
+#       this.$axios.$patch(`/maintenances/${this.$route.params.id}`, payload)
+#         .then(() => {
+#           this.$router.push(`/maintenances/${this.$route.params.id}`)
+#         })
+#     },
+#     selectCar: function(event) {
+#       this.carId = event.target.value
+#     }
+#   }
+# }
+# </script>
+# ~
+# EOF
+# cat <<'EOF' | puravida pages/maintenances/index.vue ~
+# <template>
+#   <main class="container">
+#     <h1>Maintenances</h1>
+#     <NuxtLink to="/maintenances/new" role="button">Add Maintenance</NuxtLink>
+#     <MaintenanceSet />
+#   </main>
+# </template>
+# <script>
+# export default { middleware: 'currentOrAdmin-index' }
+# </script>
+# ~
+# EOF
+# cat <<'EOF' | puravida pages/maintenances/new.vue ~
+# <template>
+#   <main class="container">
+#     <MaintenanceForm />
+#   </main>
+# </template>
+# ~
+# EOF
+# cat <<'EOF' | puravida pages/maintenances/_id/index.vue ~
+# <template>
+#   <main class="container">
+#     <section>
+#       <MaintenanceCard :maintenance="maintenance" />
+#     </section>
+#   </main>
+# </template>
 
-<script>
-export default {
-  middleware: 'currentOrAdmin-showEdit',
-  data: () => ({ maintenance: {} }),
-  async fetch() { this.maintenance = await this.$axios.$get(`maintenances/${this.$route.params.id}`) },
-  methods: {
-    uploadImage: function() { this.image = this.$refs.inputFile.files[0] },
-    deleteMaintenance: function(id) {
-      this.$axios.$delete(`maintenances/${this.$route.params.id}`)
-      this.$router.push('/maintenances')
-    }
-  }
-}
-</script>
-~
-EOF
-cat <<'EOF' | puravida pages/maintenances/_id/edit.vue ~
-<template>
-  <main class="container">
-    <MaintenanceForm />
-  </main>
-</template>
+# <script>
+# export default {
+#   middleware: 'currentOrAdmin-showEdit',
+#   data: () => ({ maintenance: {} }),
+#   async fetch() { this.maintenance = await this.$axios.$get(`maintenances/${this.$route.params.id}`) },
+#   methods: {
+#     uploadImage: function() { this.image = this.$refs.inputFile.files[0] },
+#     deleteMaintenance: function(id) {
+#       this.$axios.$delete(`maintenances/${this.$route.params.id}`)
+#       this.$router.push('/maintenances')
+#     }
+#   }
+# }
+# </script>
+# ~
+# EOF
+# cat <<'EOF' | puravida pages/maintenances/_id/edit.vue ~
+# <template>
+#   <main class="container">
+#     <MaintenanceForm />
+#   </main>
+# </template>
 
-<script>
-export default { middleware: 'currentOrAdmin-showEdit' }
-</script>
-~
-EOF
-
-
+# <script>
+# export default { middleware: 'currentOrAdmin-showEdit' }
+# </script>
+# ~
+# EOF
 
 
-echo -e "\n\n🦄 Documents (frontend)\n\n"
-cat <<'EOF' | puravida components/document/Card.vue ~
-<template>
-  <article>
-    <h2>
-      <NuxtLink :to="`/documents/${document.id}`">{{ document.name }}</NuxtLink> 
-      <NuxtLink :to="`/documents/${document.id}/edit`"><font-awesome-icon icon="pencil" /></NuxtLink>
-      <a @click.prevent=deleteCar(document.id) href="#"><font-awesome-icon icon="trash" /></a>
-    </h2>
-    <p>id: {{ document.id }}</p>
-    <p>date: {{ document.date }}</p>
-    <p>notes: {{ document.notes }}</p>
-    <p>attachment: <a :href="document.attachment">{{ document.attachmentFile }}</a></p>
-    <p v-if="document.hasOwnProperty('maintenanceDescription')">maintenance: <NuxtLink :to="`/maintenances/${document.maintenanceId}`">{{ document.maintenanceDescription }}</NuxtLink></p>
-    <p>car: <NuxtLink :to="`/cars/${document.carId}`">{{ document.carName }}</NuxtLink></p>
-  </article>
-</template>
 
-<script>
-import { mapGetters } from 'vuex'
-export default {
-  name: 'DocumentCard',
-  props: {
-    document: {
-      type: Object,
-      default: () => ({}),
-    },
-    documents: {
-      type: Array,
-      default: () => ([]),
-    },
-  },
-  computed: { ...mapGetters(['isAdmin']) },
-  methods: {
-    uploadImage: function() {
-      this.image = this.$refs.inputFile.files[0];
-    },
-    deleteDocument: function(id) {
-      this.$axios.$delete(`documents/${id}`)
-      const index = this.documents.findIndex((i) => { return i.id === id })
-      this.documents.splice(index, 1);
-    }
+
+# echo -e "\n\n🦄 Documents (frontend)\n\n"
+# cat <<'EOF' | puravida components/document/Card.vue ~
+# <template>
+#   <article>
+#     <h2>
+#       <NuxtLink :to="`/documents/${document.id}`">{{ document.name }}</NuxtLink> 
+#       <NuxtLink :to="`/documents/${document.id}/edit`"><font-awesome-icon icon="pencil" /></NuxtLink>
+#       <a @click.prevent=deleteCar(document.id) href="#"><font-awesome-icon icon="trash" /></a>
+#     </h2>
+#     <p>id: {{ document.id }}</p>
+#     <p>date: {{ document.date }}</p>
+#     <p>notes: {{ document.notes }}</p>
+#     <p>attachment: <a :href="document.attachment">{{ document.attachmentFile }}</a></p>
+#     <p v-if="document.hasOwnProperty('maintenanceDescription')">maintenance: <NuxtLink :to="`/maintenances/${document.maintenanceId}`">{{ document.maintenanceDescription }}</NuxtLink></p>
+#     <p>car: <NuxtLink :to="`/cars/${document.carId}`">{{ document.carName }}</NuxtLink></p>
+#   </article>
+# </template>
+
+# <script>
+# import { mapGetters } from 'vuex'
+# export default {
+#   name: 'DocumentCard',
+#   props: {
+#     document: {
+#       type: Object,
+#       default: () => ({}),
+#     },
+#     documents: {
+#       type: Array,
+#       default: () => ([]),
+#     },
+#   },
+#   computed: { ...mapGetters(['isAdmin']) },
+#   methods: {
+#     uploadImage: function() {
+#       this.image = this.$refs.inputFile.files[0];
+#     },
+#     deleteDocument: function(id) {
+#       this.$axios.$delete(`documents/${id}`)
+#       const index = this.documents.findIndex((i) => { return i.id === id })
+#       this.documents.splice(index, 1);
+#     }
     
-  }
-}
-</script>
-~
-EOF
+#   }
+# }
+# </script>
+# ~
+# EOF
 
-cat <<'EOF' | puravida components/document/Set.vue ~
-<template>
-  <section>
-    <div v-for="document in documents" :key="document.id">
-      <DocumentCard :document="document" :documents= "documents" />
-    </div>
-  </section>
-</template>
+# cat <<'EOF' | puravida components/document/Set.vue ~
+# <template>
+#   <section>
+#     <div v-for="document in documents" :key="document.id">
+#       <DocumentCard :document="document" :documents= "documents" />
+#     </div>
+#   </section>
+# </template>
 
-<script>
-import { mapGetters } from 'vuex'
-export default {
-  computed: { ...mapGetters(['isAuthenticated', 'isAdmin', 'loggedInUser']) }, 
-  data: () => ({
-    documents: []
-  }),
-  async fetch() {
-    const query = this.$store.$auth.ctx.query
-    const adminQuery = query.admin
-    const idQuery = query.user_id
+# <script>
+# import { mapGetters } from 'vuex'
+# export default {
+#   computed: { ...mapGetters(['isAuthenticated', 'isAdmin', 'loggedInUser']) }, 
+#   data: () => ({
+#     documents: []
+#   }),
+#   async fetch() {
+#     const query = this.$store.$auth.ctx.query
+#     const adminQuery = query.admin
+#     const idQuery = query.user_id
     
-    if (this.isAdmin && adminQuery) {
-      this.documents = await this.$axios.$get('documents')
-    } else if (idQuery) {
-      this.documents = await this.$axios.$get('documents', {
-        params: { user_id: idQuery }
-      })
-    } else {
-      this.documents = await this.$axios.$get('documents', {
-        params: { user_id: this.loggedInUser.id }
-      })
-    }
-  }
-}
-</script>
-~
-EOF
+#     if (this.isAdmin && adminQuery) {
+#       this.documents = await this.$axios.$get('documents')
+#     } else if (idQuery) {
+#       this.documents = await this.$axios.$get('documents', {
+#         params: { user_id: idQuery }
+#       })
+#     } else {
+#       this.documents = await this.$axios.$get('documents', {
+#         params: { user_id: this.loggedInUser.id }
+#       })
+#     }
+#   }
+# }
+# </script>
+# ~
+# EOF
 
-cat <<'EOF' | puravida components/document/Form.vue ~
-<template>
-  <section>
-    <h1 v-if="editOrNew === 'edit'">Edit Document</h1>
-    <h1 v-else-if="editOrNew === 'new'">Add Document</h1>
-    <article>
-      <form enctype="multipart/form-data">
-        <p v-if="editOrNew === 'edit'">id: {{ $route.params.id }}</p>
-        <p>Date: </p><input v-model="date">
-        <p>Name: </p><input v-model="name">
-        <p>Notes: </p><textarea v-model="notes"></textarea>
-        <p class="no-margin">Image: </p>
-        <!-- <img v-if="!hideImage && editOrNew === 'edit'" :src="image" />     -->
-        <input type="file" ref="inputFile" @change=uploadFile()>
-        <p>Car or Maintenance Document: </p>
-        <div>
-          <input type="radio" id="car" value="Car" v-model="carOrMaintenance">
-          <label for="car">Car</label>
-        </div>
-        <div>
-          <input type="radio" id="maintenance" value="Maintenance" v-model="carOrMaintenance">
-          <label for="maintenance">Maintenance</label>
-        </div>
-        <div v-if="editOrNew === 'new'">
-          <select v-if="carOrMaintenance === 'Car'" name="Car" @change="selectCar($event)">
-            <option value=""></option>
-            <option v-for="car in cars" :key="car.id" :value="car.id">{{ car.name }}</option>
-          </select>
-          <select v-if="carOrMaintenance === 'Maintenance'" name="maintenance" @change="selectMaintenance($event)">
-            <option value=""></option>
-            <option v-for="maintenance in maintenances" :key="maintenance.id" :value="maintenance.id">{{ maintenance.description }} ({{ maintenance.carName }})</option>
-          </select>
-        </div>
-        <button v-if="editOrNew !== 'edit'" @click.prevent=createDocument>Create Document</button>
-        <button v-else-if="editOrNew == 'edit'" @click.prevent=editDocument>Edit Document</button>
-      </form>
-    </article>
-  </section>
-</template>
+# cat <<'EOF' | puravida components/document/Form.vue ~
+# <template>
+#   <section>
+#     <h1 v-if="editOrNew === 'edit'">Edit Document</h1>
+#     <h1 v-else-if="editOrNew === 'new'">Add Document</h1>
+#     <article>
+#       <form enctype="multipart/form-data">
+#         <p v-if="editOrNew === 'edit'">id: {{ $route.params.id }}</p>
+#         <p>Date: </p><input v-model="date">
+#         <p>Name: </p><input v-model="name">
+#         <p>Notes: </p><textarea v-model="notes"></textarea>
+#         <p class="no-margin">Image: </p>
+#         <!-- <img v-if="!hideImage && editOrNew === 'edit'" :src="image" />     -->
+#         <input type="file" ref="inputFile" @change=uploadFile()>
+#         <p>Car or Maintenance Document: </p>
+#         <div>
+#           <input type="radio" id="car" value="Car" v-model="carOrMaintenance">
+#           <label for="car">Car</label>
+#         </div>
+#         <div>
+#           <input type="radio" id="maintenance" value="Maintenance" v-model="carOrMaintenance">
+#           <label for="maintenance">Maintenance</label>
+#         </div>
+#         <div v-if="editOrNew === 'new'">
+#           <select v-if="carOrMaintenance === 'Car'" name="Car" @change="selectCar($event)">
+#             <option value=""></option>
+#             <option v-for="car in cars" :key="car.id" :value="car.id">{{ car.name }}</option>
+#           </select>
+#           <select v-if="carOrMaintenance === 'Maintenance'" name="maintenance" @change="selectMaintenance($event)">
+#             <option value=""></option>
+#             <option v-for="maintenance in maintenances" :key="maintenance.id" :value="maintenance.id">{{ maintenance.description }} ({{ maintenance.carName }})</option>
+#           </select>
+#         </div>
+#         <button v-if="editOrNew !== 'edit'" @click.prevent=createDocument>Create Document</button>
+#         <button v-else-if="editOrNew == 'edit'" @click.prevent=editDocument>Edit Document</button>
+#       </form>
+#     </article>
+#   </section>
+# </template>
 
-<script>
-import { mapGetters } from 'vuex'
-export default {
-  data () {
-    return {
-      date: "",
-      name: "",
-      notes: "",
-      attachment: "",
-      editOrNew: "",
-      carOrMaintenance: "",
-      userId: "",
-      // hideImage: false,
-      cars: [],
-      carId: "",
-      carIds: [],
-      maintenances: [],
-      maintenanceIds: "",
-      maintenanceId: "",
-      documents: [],
-      documentIds: [],
-      documentableId: ""
-    }
-  },
-  mounted() {
-    const splitPath = $nuxt.$route.path.split('/')
-    this.editOrNew = splitPath[splitPath.length-1]
-    this.getUserId()
-    this.getCarsMaintsAndDocIds()
+# <script>
+# import { mapGetters } from 'vuex'
+# export default {
+#   data () {
+#     return {
+#       date: "",
+#       name: "",
+#       notes: "",
+#       attachment: "",
+#       editOrNew: "",
+#       carOrMaintenance: "",
+#       userId: "",
+#       // hideImage: false,
+#       cars: [],
+#       carId: "",
+#       carIds: [],
+#       maintenances: [],
+#       maintenanceIds: "",
+#       maintenanceId: "",
+#       documents: [],
+#       documentIds: [],
+#       documentableId: ""
+#     }
+#   },
+#   mounted() {
+#     const splitPath = $nuxt.$route.path.split('/')
+#     this.editOrNew = splitPath[splitPath.length-1]
+#     this.getUserId()
+#     this.getCarsMaintsAndDocIds()
     
-  },
-  computed: {
-    ...mapGetters(['isAuthenticated', 'isAdmin', 'loggedInUser`']),
-  },
-  async fetch() {
-    const splitPath = $nuxt.$route.path.split('/')
-    this.editOrNew = $nuxt.$route.path.split('/')[$nuxt.$route.path.split('/').length-1]
-    if ($nuxt.$route.path.split('/')[$nuxt.$route.path.split('/').length-1]=='edit') {
-      const document = await this.$axios.$get(`documents/${this.$route.params.id}`)
-      this.date = document.date
-      this.name = document.name
-      this.notes = document.notes
-      this.description = document.description,
-      this.attachment = document.image  
-    }
-    if (this.editOrNew == 'new') {
-      this.maintenanceIds = 
-      this.cars = await this.$axios.$get('/cars', { params: { user_id: this.$auth.$state.user.id } })
-      this.maintenances = await this.$axios.$get('/maintenances', { params: { user_id: this.$auth.$state.user.id } })
-    }
-  },
-  methods: {
-    uploadFile: function() {
-      this.attachment = this.$refs.inputFile.files[0]
-      // this.hideImage = true
-    },
-    getUserId() {
-      const userIdQuery = $nuxt.$route.query.user_id
-      this.userId = userIdQuery ? userIdQuery : null
-    },
-    getCarsMaintsAndDocIds() {
-      const user = this.$auth.user
-      this.cars = user.cars
-      this.maintenances = user.maintenances
-      this.documents = user.documents
-      console.log(this.maintenances)
-    },
-    createDocument: function() {
-      const params = {
-        'date': this.date,
-        'name': this.name,
-        'notes': this.notes,
-        // 'attachment': this.attachment,
-        'documentable_type': this.carOrMaintenance,
-        'documentable_id': parseInt(this.documentableId)
-      }
-      console.log("params")
-      console.log(params)
-      let payload = new FormData()
-      Object.entries(params).forEach(
-        ([key, value]) => payload.append(key, value)
-      )
-      this.$axios.$post('documents', payload)
-        .then((res) => {
-          const documentId = res.id
-          this.$router.push(`/documents/${documentId}`)
-        })
-    },
-    editDocument: function() {
-      let params = {}
-      const filePickerFile = this.$refs.inputFile.files[0]
-      if (!filePickerFile) {
-        params = { 'date': this.date, 'name': this.name, 'notes': this.notes, 'description': this.description }
-      } else {
-        params = { 'date': this.date, 'name': this.name, 'notes': this.notes, 'description': this.description, 'image': this.image }
-      } 
-      let payload = new FormData()
-      Object.entries(params).forEach(
-        ([key, value]) => payload.append(key, value)
-      )
-      this.$axios.$patch(`/documents/${this.$route.params.id}`, payload)
-        .then(() => {
-          this.$router.push(`/documents/${this.$route.params.id}`)
-        })
-    },
-    selectCar: function(event) {
-      this.carId = event.target.value
-      this.documentableId = event.target.value
-    },
-    selectMaintenance: function(event) {
-      this.maintenanceId = event.target.value
-      this.documentableId = event.target.value
-    }
-  }
-}
-</script>
-~
-EOF
+#   },
+#   computed: {
+#     ...mapGetters(['isAuthenticated', 'isAdmin', 'loggedInUser`']),
+#   },
+#   async fetch() {
+#     const splitPath = $nuxt.$route.path.split('/')
+#     this.editOrNew = $nuxt.$route.path.split('/')[$nuxt.$route.path.split('/').length-1]
+#     if ($nuxt.$route.path.split('/')[$nuxt.$route.path.split('/').length-1]=='edit') {
+#       const document = await this.$axios.$get(`documents/${this.$route.params.id}`)
+#       this.date = document.date
+#       this.name = document.name
+#       this.notes = document.notes
+#       this.description = document.description,
+#       this.attachment = document.image  
+#     }
+#     if (this.editOrNew == 'new') {
+#       this.maintenanceIds = 
+#       this.cars = await this.$axios.$get('/cars', { params: { user_id: this.$auth.$state.user.id } })
+#       this.maintenances = await this.$axios.$get('/maintenances', { params: { user_id: this.$auth.$state.user.id } })
+#     }
+#   },
+#   methods: {
+#     uploadFile: function() {
+#       this.attachment = this.$refs.inputFile.files[0]
+#       // this.hideImage = true
+#     },
+#     getUserId() {
+#       const userIdQuery = $nuxt.$route.query.user_id
+#       this.userId = userIdQuery ? userIdQuery : null
+#     },
+#     getCarsMaintsAndDocIds() {
+#       const user = this.$auth.user
+#       this.cars = user.cars
+#       this.maintenances = user.maintenances
+#       this.documents = user.documents
+#       console.log(this.maintenances)
+#     },
+#     createDocument: function() {
+#       const params = {
+#         'date': this.date,
+#         'name': this.name,
+#         'notes': this.notes,
+#         // 'attachment': this.attachment,
+#         'documentable_type': this.carOrMaintenance,
+#         'documentable_id': parseInt(this.documentableId)
+#       }
+#       console.log("params")
+#       console.log(params)
+#       let payload = new FormData()
+#       Object.entries(params).forEach(
+#         ([key, value]) => payload.append(key, value)
+#       )
+#       this.$axios.$post('documents', payload)
+#         .then((res) => {
+#           const documentId = res.id
+#           this.$router.push(`/documents/${documentId}`)
+#         })
+#     },
+#     editDocument: function() {
+#       let params = {}
+#       const filePickerFile = this.$refs.inputFile.files[0]
+#       if (!filePickerFile) {
+#         params = { 'date': this.date, 'name': this.name, 'notes': this.notes, 'description': this.description }
+#       } else {
+#         params = { 'date': this.date, 'name': this.name, 'notes': this.notes, 'description': this.description, 'image': this.image }
+#       } 
+#       let payload = new FormData()
+#       Object.entries(params).forEach(
+#         ([key, value]) => payload.append(key, value)
+#       )
+#       this.$axios.$patch(`/documents/${this.$route.params.id}`, payload)
+#         .then(() => {
+#           this.$router.push(`/documents/${this.$route.params.id}`)
+#         })
+#     },
+#     selectCar: function(event) {
+#       this.carId = event.target.value
+#       this.documentableId = event.target.value
+#     },
+#     selectMaintenance: function(event) {
+#       this.maintenanceId = event.target.value
+#       this.documentableId = event.target.value
+#     }
+#   }
+# }
+# </script>
+# ~
+# EOF
 
-cat <<'EOF' | puravida pages/documents/index.vue ~
-<template>
-  <main class="container">
-    <h1>Documents</h1>
-    <NuxtLink :to="`${newDocUrl}`" role="button">Add Document</NuxtLink>
-    <DocumentSet />
-  </main>
-</template>
-<script>
-  export default { 
-    middleware: 'currentOrAdmin-index',
-    data () {
-      return {
-        newDocUrl: ""
-      }
-    },
-    mounted() {
-      this.newDocUrl = this.getNewDocUrl()
-    },
-    methods: {
-      getNewDocUrl: () => {
-        const url = "/documents/new"
-        let query = ""
-        if ($nuxt.$route.query && $nuxt.$route.query.user_id) {
-          query = `?user_id=${$nuxt.$route.query.user_id}`
-        }
-        return url + query
-      }
-    }
-  }
-</script>
-~
-EOF
+# cat <<'EOF' | puravida pages/documents/index.vue ~
+# <template>
+#   <main class="container">
+#     <h1>Documents</h1>
+#     <NuxtLink :to="`${newDocUrl}`" role="button">Add Document</NuxtLink>
+#     <DocumentSet />
+#   </main>
+# </template>
+# <script>
+#   export default { 
+#     middleware: 'currentOrAdmin-index',
+#     data () {
+#       return {
+#         newDocUrl: ""
+#       }
+#     },
+#     mounted() {
+#       this.newDocUrl = this.getNewDocUrl()
+#     },
+#     methods: {
+#       getNewDocUrl: () => {
+#         const url = "/documents/new"
+#         let query = ""
+#         if ($nuxt.$route.query && $nuxt.$route.query.user_id) {
+#           query = `?user_id=${$nuxt.$route.query.user_id}`
+#         }
+#         return url + query
+#       }
+#     }
+#   }
+# </script>
+# ~
+# EOF
 
-cat <<'EOF' | puravida pages/documents/new.vue ~
-<template>
-  <main class="container">
-    <DocumentForm />
-  </main>
-</template>
-~
-EOF
+# cat <<'EOF' | puravida pages/documents/new.vue ~
+# <template>
+#   <main class="container">
+#     <DocumentForm />
+#   </main>
+# </template>
+# ~
+# EOF
 
-cat <<'EOF' | puravida pages/documents/_id/index.vue ~
-<template>
-  <main class="container">
-    <section>
-      <DocumentCard :document="document" />
-    </section>
-  </main>
-</template>
+# cat <<'EOF' | puravida pages/documents/_id/index.vue ~
+# <template>
+#   <main class="container">
+#     <section>
+#       <DocumentCard :document="document" />
+#     </section>
+#   </main>
+# </template>
 
-<script>
-export default {
-  middleware: 'currentOrAdmin-showEdit',
-  data: () => ({ document: {} }),
-  async fetch() { this.document = await this.$axios.$get(`documents/${this.$route.params.id}`) },
-  methods: {
-    uploadImage: function() { this.image = this.$refs.inputFile.files[0] },
-    deleteDocument: function(id) {
-      this.$axios.$delete(`documents/${this.$route.params.id}`)
-      this.$router.push('/documents')
-    }
-  }
-}
-</script>
-~
-EOF
+# <script>
+# export default {
+#   middleware: 'currentOrAdmin-showEdit',
+#   data: () => ({ document: {} }),
+#   async fetch() { this.document = await this.$axios.$get(`documents/${this.$route.params.id}`) },
+#   methods: {
+#     uploadImage: function() { this.image = this.$refs.inputFile.files[0] },
+#     deleteDocument: function(id) {
+#       this.$axios.$delete(`documents/${this.$route.params.id}`)
+#       this.$router.push('/documents')
+#     }
+#   }
+# }
+# </script>
+# ~
+# EOF
 
-cat <<'EOF' | puravida pages/documents/_id/edit.vue ~
-<template>
-  <main class="container">
-    <DocumentForm />
-  </main>
-</template>
+# cat <<'EOF' | puravida pages/documents/_id/edit.vue ~
+# <template>
+#   <main class="container">
+#     <DocumentForm />
+#   </main>
+# </template>
 
-<script>
-export default { middleware: 'currentOrAdmin-showEdit' }
-</script>
-~
-EOF
+# <script>
+# export default { middleware: 'currentOrAdmin-showEdit' }
+# </script>
+# ~
+# EOF
 
 
 
-echo -e "\n\n🦄 Nav\n\n"
-cat <<'EOF' | puravida components/nav/Brand.vue ~
-<template>
-  <span>
-    <font-awesome-icon icon="laptop-code" /> Ruxtmin
-  </span>
-</template>
-~
-EOF
-cat <<'EOF' | puravida components/nav/Default.vue ~
-<template>
-  <nav class="top-nav container-fluid">
-    <ul><li><strong><NuxtLink to="/"><NavBrand /></NuxtLink></strong></li></ul>
-    <input id="menu-toggle" type="checkbox" />
-    <label class='menu-button-container' for="menu-toggle">
-      <div class='menu-button'></div>
-    </label>
-    <ul class="menu">
-      <li v-if="!isAuthenticated"><strong><NuxtLink to="/log-in">Log In</NuxtLink></strong></li>
-      <li v-if="!isAuthenticated"><strong><NuxtLink to="/sign-up">Sign Up</NuxtLink></strong></li>
-      <li v-if="isAuthenticated"><strong><NuxtLink :to="`/cars?user_id=${loggedInUser.id}`">Cars</NuxtLink></strong></li>
-      <li v-if="isAuthenticated"><strong><NuxtLink :to="`/maintenances?user_id=${loggedInUser.id}`">Maintenances</NuxtLink></strong></li>
-      <li v-if="isAuthenticated"><strong><NuxtLink :to="`/documents?user_id=${loggedInUser.id}`">Documents</NuxtLink></strong></li>
-      <li v-if="isAdmin"><strong><NuxtLink to="/admin">Admin</NuxtLink></strong></li>
-      <li v-if="isAuthenticated">
-        <details role="list" dir="rtl" class='dropdown'>
-          <summary class='summary' aria-haspopup="listbox" role="link">
-            <img v-if="loggedInUser.avatar" :src="loggedInUser.avatar" />
-            <font-awesome-icon v-else icon="circle-user" />
-          </summary>
-          <ul>
-            <li><NuxtLink :to="`/users/${loggedInUser.id}`">Profile</NuxtLink></li>
-            <li><NuxtLink :to="`/users/${loggedInUser.id}/edit`">Settings</NuxtLink></li>
-            <li><a @click="logOut">Log Out</a></li>
-          </ul>
-        </details>
-      </li>
-      <!-- <li v-if="isAuthenticated"><strong><NuxtLink :to="`/users/${loggedInUser.id}`">Settings</NuxtLink></strong></li> -->
-      <li class="logout-desktop" v-if="isAuthenticated"><strong><a @click="logOut">Log Out</a></strong></li>
-    </ul>
-  </nav>
-</template>
+# echo -e "\n\n🦄 Nav\n\n"
+# cat <<'EOF' | puravida components/nav/Brand.vue ~
+# <template>
+#   <span>
+#     <font-awesome-icon icon="laptop-code" /> Ruxtmin
+#   </span>
+# </template>
+# ~
+# EOF
+# cat <<'EOF' | puravida components/nav/Default.vue ~
+# <template>
+#   <nav class="top-nav container-fluid">
+#     <ul><li><strong><NuxtLink to="/"><NavBrand /></NuxtLink></strong></li></ul>
+#     <input id="menu-toggle" type="checkbox" />
+#     <label class='menu-button-container' for="menu-toggle">
+#       <div class='menu-button'></div>
+#     </label>
+#     <ul class="menu">
+#       <li v-if="!isAuthenticated"><strong><NuxtLink to="/log-in">Log In</NuxtLink></strong></li>
+#       <li v-if="!isAuthenticated"><strong><NuxtLink to="/sign-up">Sign Up</NuxtLink></strong></li>
+#       <li v-if="isAuthenticated"><strong><NuxtLink :to="`/cars?user_id=${loggedInUser.id}`">Cars</NuxtLink></strong></li>
+#       <li v-if="isAuthenticated"><strong><NuxtLink :to="`/maintenances?user_id=${loggedInUser.id}`">Maintenances</NuxtLink></strong></li>
+#       <li v-if="isAuthenticated"><strong><NuxtLink :to="`/documents?user_id=${loggedInUser.id}`">Documents</NuxtLink></strong></li>
+#       <li v-if="isAdmin"><strong><NuxtLink to="/admin">Admin</NuxtLink></strong></li>
+#       <li v-if="isAuthenticated">
+#         <details role="list" dir="rtl" class='dropdown'>
+#           <summary class='summary' aria-haspopup="listbox" role="link">
+#             <img v-if="loggedInUser.avatar" :src="loggedInUser.avatar" />
+#             <font-awesome-icon v-else icon="circle-user" />
+#           </summary>
+#           <ul>
+#             <li><NuxtLink :to="`/users/${loggedInUser.id}`">Profile</NuxtLink></li>
+#             <li><NuxtLink :to="`/users/${loggedInUser.id}/edit`">Settings</NuxtLink></li>
+#             <li><a @click="logOut">Log Out</a></li>
+#           </ul>
+#         </details>
+#       </li>
+#       <!-- <li v-if="isAuthenticated"><strong><NuxtLink :to="`/users/${loggedInUser.id}`">Settings</NuxtLink></strong></li> -->
+#       <li class="logout-desktop" v-if="isAuthenticated"><strong><a @click="logOut">Log Out</a></strong></li>
+#     </ul>
+#   </nav>
+# </template>
 
-<script>
-import { mapGetters } from 'vuex'
-export default {
-  computed: { ...mapGetters(['isAuthenticated', 'isAdmin', 'loggedInUser']) }, 
-  methods: { logOut() { this.$auth.logout() } }
-}
-</script>
+# <script>
+# import { mapGetters } from 'vuex'
+# export default {
+#   computed: { ...mapGetters(['isAuthenticated', 'isAdmin', 'loggedInUser']) }, 
+#   methods: { logOut() { this.$auth.logout() } }
+# }
+# </script>
 
-<style lang="sass" scoped>
-// css-only responsive nav
-// from https://codepen.io/alvarotrigo/pen/MWEJEWG (accessed 10/16/23, modified slightly)
+# <style lang="sass" scoped>
+# // css-only responsive nav
+# // from https://codepen.io/alvarotrigo/pen/MWEJEWG (accessed 10/16/23, modified slightly)
 
-h2 
-  vertical-align: center
-  text-align: center
+# h2 
+#   vertical-align: center
+#   text-align: center
 
-html, body 
-  margin: 0
-  height: 100%
+# html, body 
+#   margin: 0
+#   height: 100%
 
-.top-nav 
-  height: 50px
+# .top-nav 
+#   height: 50px
 
-.top-nav > ul 
-  margin-top: 15px
+# .top-nav > ul 
+#   margin-top: 15px
 
-.menu 
-  display: flex
-  flex-direction: row
-  list-style-type: none
-  margin: 0
-  padding: 0
+# .menu 
+#   display: flex
+#   flex-direction: row
+#   list-style-type: none
+#   margin: 0
+#   padding: 0
 
-[type="checkbox"] ~ label.menu-button-container 
-  display: none
-  height: 100%
-  width: 30px
-  cursor: pointer
-  flex-direction: column
-  justify-content: center
-  align-items: center
+# [type="checkbox"] ~ label.menu-button-container 
+#   display: none
+#   height: 100%
+#   width: 30px
+#   cursor: pointer
+#   flex-direction: column
+#   justify-content: center
+#   align-items: center
 
-#menu-toggle 
-  display: none
+# #menu-toggle 
+#   display: none
 
-.menu-button,
-.menu-button::before,
-.menu-button::after 
-  display: block
-  background-color: #000
-  position: absolute
-  height: 4px
-  width: 30px
-  transition: transform 400ms cubic-bezier(0.23, 1, 0.32, 1)
-  border-radius: 2px
+# .menu-button,
+# .menu-button::before,
+# .menu-button::after 
+#   display: block
+#   background-color: #000
+#   position: absolute
+#   height: 4px
+#   width: 30px
+#   transition: transform 400ms cubic-bezier(0.23, 1, 0.32, 1)
+#   border-radius: 2px
 
-.menu-button::before 
-  content: ''
-  margin-top: -8px
+# .menu-button::before 
+#   content: ''
+#   margin-top: -8px
 
-.menu-button::after 
-  content: ''
-  margin-top: 8px
+# .menu-button::after 
+#   content: ''
+#   margin-top: 8px
 
-#menu-toggle:checked + .menu-button-container .menu-button::before 
-  margin-top: 0px
-  transform: rotate(405deg)
+# #menu-toggle:checked + .menu-button-container .menu-button::before 
+#   margin-top: 0px
+#   transform: rotate(405deg)
 
-#menu-toggle:checked + .menu-button-container .menu-button 
-  background: rgba(255, 255, 255, 0)
+# #menu-toggle:checked + .menu-button-container .menu-button 
+#   background: rgba(255, 255, 255, 0)
 
-#menu-toggle:checked + .menu-button-container .menu-button::after 
-  margin-top: 0px
-  transform: rotate(-405deg)
+# #menu-toggle:checked + .menu-button-container .menu-button::after 
+#   margin-top: 0px
+#   transform: rotate(-405deg)
 
-.menu 
-  > li 
-    overflow: visible
+# .menu 
+#   > li 
+#     overflow: visible
 
-  > li details.dropdown
-    background: none
+#   > li details.dropdown
+#     background: none
 
-    .summary
-      margin: 0
-      padding: 1rem 0 0
-      font-size: 1.5rem
+#     .summary
+#       margin: 0
+#       padding: 1rem 0 0
+#       font-size: 1.5rem
 
-      &:focus
-        color: var(--color)
-        background: none
+#       &:focus
+#         color: var(--color)
+#         background: none
 
-      &:after
-        display: none
+#       &:after
+#         display: none
 
-    ul
-      padding-top: 0
-      margin-top: 0
-      right: -1rem
+#     ul
+#       padding-top: 0
+#       margin-top: 0
+#       right: -1rem
 
-  > li.logout-desktop
-    display: none
+#   > li.logout-desktop
+#     display: none
 
-@media (max-width: 991px) 
-  .menu 
+# @media (max-width: 991px) 
+#   .menu 
     
-    > li 
-      overflow: hidden
+#     > li 
+#       overflow: hidden
     
-    > li.dropdown
-      display: none
+#     > li.dropdown
+#       display: none
 
-    > li.logout-desktop
-      display: flex
+#     > li.logout-desktop
+#       display: flex
 
-  [type="checkbox"] ~ label.menu-button-container 
-    display: flex
+#   [type="checkbox"] ~ label.menu-button-container 
+#     display: flex
 
-  .top-nav > ul.menu 
-    position: absolute
-    top: 0
-    margin-top: 50px
-    left: 0
-    flex-direction: column
-    width: 100%
-    justify-content: center
-    align-items: center
+#   .top-nav > ul.menu 
+#     position: absolute
+#     top: 0
+#     margin-top: 50px
+#     left: 0
+#     flex-direction: column
+#     width: 100%
+#     justify-content: center
+#     align-items: center
 
-  #menu-toggle ~ .menu li 
-    height: 0
-    margin: 0
-    padding: 0
-    border: 0
-    transition: height 400ms cubic-bezier(0.23, 1, 0.32, 1)
+#   #menu-toggle ~ .menu li 
+#     height: 0
+#     margin: 0
+#     padding: 0
+#     border: 0
+#     transition: height 400ms cubic-bezier(0.23, 1, 0.32, 1)
 
-  #menu-toggle:checked ~ .menu li 
-    border: 1px solid #333
-    height: 2.5em
-    padding: 0.5em
-    transition: height 400ms cubic-bezier(0.23, 1, 0.32, 1)
+#   #menu-toggle:checked ~ .menu li 
+#     border: 1px solid #333
+#     height: 2.5em
+#     padding: 0.5em
+#     transition: height 400ms cubic-bezier(0.23, 1, 0.32, 1)
 
-  .menu > li 
-    display: flex
-    justify-content: center
-    margin: 0
-    padding: 0.5em 0
-    width: 100%
-    // color: white
-    background-color: #222
+#   .menu > li 
+#     display: flex
+#     justify-content: center
+#     margin: 0
+#     padding: 0.5em 0
+#     width: 100%
+#     // color: white
+#     background-color: #222
 
-  .menu > li:not(:last-child) 
-    border-bottom: 1px solid #444
-</style>
-~
-EOF
-cat <<'EOF' | puravida layouts/default.vue ~
-<template>
-  <div>
-    <NavDefault />
-    <Nuxt />
-  </div>
-</template>
-~
-EOF
+#   .menu > li:not(:last-child) 
+#     border-bottom: 1px solid #444
+# </style>
+# ~
+# EOF
+# cat <<'EOF' | puravida layouts/default.vue ~
+# <template>
+#   <div>
+#     <NavDefault />
+#     <Nuxt />
+#   </div>
+# </template>
+# ~
+# EOF
 
-echo -e "\n\n🦄 Home\n\n"
-cat <<'EOF' | puravida pages/index.vue ~
-<template>
-  <main class="container">
-    <h1>Rails 7 Nuxt 2 Admin Boilerplate</h1>
+# echo -e "\n\n🦄 Home\n\n"
+# cat <<'EOF' | puravida pages/index.vue ~
+# <template>
+#   <main class="container">
+#     <h1>Rails 7 Nuxt 2 Admin Boilerplate</h1>
     
-    <h2 class="small-bottom-margin">Features</h2>
-    <ul class="features">
-      <li>Admin dashboard</li>
-      <li>Placeholder users</li>
-      <li>Placeholder user item ("car")</li>
-    </ul>
+#     <h2 class="small-bottom-margin">Features</h2>
+#     <ul class="features">
+#       <li>Admin dashboard</li>
+#       <li>Placeholder users</li>
+#       <li>Placeholder user item ("car")</li>
+#     </ul>
 
-    <h3 class="small-bottom-margin stack">Stack</h3>
-    <div class="aligned-columns">
-      <p><span>frontend:</span> Nuxt 2</p>
-      <p><span>backend API:</span> Rails 7</p>
-      <p><span>database:</span> Postgres</p>
-      <p><span>styles:</span> Sass</p>
-      <p><span>css framework:</span> Pico.css</p>
-      <p><span>e2e tests:</span> Cypress</p>
-      <p><span>api tests:</span> RSpec</p>
-    </div>
+#     <h3 class="small-bottom-margin stack">Stack</h3>
+#     <div class="aligned-columns">
+#       <p><span>frontend:</span> Nuxt 2</p>
+#       <p><span>backend API:</span> Rails 7</p>
+#       <p><span>database:</span> Postgres</p>
+#       <p><span>styles:</span> Sass</p>
+#       <p><span>css framework:</span> Pico.css</p>
+#       <p><span>e2e tests:</span> Cypress</p>
+#       <p><span>api tests:</span> RSpec</p>
+#     </div>
 
-    <h3 class="small-bottom-margin tools">Tools</h3>
-    <div class="aligned-columns">
-      <p><span>user avatars:</span> local active storage</p>
-      <p><span>backend auth:</span> bcrypt & jwt</p>
-      <p><span>frontend auth:</span> nuxt auth module</p>
-    </div>
+#     <h3 class="small-bottom-margin tools">Tools</h3>
+#     <div class="aligned-columns">
+#       <p><span>user avatars:</span> local active storage</p>
+#       <p><span>backend auth:</span> bcrypt & jwt</p>
+#       <p><span>frontend auth:</span> nuxt auth module</p>
+#     </div>
 
-    <h3 class="small-bottom-margin">User Logins</h3>
-    <table class="half-width">
-      <tr><th>Email</th><th>Password</th><th>Notes</th></tr>
-      <tr><td>michaelscott@dundermifflin.com</td><td>password</td><td>(admin)</td></tr>
-      <tr><td>jimhalpert@dundermifflin.com</td><td>password</td><td></td></tr>
-      <tr><td>pambeesly@dundermifflin.com</td><td>password</td><td></td></tr>
-    </table>
+#     <h3 class="small-bottom-margin">User Logins</h3>
+#     <table class="half-width">
+#       <tr><th>Email</th><th>Password</th><th>Notes</th></tr>
+#       <tr><td>michaelscott@dundermifflin.com</td><td>password</td><td>(admin)</td></tr>
+#       <tr><td>jimhalpert@dundermifflin.com</td><td>password</td><td></td></tr>
+#       <tr><td>pambeesly@dundermifflin.com</td><td>password</td><td></td></tr>
+#     </table>
     
-    <p class="big-bottom-margin">
-      <NuxtLink to="/log-in" role="button" class="secondary">Log In</NuxtLink> 
-      <NuxtLink to="/sign-up" role="button" class="contrast outline">Sign Up</NuxtLink>
-    </p>    
+#     <p class="big-bottom-margin">
+#       <NuxtLink to="/log-in" role="button" class="secondary">Log In</NuxtLink> 
+#       <NuxtLink to="/sign-up" role="button" class="contrast outline">Sign Up</NuxtLink>
+#     </p>    
 
-  </main>
-</template>
+#   </main>
+# </template>
 
-<script>
-export default { auth: false }
-</script>
-~
-EOF
-cat <<'EOF' | puravida components/Notification.vue ~
-<template>
-  <div class="notification is-danger">
-    {{ message }}
-  </div>
-</template>
+# <script>
+# export default { auth: false }
+# </script>
+# ~
+# EOF
+# cat <<'EOF' | puravida components/Notification.vue ~
+# <template>
+#   <div class="notification is-danger">
+#     {{ message }}
+#   </div>
+# </template>
 
-<script>
-export default {
-  name: 'Notification',
-  props: ['message']
-}
-</script>
-~
-EOF
+# <script>
+# export default {
+#   name: 'Notification',
+#   props: ['message']
+# }
+# </script>
+# ~
+# EOF
 
-echo -e "\n\n🦄 Login & Signup Pages\n\n"
-cat <<'EOF' | puravida pages/log-in.vue ~
-<template>
-  <main class="container">
-    <h2>Log In</h2>
-    <Notification :message="error" v-if="error"/>
-    <form method="post" @submit.prevent="login">
-      <div>
-        <label>Email</label>
-        <div>
-          <input
-            type="email"
-            name="email"
-            v-model="email"
-          />
-        </div>
-      </div>
-      <div>
-        <label>Password</label>
-        <div>
-          <input
-            type="password"
-            name="password"
-            v-model="password"
-          />
-        </div>
-      </div>
-      <div>
-        <button type="submit">Log In</button>
-      </div>
-    </form>
-    <div>
-      <p>
-        Don't have an account? <NuxtLink to="/sign-up">Sign up</NuxtLink>
-      </p>
-    </div>
-  </main>
-</template>
+# echo -e "\n\n🦄 Login & Signup Pages\n\n"
+# cat <<'EOF' | puravida pages/log-in.vue ~
+# <template>
+#   <main class="container">
+#     <h2>Log In</h2>
+#     <Notification :message="error" v-if="error"/>
+#     <form method="post" @submit.prevent="login">
+#       <div>
+#         <label>Email</label>
+#         <div>
+#           <input
+#             type="email"
+#             name="email"
+#             v-model="email"
+#           />
+#         </div>
+#       </div>
+#       <div>
+#         <label>Password</label>
+#         <div>
+#           <input
+#             type="password"
+#             name="password"
+#             v-model="password"
+#           />
+#         </div>
+#       </div>
+#       <div>
+#         <button type="submit">Log In</button>
+#       </div>
+#     </form>
+#     <div>
+#       <p>
+#         Don't have an account? <NuxtLink to="/sign-up">Sign up</NuxtLink>
+#       </p>
+#     </div>
+#   </main>
+# </template>
 
-<script>
-import Notification from '~/components/Notification'
-export default {
-  auth: false,
-  components: {
-    Notification,
-  },
-  data() {
-    return {
-      email: '',
-      password: '',
-      error: null
-    }
-  },
-  methods: {
-    async login() {
-      this.$auth.loginWith('local', {
-        data: {
-          email: this.email,
-          password: this.password
-        }
-      }).then (() => {
-        const id = this.$auth.$state.user.id
-        this.$router.push(`/users/${id}`)
-      })
-    }
-  }
-}
-</script>
-~
-EOF
-cat <<'EOF' | puravida pages/sign-up.vue ~
-<template>
-  <main class="container">
-    <UserForm />      
-  </main>
-</template>
+# <script>
+# import Notification from '~/components/Notification'
+# export default {
+#   auth: false,
+#   components: {
+#     Notification,
+#   },
+#   data() {
+#     return {
+#       email: '',
+#       password: '',
+#       error: null
+#     }
+#   },
+#   methods: {
+#     async login() {
+#       this.$auth.loginWith('local', {
+#         data: {
+#           email: this.email,
+#           password: this.password
+#         }
+#       }).then (() => {
+#         const id = this.$auth.$state.user.id
+#         this.$router.push(`/users/${id}`)
+#       })
+#     }
+#   }
+# }
+# </script>
+# ~
+# EOF
+# cat <<'EOF' | puravida pages/sign-up.vue ~
+# <template>
+#   <main class="container">
+#     <UserForm />      
+#   </main>
+# </template>
 
-<script>
-export default { auth: false }
-</script>
-~
-EOF
-cat <<'EOF' | puravida store/index.js ~
-export const getters = {
-  isAuthenticated(state) {
-    return state.auth.loggedIn
-  },
+# <script>
+# export default { auth: false }
+# </script>
+# ~
+# EOF
+# cat <<'EOF' | puravida store/index.js ~
+# export const getters = {
+#   isAuthenticated(state) {
+#     return state.auth.loggedIn
+#   },
 
-  isAdmin(state) {
-    if (state.auth.user && state.auth.user.admin !== null && state.auth.user.admin == true) { 
-        return true
-    } else {
-      return false
-    } 
-  },
+#   isAdmin(state) {
+#     if (state.auth.user && state.auth.user.admin !== null && state.auth.user.admin == true) { 
+#         return true
+#     } else {
+#       return false
+#     } 
+#   },
 
-  loggedInUser(state) {
-    return state.auth.user
-  }
-}
-~
-EOF
+#   loggedInUser(state) {
+#     return state.auth.user
+#   }
+# }
+# ~
+# EOF
 
-echo -e "\n\n🦄 Admin Page\n\n"
+# echo -e "\n\n🦄 Admin Page\n\n"
 
-cat <<'EOF' | puravida pages/admin/index.vue ~
-<template>
-  <main class="container">
-    <h1>Admin</h1>
-    <p>Number of users: {{ this.users.length }}</p>
-    <p>Number of admins: {{ (this.users.filter((obj) => obj.admin === true)).length }}</p>
-    <p>Number of cars: {{ this.cars.length }}</p>
-    <p>Number of maintenances: {{ this.maintenances.length }}</p>
-    <p>Number of documents: {{ this.documents.length }}</p>
-    <p><NuxtLink to="/users">Users</NuxtLink></p>
-    <p><NuxtLink to="/cars?admin=true">Cars</NuxtLink></p>
-    <p><NuxtLink to="/maintenances?admin=true">Maintenances</NuxtLink></p>
-    <p><NuxtLink to="/documents?admin=true">Documents</NuxtLink></p>
-  </main>
-</template>
+# cat <<'EOF' | puravida pages/admin/index.vue ~
+# <template>
+#   <main class="container">
+#     <h1>Admin</h1>
+#     <p>Number of users: {{ this.users.length }}</p>
+#     <p>Number of admins: {{ (this.users.filter((obj) => obj.admin === true)).length }}</p>
+#     <p>Number of cars: {{ this.cars.length }}</p>
+#     <p>Number of maintenances: {{ this.maintenances.length }}</p>
+#     <p>Number of documents: {{ this.documents.length }}</p>
+#     <p><NuxtLink to="/users">Users</NuxtLink></p>
+#     <p><NuxtLink to="/cars?admin=true">Cars</NuxtLink></p>
+#     <p><NuxtLink to="/maintenances?admin=true">Maintenances</NuxtLink></p>
+#     <p><NuxtLink to="/documents?admin=true">Documents</NuxtLink></p>
+#   </main>
+# </template>
 
-<script>
-export default { 
-  middleware: 'adminOnly',
-  layout: 'admin',
-  data: () => ({ 
-    users: [],
-    cars: [],
-    maintenances: [],
-    documents: []
-  }),
-  async fetch() { 
-    this.users = await this.$axios.$get('users')
-    this.cars = await this.$axios.$get('cars')
-    this.maintenances = await this.$axios.$get('maintenances')
-    this.documents = await this.$axios.$get('documents')
-  }
-}
-</script>
-~
-EOF
-
-
-echo -e "\n\n🦄 Cypress\n\n"
-cd ~/Desktop/front
-npm install cypress --save-dev
-npx cypress open
-puravida cypress/fixtures/images
-cp -a ~/Desktop/rux-drivetracks/assets/office-avatars ~/Desktop/front/cypress/fixtures/images
-
-cat <<'EOF' | puravida cypress/support/commands.js ~
-Cypress.Commands.add('login', () => { 
-  cy.visit('http://localhost:3001/log-in')
-  cy.get('input').eq(1).type('jimhalpert@dundermifflin.com')
-  cy.get('input').eq(2).type('password{enter}')
-})
-
-Cypress.Commands.add('loginNonAdmin', () => { 
-  cy.visit('http://localhost:3001/log-in')
-  cy.get('input').eq(1).type('jimhalpert@dundermifflin.com')
-  cy.get('input').eq(2).type('password{enter}')
-})
-
-Cypress.Commands.add('loginAdmin', () => { 
-  cy.visit('http://localhost:3001/log-in')
-  cy.get('input').eq(1).type('michaelscott@dundermifflin.com')
-  cy.get('input').eq(2).type('password{enter}')
-})
-
-Cypress.Commands.add('loginInvalid', () => { 
-  cy.visit('http://localhost:3001/log-in')
-  cy.get('input').eq(1).type('xyz@dundermifflin.com')
-  cy.get('input').eq(2).type('password{enter}')
-})
-
-Cypress.Commands.add('logoutNonAdmin', (admin) => { 
-  cy.logout(false);
-})
-
-Cypress.Commands.add('logoutAdmin', (admin) => { 
-  cy.logout(true);
-})
-
-Cypress.Commands.add('logout', (admin) => { 
-  const num = admin ? 3 : 2
-  cy.get('nav ul.menu').find('li').eq(num).click()
-    .then(() => { cy.get('nav details ul').find('li').eq(2).click() })
-})
-~
-EOF
-cat <<'EOF' | puravida cypress/e2e/logged-out-page-copy.cy.js ~
-/// <reference types="cypress" />
-
-// reset the db: db:drop db:create db:migrate db:seed RAILS_ENV=test
-// run dev server with test db: CYPRESS=1 bin/rails server -p 3000
-context('Logged Out', () => {
-  describe('Homepage Copy', () => {
-    it('should find page copy', () => {
-      cy.visit('http://localhost:3001/')
-      cy.get('main.container')
-        .should('contain', 'Rails 7 Nuxt 2 Admin Boilerplate')
-        .should('contain', 'Features')
-      cy.get('ul.features')
-        .within(() => {
-          cy.get('li').eq(0).contains('Admin dashboard')
-          cy.get('li').eq(1).contains('Placeholder users')
-          cy.get('li').eq(2).contains('Placeholder user item ("car")')
-        })
-      cy.get('h3.stack')
-        .next('div.aligned-columns')
-          .within(() => {
-            cy.get('p').eq(0).contains('frontend:')
-            cy.get('p').eq(0).contains('Nuxt 2')
-            cy.get('p').eq(1).contains('backend API:')
-            cy.get('p').eq(1).contains('Rails 7')
-            cy.get('p').eq(2).contains('database:')
-            cy.get('p').eq(2).contains('Postgres')
-            cy.get('p').eq(3).contains('styles:')
-            cy.get('p').eq(3).contains('Sass')
-            cy.get('p').eq(4).contains('css framework:')
-            cy.get('p').eq(4).contains('Pico.css')
-            cy.get('p').eq(5).contains('e2e tests:')
-            cy.get('p').eq(5).contains('Cypress')
-            cy.get('p').eq(6).contains('api tests:')
-            cy.get('p').eq(6).contains('RSpec')      
-          })
-      cy.get('h3.tools')
-        .next('div.aligned-columns')
-          .within(() => {
-            cy.get('p').eq(0).contains('user avatars:')
-            cy.get('p').eq(0).contains('local active storage')
-            cy.get('p').eq(1).contains('backend auth:')
-            cy.get('p').eq(1).contains('bcrypt & jwt')
-            cy.get('p').eq(2).contains('frontend auth:')
-            cy.get('p').eq(2).contains('nuxt auth module')
-          }) 
-    })
-  })
-
-  describe('Log In Copy', () => {
-    it('should find page copy', () => {
-      cy.visit('http://localhost:3001/log-in')
-      cy.get('main.container')
-        .should('contain', 'Email')
-        .should('contain', 'Password')
-        .should('contain', 'Log In')
-        .should('contain', "Don't have an account")
-    })
-  })
-
-  describe('Sign Up Copy', () => {
-    it('should find page copy', () => {
-      cy.visit('http://localhost:3001/sign-up')
-      cy.get('main.container')
-        .should('contain', 'Name')
-        .should('contain', 'Email')
-        .should('contain', 'Avatar')
-        .should('contain', 'Password')
-        .should('contain', 'Create User')
-    })
-  })
-})
-~
-EOF
-cat <<'EOF' | puravida cypress/e2e/sign-up-flow.cy.js ~
-/// <reference types="cypress" />
-
-// reset the db: db:drop db:create db:migrate db:seed RAILS_ENV=test
-// run dev server with test db: CYPRESS=1 bin/rails server -p 3000
-describe('Sign Up Flow', () => {
-  it('Should redirect to user show page', () => {
-    cy.visit('http://localhost:3001/sign-up')
-    cy.get('p').contains('Name').next('input').type('name')
-    cy.get('p').contains('Email').next('input').type('test' + Math.random().toString(36).substring(2, 15) + '@mail.com')
-    cy.get('p').contains('Email').next('input').type('test' + Math.random().toString(36).substring(2, 15) + '@mail.com')
-    cy.get('input[type=file]').selectFile('cypress/fixtures/images/office-avatars/dwight-schrute.png')
-    cy.get('p').contains('Password').next('input').type('password')
-    cy.get('button').contains('Create User').click()
-    cy.url().should('match', /http:\/\/localhost:3001\/users\/\d+/)
-    cy.get('h2').should('contain', 'name')
-    // TODO: assert avatar presence
-    // cy.logout()
-  })
-})
-~
-EOF
-cat <<'EOF' | puravida cypress/e2e/log-in-flow.cy.js ~
-/// <reference types="cypress" />
-
-// reset the db: db:drop db:create db:migrate db:seed RAILS_ENV=test
-// run dev server with test db: CYPRESS=1 bin/rails server -p 3000
-
-describe('Manual Login', () => {
-  it('Should log in user', () => {
-    cy.intercept('POST', '/login').as('login')
-    cy.loginAdmin()
-    cy.wait('@login').then(({response}) => {
-      expect(response.statusCode).to.eq(200)
-    })
-    cy.url().should('eq', 'http://localhost:3001/users/1')
-    cy.get('h2').should('contain', 'Michael Scott')
-    cy.logoutAdmin()
-  })
-})
-
-context('Mocked Request Login', () => {
-  describe('Login with real email', () => {
-    it('Should get 200 response', () => {
-      cy.visit('http://localhost:3001/log-in')
-      cy.request(
-        { url: 'http://localhost:3000/login', method: 'POST', body: { email: 'michaelscott@dundermifflin.com', 
-        password: 'password' }, failOnStatusCode: false })
-        .its('status').should('equal', 200)
-      cy.get('h2').should('contain', 'Log In')
-      cy.url().should('include', '/log-in')
-    })
-  })
-
-  describe('Login with fake email', () => {
-    it('Should get 401 response', () => {
-      cy.visit('http://localhost:3001/log-in')
-      cy.request(
-        { url: 'http://localhost:3000/login', method: 'POST', body: { email: 'xyz@dundermifflin.com', 
-        password: 'password' }, failOnStatusCode: false })
-        .its('status').should('equal', 401)
-      cy.get('h2').should('contain', 'Log In')
-      cy.url().should('include', '/log-in')
-    })
-  })
-})
-~
-EOF
-cat <<'EOF' | puravida cypress/e2e/admin.cy.js ~
-/// <reference types="cypress" />
-
-// reset the db: rails db:drop db:create db:migrate db:seed RAILS_ENV=test
-// run dev server with test db: CYPRESS=1 bin/rails server -p 3000
-
-describe('Admin login', () => {
-  it('Should go to admin show page', () => {
-    cy.loginAdmin()
-    cy.url().should('match', /http:\/\/localhost:3001\/users\/1/)
-    cy.get('h2').should('contain', 'Michael Scott')
-    cy.get('p').should('contain', 'id: 1')
-    cy.get('p').should('contain', 'avatar:')
-    cy.get('p').contains('avatar:').next('img').should('have.attr', 'src').should('match', /http.*michael-scott.png/)
-    cy.get('p').should('contain', 'admin: true')
-    cy.logoutAdmin()
-  })
-  it('Should contain admin nav', () => {
-    cy.loginAdmin()
-    cy.get('nav ul.menu li a').should('contain', 'Admin')
-    cy.logoutAdmin()
-  })
-})
-
-describe('Admin nav', () => {
-  it('Should work', () => {
-    cy.loginAdmin()
-    cy.get('nav li a').contains('Admin').click()
-    cy.url().should('match', /http:\/\/localhost:3001\/admin/)
-    cy.logoutAdmin()
-  })
-})
-
-describe('Admin page', () => {
-  it('Should have correct copy', () => {
-    cy.loginAdmin()
-    cy.url().should('match', /http:\/\/localhost:3001\/users\/1/)
-    cy.visit('http://localhost:3001/admin')
-    cy.url().should('match', /http:\/\/localhost:3001\/admin/)
-    cy.get('p').eq(0).invoke('text').should('match', /Number of users: \d+/)
-    cy.get('p').eq(1).invoke('text').should('match', /Number of admins: \d+/)
-    cy.get('p').eq(2).contains('Users')
-    cy.get('p').eq(3).contains('Cars')
-    cy.logoutAdmin()
-  })
-  it('Should have correct links', () => {
-    cy.loginAdmin()
-    cy.url().should('match', /http:\/\/localhost:3001\/users\/1/)
-    cy.visit('http://localhost:3001/admin')
-    cy.url().should('match', /http:\/\/localhost:3001\/admin/)
-    cy.get('p').contains('Users').should('have.attr', 'href', '/users')
-    cy.logoutAdmin()
-  })
-  it('Should have working links', () => {
-    cy.loginAdmin()
-    cy.url().should('match', /http:\/\/localhost:3001\/users\/1/)
-    cy.visit('http://localhost:3001/admin')
-    cy.url().should('match', /http:\/\/localhost:3001\/admin/)
-    cy.get('p a').contains('Users').click()
-    cy.url().should('match', /http:\/\/localhost:3001\/users/)
-    cy.logoutAdmin()
-  })
-})
-
-describe('Edit user as admin', () => {
-  it('Should be successful', () => {
-    cy.loginAdmin()
-    cy.url().should('match', /http:\/\/localhost:3001\/users\/1/)
-    cy.get('h2').children().eq(1).click()
-    cy.url().should('match', /http:\/\/localhost:3001\/users\/1\/edit/)
-    cy.get('p').contains('Name').next('input').clear()
-    cy.get('p').contains('Name').next('input').type('name')
-    cy.get('p').contains('Email').next('input').clear()
-    cy.get('p').contains('Email').next('input').type('name@mail.com')
-    cy.get('input[type=file]').selectFile('cypress/fixtures/images/office-avatars/dwight-schrute.png')
-    cy.get('button').click()
-    cy.url().should('match', /http:\/\/localhost:3001\/users\/1/)
-    cy.get('h2').should('contain', 'name')
-    cy.get('p').contains('email').should('contain', 'name@mail.com')
-    cy.get('p').contains('avatar:').next('img').should('have.attr', 'src').should('match', /http.*dwight-schrute.png/)
-    cy.get('p').should('contain', 'admin: true')
-    cy.get('h2').children().eq(1).click()
-    cy.url().should('match', /http:\/\/localhost:3001\/users\/1\/edit/)
-    cy.get('p').contains('Name').next('input').clear()
-    cy.get('p').contains('Name').next('input').type('Michael Scott')
-    cy.get('p').contains('Email').next('input').clear()
-    cy.get('p').contains('Email').next('input').type('michaelscott@dundermifflin.com')
-    cy.get('input[type=file]').selectFile('cypress/fixtures/images/office-avatars/michael-scott.png')
-    cy.get('button').click()
-    cy.url().should('match', /http:\/\/localhost:3001\/users\/1/)
-    cy.get('h2').should('contain', 'Michael Scott')
-    cy.get('p').contains('email').should('contain', 'michaelscott@dundermifflin.com')
-    cy.get('p').contains('avatar:').next('img').should('have.attr', 'src').should('match', /http.*michael-scott.png/)
-    cy.get('p').should('contain', 'admin: true')
-    cy.logoutAdmin()
-  })
-})
-
-describe('Admin /users page', () => {
-  it('Should show three users', () => {
-    cy.loginAdmin()
-    cy.url().should('match', /http:\/\/localhost:3001\/users\/1/)
-    cy.visit('http://localhost:3001/users')
-    cy.url().should('match', /http:\/\/localhost:3001\/users/)
-    cy.get('section').children('div').should('have.length', 3)
-    cy.logoutAdmin()
-  })
-})
-
-describe('Admin visiting /cars', () => {
-
-  context('No query string', () => {
-    it("Should show admin's two cars", () => {
-      cy.loginAdmin()
-      cy.url().should('match', /http:\/\/localhost:3001\/users\/1/)
-      cy.visit('http://localhost:3001/cars')
-      cy.url().should('match', /http:\/\/localhost:3001\/cars/)
-      cy.get('section').children('div').should('have.length', 2)
-      cy.get('article').eq(0).find('h2').should('contain', 'Wrenches')
-      cy.get('article').eq(0).should('contain', "Michael's wrench")
-      cy.get('article').eq(1).find('h2').should('contain', 'Bolts')
-      cy.get('article').eq(1).should('contain', "Michael's bolt")
-      cy.logoutAdmin()
-    })
-  })
+# <script>
+# export default { 
+#   middleware: 'adminOnly',
+#   layout: 'admin',
+#   data: () => ({ 
+#     users: [],
+#     cars: [],
+#     maintenances: [],
+#     documents: []
+#   }),
+#   async fetch() { 
+#     this.users = await this.$axios.$get('users')
+#     this.cars = await this.$axios.$get('cars')
+#     this.maintenances = await this.$axios.$get('maintenances')
+#     this.documents = await this.$axios.$get('documents')
+#   }
+# }
+# </script>
+# ~
+# EOF
 
 
-  context('?admin=true query string', () => {
-    it("Should show all cars", () => {
-      cy.loginAdmin()
-      cy.url().should('match', /http:\/\/localhost:3001\/users\/1/)
-      cy.visit('http://localhost:3001/cars?admin=true')
-      cy.url().should('match', /http:\/\/localhost:3001\/cars\?admin=true/)
-      cy.get('section').children('div').should('have.length', 7)
-      cy.logoutAdmin()
-    })
-  })
+# echo -e "\n\n🦄 Cypress\n\n"
+# cd ~/Desktop/front
+# npm install cypress --save-dev
+# npx cypress open
+# puravida cypress/fixtures/images
+# cp -a ~/Desktop/rux-drivetracks/assets/office-avatars ~/Desktop/front/cypress/fixtures/images
 
-  context('user_id=1 query string', () => {
-    it("Should show user one's two cars", () => {
-      cy.loginAdmin()
-      cy.url().should('match', /http:\/\/localhost:3001\/users\/1/)
-      cy.visit('http://localhost:3001/cars?user_id=1')
-      cy.url().should('match', /http:\/\/localhost:3001\/cars\?user_id=1/)
-      cy.get('section').children('div').should('have.length', 2)
-      cy.get('article').eq(0).should('contain', "Michael's wrench")
-      cy.get('article').eq(1).should('contain', "Michael's bolt")
-      cy.logoutAdmin()
-    })
-  })
+# cat <<'EOF' | puravida cypress/support/commands.js ~
+# Cypress.Commands.add('login', () => { 
+#   cy.visit('http://localhost:3001/log-in')
+#   cy.get('input').eq(1).type('jimhalpert@dundermifflin.com')
+#   cy.get('input').eq(2).type('password{enter}')
+# })
 
-  context('user_id=2 query string', () => {
-    it("Should show user two's three cars", () => {
-      cy.loginAdmin()
-      cy.url().should('match', /http:\/\/localhost:3001\/users\/1/)
-      cy.visit('http://localhost:3001/cars?user_id=2')
-      cy.url().should('match', /http:\/\/localhost:3001\/cars\?user_id=2/)
-      cy.get('section').children('div').should('have.length', 3)
-      cy.get('article').eq(0).should('contain', "Jim's bracket")
-      cy.get('article').eq(1).should('contain', "Jim's nut")
-      cy.get('article').eq(2).should('contain', "Jim's pipe")
-      cy.logoutAdmin()
-    })
-  })
+# Cypress.Commands.add('loginNonAdmin', () => { 
+#   cy.visit('http://localhost:3001/log-in')
+#   cy.get('input').eq(1).type('jimhalpert@dundermifflin.com')
+#   cy.get('input').eq(2).type('password{enter}')
+# })
+
+# Cypress.Commands.add('loginAdmin', () => { 
+#   cy.visit('http://localhost:3001/log-in')
+#   cy.get('input').eq(1).type('michaelscott@dundermifflin.com')
+#   cy.get('input').eq(2).type('password{enter}')
+# })
+
+# Cypress.Commands.add('loginInvalid', () => { 
+#   cy.visit('http://localhost:3001/log-in')
+#   cy.get('input').eq(1).type('xyz@dundermifflin.com')
+#   cy.get('input').eq(2).type('password{enter}')
+# })
+
+# Cypress.Commands.add('logoutNonAdmin', (admin) => { 
+#   cy.logout(false);
+# })
+
+# Cypress.Commands.add('logoutAdmin', (admin) => { 
+#   cy.logout(true);
+# })
+
+# Cypress.Commands.add('logout', (admin) => { 
+#   const num = admin ? 3 : 2
+#   cy.get('nav ul.menu').find('li').eq(num).click()
+#     .then(() => { cy.get('nav details ul').find('li').eq(2).click() })
+# })
+# ~
+# EOF
+# cat <<'EOF' | puravida cypress/e2e/logged-out-page-copy.cy.js ~
+# /// <reference types="cypress" />
+
+# // reset the db: db:drop db:create db:migrate db:seed RAILS_ENV=test
+# // run dev server with test db: CYPRESS=1 bin/rails server -p 3000
+# context('Logged Out', () => {
+#   describe('Homepage Copy', () => {
+#     it('should find page copy', () => {
+#       cy.visit('http://localhost:3001/')
+#       cy.get('main.container')
+#         .should('contain', 'Rails 7 Nuxt 2 Admin Boilerplate')
+#         .should('contain', 'Features')
+#       cy.get('ul.features')
+#         .within(() => {
+#           cy.get('li').eq(0).contains('Admin dashboard')
+#           cy.get('li').eq(1).contains('Placeholder users')
+#           cy.get('li').eq(2).contains('Placeholder user item ("car")')
+#         })
+#       cy.get('h3.stack')
+#         .next('div.aligned-columns')
+#           .within(() => {
+#             cy.get('p').eq(0).contains('frontend:')
+#             cy.get('p').eq(0).contains('Nuxt 2')
+#             cy.get('p').eq(1).contains('backend API:')
+#             cy.get('p').eq(1).contains('Rails 7')
+#             cy.get('p').eq(2).contains('database:')
+#             cy.get('p').eq(2).contains('Postgres')
+#             cy.get('p').eq(3).contains('styles:')
+#             cy.get('p').eq(3).contains('Sass')
+#             cy.get('p').eq(4).contains('css framework:')
+#             cy.get('p').eq(4).contains('Pico.css')
+#             cy.get('p').eq(5).contains('e2e tests:')
+#             cy.get('p').eq(5).contains('Cypress')
+#             cy.get('p').eq(6).contains('api tests:')
+#             cy.get('p').eq(6).contains('RSpec')      
+#           })
+#       cy.get('h3.tools')
+#         .next('div.aligned-columns')
+#           .within(() => {
+#             cy.get('p').eq(0).contains('user avatars:')
+#             cy.get('p').eq(0).contains('local active storage')
+#             cy.get('p').eq(1).contains('backend auth:')
+#             cy.get('p').eq(1).contains('bcrypt & jwt')
+#             cy.get('p').eq(2).contains('frontend auth:')
+#             cy.get('p').eq(2).contains('nuxt auth module')
+#           }) 
+#     })
+#   })
+
+#   describe('Log In Copy', () => {
+#     it('should find page copy', () => {
+#       cy.visit('http://localhost:3001/log-in')
+#       cy.get('main.container')
+#         .should('contain', 'Email')
+#         .should('contain', 'Password')
+#         .should('contain', 'Log In')
+#         .should('contain', "Don't have an account")
+#     })
+#   })
+
+#   describe('Sign Up Copy', () => {
+#     it('should find page copy', () => {
+#       cy.visit('http://localhost:3001/sign-up')
+#       cy.get('main.container')
+#         .should('contain', 'Name')
+#         .should('contain', 'Email')
+#         .should('contain', 'Avatar')
+#         .should('contain', 'Password')
+#         .should('contain', 'Create User')
+#     })
+#   })
+# })
+# ~
+# EOF
+# cat <<'EOF' | puravida cypress/e2e/sign-up-flow.cy.js ~
+# /// <reference types="cypress" />
+
+# // reset the db: db:drop db:create db:migrate db:seed RAILS_ENV=test
+# // run dev server with test db: CYPRESS=1 bin/rails server -p 3000
+# describe('Sign Up Flow', () => {
+#   it('Should redirect to user show page', () => {
+#     cy.visit('http://localhost:3001/sign-up')
+#     cy.get('p').contains('Name').next('input').type('name')
+#     cy.get('p').contains('Email').next('input').type('test' + Math.random().toString(36).substring(2, 15) + '@mail.com')
+#     cy.get('p').contains('Email').next('input').type('test' + Math.random().toString(36).substring(2, 15) + '@mail.com')
+#     cy.get('input[type=file]').selectFile('cypress/fixtures/images/office-avatars/dwight-schrute.png')
+#     cy.get('p').contains('Password').next('input').type('password')
+#     cy.get('button').contains('Create User').click()
+#     cy.url().should('match', /http:\/\/localhost:3001\/users\/\d+/)
+#     cy.get('h2').should('contain', 'name')
+#     // TODO: assert avatar presence
+#     // cy.logout()
+#   })
+# })
+# ~
+# EOF
+# cat <<'EOF' | puravida cypress/e2e/log-in-flow.cy.js ~
+# /// <reference types="cypress" />
+
+# // reset the db: db:drop db:create db:migrate db:seed RAILS_ENV=test
+# // run dev server with test db: CYPRESS=1 bin/rails server -p 3000
+
+# describe('Manual Login', () => {
+#   it('Should log in user', () => {
+#     cy.intercept('POST', '/login').as('login')
+#     cy.loginAdmin()
+#     cy.wait('@login').then(({response}) => {
+#       expect(response.statusCode).to.eq(200)
+#     })
+#     cy.url().should('eq', 'http://localhost:3001/users/1')
+#     cy.get('h2').should('contain', 'Michael Scott')
+#     cy.logoutAdmin()
+#   })
+# })
+
+# context('Mocked Request Login', () => {
+#   describe('Login with real email', () => {
+#     it('Should get 200 response', () => {
+#       cy.visit('http://localhost:3001/log-in')
+#       cy.request(
+#         { url: 'http://localhost:3000/login', method: 'POST', body: { email: 'michaelscott@dundermifflin.com', 
+#         password: 'password' }, failOnStatusCode: false })
+#         .its('status').should('equal', 200)
+#       cy.get('h2').should('contain', 'Log In')
+#       cy.url().should('include', '/log-in')
+#     })
+#   })
+
+#   describe('Login with fake email', () => {
+#     it('Should get 401 response', () => {
+#       cy.visit('http://localhost:3001/log-in')
+#       cy.request(
+#         { url: 'http://localhost:3000/login', method: 'POST', body: { email: 'xyz@dundermifflin.com', 
+#         password: 'password' }, failOnStatusCode: false })
+#         .its('status').should('equal', 401)
+#       cy.get('h2').should('contain', 'Log In')
+#       cy.url().should('include', '/log-in')
+#     })
+#   })
+# })
+# ~
+# EOF
+# cat <<'EOF' | puravida cypress/e2e/admin.cy.js ~
+# /// <reference types="cypress" />
+
+# // reset the db: rails db:drop db:create db:migrate db:seed RAILS_ENV=test
+# // run dev server with test db: CYPRESS=1 bin/rails server -p 3000
+
+# describe('Admin login', () => {
+#   it('Should go to admin show page', () => {
+#     cy.loginAdmin()
+#     cy.url().should('match', /http:\/\/localhost:3001\/users\/1/)
+#     cy.get('h2').should('contain', 'Michael Scott')
+#     cy.get('p').should('contain', 'id: 1')
+#     cy.get('p').should('contain', 'avatar:')
+#     cy.get('p').contains('avatar:').next('img').should('have.attr', 'src').should('match', /http.*michael-scott.png/)
+#     cy.get('p').should('contain', 'admin: true')
+#     cy.logoutAdmin()
+#   })
+#   it('Should contain admin nav', () => {
+#     cy.loginAdmin()
+#     cy.get('nav ul.menu li a').should('contain', 'Admin')
+#     cy.logoutAdmin()
+#   })
+# })
+
+# describe('Admin nav', () => {
+#   it('Should work', () => {
+#     cy.loginAdmin()
+#     cy.get('nav li a').contains('Admin').click()
+#     cy.url().should('match', /http:\/\/localhost:3001\/admin/)
+#     cy.logoutAdmin()
+#   })
+# })
+
+# describe('Admin page', () => {
+#   it('Should have correct copy', () => {
+#     cy.loginAdmin()
+#     cy.url().should('match', /http:\/\/localhost:3001\/users\/1/)
+#     cy.visit('http://localhost:3001/admin')
+#     cy.url().should('match', /http:\/\/localhost:3001\/admin/)
+#     cy.get('p').eq(0).invoke('text').should('match', /Number of users: \d+/)
+#     cy.get('p').eq(1).invoke('text').should('match', /Number of admins: \d+/)
+#     cy.get('p').eq(2).contains('Users')
+#     cy.get('p').eq(3).contains('Cars')
+#     cy.logoutAdmin()
+#   })
+#   it('Should have correct links', () => {
+#     cy.loginAdmin()
+#     cy.url().should('match', /http:\/\/localhost:3001\/users\/1/)
+#     cy.visit('http://localhost:3001/admin')
+#     cy.url().should('match', /http:\/\/localhost:3001\/admin/)
+#     cy.get('p').contains('Users').should('have.attr', 'href', '/users')
+#     cy.logoutAdmin()
+#   })
+#   it('Should have working links', () => {
+#     cy.loginAdmin()
+#     cy.url().should('match', /http:\/\/localhost:3001\/users\/1/)
+#     cy.visit('http://localhost:3001/admin')
+#     cy.url().should('match', /http:\/\/localhost:3001\/admin/)
+#     cy.get('p a').contains('Users').click()
+#     cy.url().should('match', /http:\/\/localhost:3001\/users/)
+#     cy.logoutAdmin()
+#   })
+# })
+
+# describe('Edit user as admin', () => {
+#   it('Should be successful', () => {
+#     cy.loginAdmin()
+#     cy.url().should('match', /http:\/\/localhost:3001\/users\/1/)
+#     cy.get('h2').children().eq(1).click()
+#     cy.url().should('match', /http:\/\/localhost:3001\/users\/1\/edit/)
+#     cy.get('p').contains('Name').next('input').clear()
+#     cy.get('p').contains('Name').next('input').type('name')
+#     cy.get('p').contains('Email').next('input').clear()
+#     cy.get('p').contains('Email').next('input').type('name@mail.com')
+#     cy.get('input[type=file]').selectFile('cypress/fixtures/images/office-avatars/dwight-schrute.png')
+#     cy.get('button').click()
+#     cy.url().should('match', /http:\/\/localhost:3001\/users\/1/)
+#     cy.get('h2').should('contain', 'name')
+#     cy.get('p').contains('email').should('contain', 'name@mail.com')
+#     cy.get('p').contains('avatar:').next('img').should('have.attr', 'src').should('match', /http.*dwight-schrute.png/)
+#     cy.get('p').should('contain', 'admin: true')
+#     cy.get('h2').children().eq(1).click()
+#     cy.url().should('match', /http:\/\/localhost:3001\/users\/1\/edit/)
+#     cy.get('p').contains('Name').next('input').clear()
+#     cy.get('p').contains('Name').next('input').type('Michael Scott')
+#     cy.get('p').contains('Email').next('input').clear()
+#     cy.get('p').contains('Email').next('input').type('michaelscott@dundermifflin.com')
+#     cy.get('input[type=file]').selectFile('cypress/fixtures/images/office-avatars/michael-scott.png')
+#     cy.get('button').click()
+#     cy.url().should('match', /http:\/\/localhost:3001\/users\/1/)
+#     cy.get('h2').should('contain', 'Michael Scott')
+#     cy.get('p').contains('email').should('contain', 'michaelscott@dundermifflin.com')
+#     cy.get('p').contains('avatar:').next('img').should('have.attr', 'src').should('match', /http.*michael-scott.png/)
+#     cy.get('p').should('contain', 'admin: true')
+#     cy.logoutAdmin()
+#   })
+# })
+
+# describe('Admin /users page', () => {
+#   it('Should show three users', () => {
+#     cy.loginAdmin()
+#     cy.url().should('match', /http:\/\/localhost:3001\/users\/1/)
+#     cy.visit('http://localhost:3001/users')
+#     cy.url().should('match', /http:\/\/localhost:3001\/users/)
+#     cy.get('section').children('div').should('have.length', 3)
+#     cy.logoutAdmin()
+#   })
+# })
+
+# describe('Admin visiting /cars', () => {
+
+#   context('No query string', () => {
+#     it("Should show admin's two cars", () => {
+#       cy.loginAdmin()
+#       cy.url().should('match', /http:\/\/localhost:3001\/users\/1/)
+#       cy.visit('http://localhost:3001/cars')
+#       cy.url().should('match', /http:\/\/localhost:3001\/cars/)
+#       cy.get('section').children('div').should('have.length', 2)
+#       cy.get('article').eq(0).find('h2').should('contain', 'Wrenches')
+#       cy.get('article').eq(0).should('contain', "Michael's wrench")
+#       cy.get('article').eq(1).find('h2').should('contain', 'Bolts')
+#       cy.get('article').eq(1).should('contain', "Michael's bolt")
+#       cy.logoutAdmin()
+#     })
+#   })
+
+
+#   context('?admin=true query string', () => {
+#     it("Should show all cars", () => {
+#       cy.loginAdmin()
+#       cy.url().should('match', /http:\/\/localhost:3001\/users\/1/)
+#       cy.visit('http://localhost:3001/cars?admin=true')
+#       cy.url().should('match', /http:\/\/localhost:3001\/cars\?admin=true/)
+#       cy.get('section').children('div').should('have.length', 7)
+#       cy.logoutAdmin()
+#     })
+#   })
+
+#   context('user_id=1 query string', () => {
+#     it("Should show user one's two cars", () => {
+#       cy.loginAdmin()
+#       cy.url().should('match', /http:\/\/localhost:3001\/users\/1/)
+#       cy.visit('http://localhost:3001/cars?user_id=1')
+#       cy.url().should('match', /http:\/\/localhost:3001\/cars\?user_id=1/)
+#       cy.get('section').children('div').should('have.length', 2)
+#       cy.get('article').eq(0).should('contain', "Michael's wrench")
+#       cy.get('article').eq(1).should('contain', "Michael's bolt")
+#       cy.logoutAdmin()
+#     })
+#   })
+
+#   context('user_id=2 query string', () => {
+#     it("Should show user two's three cars", () => {
+#       cy.loginAdmin()
+#       cy.url().should('match', /http:\/\/localhost:3001\/users\/1/)
+#       cy.visit('http://localhost:3001/cars?user_id=2')
+#       cy.url().should('match', /http:\/\/localhost:3001\/cars\?user_id=2/)
+#       cy.get('section').children('div').should('have.length', 3)
+#       cy.get('article').eq(0).should('contain', "Jim's bracket")
+#       cy.get('article').eq(1).should('contain', "Jim's nut")
+#       cy.get('article').eq(2).should('contain', "Jim's pipe")
+#       cy.logoutAdmin()
+#     })
+#   })
   
-})
-~
-EOF
-cat <<'EOF' | puravida cypress/e2e/non-admin.cy.js ~
-/// <reference types="cypress" />
+# })
+# ~
+# EOF
+# cat <<'EOF' | puravida cypress/e2e/non-admin.cy.js ~
+# /// <reference types="cypress" />
 
-// reset the db: rails db:drop db:create db:migrate db:seed RAILS_ENV=test
-// run dev server with test db: CYPRESS=1 bin/rails server -p 3000
+# // reset the db: rails db:drop db:create db:migrate db:seed RAILS_ENV=test
+# // run dev server with test db: CYPRESS=1 bin/rails server -p 3000
 
-describe('Non-admin login', () => {
-  it('Should go to non-admin show page', () => {
-    cy.loginNonAdmin()
-    cy.url().should('match', /http:\/\/localhost:3001\/users\/2/)
-    cy.get('h2').should('contain', 'Jim Halpert')
-    cy.get('p').should('contain', 'id: 2')
-    cy.get('p').should('contain', 'avatar:')
-    cy.get('p').contains('avatar:').next('img').should('have.attr', 'src').should('match', /http.*jim-halpert.png/)
-    cy.get('p').contains('admin').should('not.exist')
-    cy.logoutNonAdmin()
-  })
-  it('Should not contain admin nav', () => {
-    cy.loginNonAdmin()
-    cy.url().should('match', /http:\/\/localhost:3001\/users\/2/)
-    cy.get('nav ul.menu li a').contains('Admin').should('not.exist')
-    cy.logoutNonAdmin()
-  })
-})
+# describe('Non-admin login', () => {
+#   it('Should go to non-admin show page', () => {
+#     cy.loginNonAdmin()
+#     cy.url().should('match', /http:\/\/localhost:3001\/users\/2/)
+#     cy.get('h2').should('contain', 'Jim Halpert')
+#     cy.get('p').should('contain', 'id: 2')
+#     cy.get('p').should('contain', 'avatar:')
+#     cy.get('p').contains('avatar:').next('img').should('have.attr', 'src').should('match', /http.*jim-halpert.png/)
+#     cy.get('p').contains('admin').should('not.exist')
+#     cy.logoutNonAdmin()
+#   })
+#   it('Should not contain admin nav', () => {
+#     cy.loginNonAdmin()
+#     cy.url().should('match', /http:\/\/localhost:3001\/users\/2/)
+#     cy.get('nav ul.menu li a').contains('Admin').should('not.exist')
+#     cy.logoutNonAdmin()
+#   })
+# })
 
-describe('Accessing /users as non-admin', () => {
-  it('Should redirect to home', () => {
-    cy.loginNonAdmin()
-    cy.url().should('match', /http:\/\/localhost:3001\/users\/2/)
-    cy.visit('http://localhost:3001/users', { failOnStatusCode: false } )
-    cy.url().should('match', /^http:\/\/localhost:3001\/$/)
-    cy.logoutNonAdmin()
-  })
-})
+# describe('Accessing /users as non-admin', () => {
+#   it('Should redirect to home', () => {
+#     cy.loginNonAdmin()
+#     cy.url().should('match', /http:\/\/localhost:3001\/users\/2/)
+#     cy.visit('http://localhost:3001/users', { failOnStatusCode: false } )
+#     cy.url().should('match', /^http:\/\/localhost:3001\/$/)
+#     cy.logoutNonAdmin()
+#   })
+# })
 
-describe('Accessing /users/1 as non-admin', () => {
-  it('Should go to non-admin show page', () => {
-    cy.loginNonAdmin()
-    cy.url().should('match', /http:\/\/localhost:3001\/users\/2/)
-    cy.visit('http://localhost:3001/users/1', { failOnStatusCode: false } )
-    cy.url().should('match', /^http:\/\/localhost:3001\/$/)
-    cy.logoutNonAdmin()
-  })
-})
+# describe('Accessing /users/1 as non-admin', () => {
+#   it('Should go to non-admin show page', () => {
+#     cy.loginNonAdmin()
+#     cy.url().should('match', /http:\/\/localhost:3001\/users\/2/)
+#     cy.visit('http://localhost:3001/users/1', { failOnStatusCode: false } )
+#     cy.url().should('match', /^http:\/\/localhost:3001\/$/)
+#     cy.logoutNonAdmin()
+#   })
+# })
 
-describe('Accessing /users/2 as non-admin user 2', () => {
-  it('Should go to user show page', () => {
-    cy.loginNonAdmin()
-    cy.url().should('match', /http:\/\/localhost:3001\/users\/2/)
-    cy.visit('http://localhost:3001/users/2', { failOnStatusCode: false } )
-    cy.url().should('match', /^http:\/\/localhost:3001\/users\/2$/)
-    cy.logoutNonAdmin()
-  })
-})
+# describe('Accessing /users/2 as non-admin user 2', () => {
+#   it('Should go to user show page', () => {
+#     cy.loginNonAdmin()
+#     cy.url().should('match', /http:\/\/localhost:3001\/users\/2/)
+#     cy.visit('http://localhost:3001/users/2', { failOnStatusCode: false } )
+#     cy.url().should('match', /^http:\/\/localhost:3001\/users\/2$/)
+#     cy.logoutNonAdmin()
+#   })
+# })
 
-describe('Accessing /users/3 as non-admin user 2', () => {
-  it('Should go to home', () => {
-    cy.loginNonAdmin()
-    cy.url().should('match', /http:\/\/localhost:3001\/users\/2/)
-    cy.visit('http://localhost:3001/users/3', { failOnStatusCode: false } )
-    cy.url().should('match', /^http:\/\/localhost:3001\/$/)
-    cy.logoutNonAdmin()
-  })
-})
+# describe('Accessing /users/3 as non-admin user 2', () => {
+#   it('Should go to home', () => {
+#     cy.loginNonAdmin()
+#     cy.url().should('match', /http:\/\/localhost:3001\/users\/2/)
+#     cy.visit('http://localhost:3001/users/3', { failOnStatusCode: false } )
+#     cy.url().should('match', /^http:\/\/localhost:3001\/$/)
+#     cy.logoutNonAdmin()
+#   })
+# })
 
-describe('Accessing /users/1/edit as non-admin', () => {
-  it('Should go to non-admin show page', () => {
-    cy.loginNonAdmin()
-    cy.url().should('match', /http:\/\/localhost:3001\/users\/2/)
-    cy.visit('http://localhost:3001/users/1/edit', { failOnStatusCode: false } )
-    cy.url().should('match', /^http:\/\/localhost:3001\/$/)
-    cy.logoutNonAdmin()
-  })
-})
+# describe('Accessing /users/1/edit as non-admin', () => {
+#   it('Should go to non-admin show page', () => {
+#     cy.loginNonAdmin()
+#     cy.url().should('match', /http:\/\/localhost:3001\/users\/2/)
+#     cy.visit('http://localhost:3001/users/1/edit', { failOnStatusCode: false } )
+#     cy.url().should('match', /^http:\/\/localhost:3001\/$/)
+#     cy.logoutNonAdmin()
+#   })
+# })
 
-describe('Accessing /users/3/edit as non-admin', () => {
-  it('Should go to non-admin show page', () => {
-    cy.loginNonAdmin()
-    cy.url().should('match', /http:\/\/localhost:3001\/users\/2/)
-    cy.visit('http://localhost:3001/users/3/edit', { failOnStatusCode: false } )
-    cy.url().should('match', /^http:\/\/localhost:3001\/$/)
-    cy.logoutNonAdmin()
-  })
-})
+# describe('Accessing /users/3/edit as non-admin', () => {
+#   it('Should go to non-admin show page', () => {
+#     cy.loginNonAdmin()
+#     cy.url().should('match', /http:\/\/localhost:3001\/users\/2/)
+#     cy.visit('http://localhost:3001/users/3/edit', { failOnStatusCode: false } )
+#     cy.url().should('match', /^http:\/\/localhost:3001\/$/)
+#     cy.logoutNonAdmin()
+#   })
+# })
 
-describe('Edit self as non-admin', () => {
-  it('Edit should be successful', () => {
-    cy.loginNonAdmin()
-    cy.url().should('match', /http:\/\/localhost:3001\/users\/2/)
-    cy.get('h2').contains('Jim Halpert').next('a').click()
-    cy.url().should('match', /http:\/\/localhost:3001\/users\/2\/edit/)
-    cy.get('p').contains('Name').next('input').clear()
-    cy.get('p').contains('Name').next('input').type('name')
-    cy.get('p').contains('Email').next('input').clear()
-    cy.get('p').contains('Email').next('input').type('name@mail.com')
-    cy.get('input[type=file]').selectFile('cypress/fixtures/images/office-avatars/dwight-schrute.png')
-    cy.get('button').click()
-    cy.url().should('match', /http:\/\/localhost:3001\/users\/2/)
-    cy.get('h2').should('contain', 'name')
-    cy.get('p').contains('email').should('contain', 'name@mail.com')
-    cy.get('p').contains('avatar:').next('img').should('have.attr', 'src').should('match', /http.*dwight-schrute.png/)
-    cy.get('p').contains('admin').should('not.exist')
-    cy.get('h2').children().eq(1).click()
-    cy.url().should('match', /http:\/\/localhost:3001\/users\/2\/edit/)
-    cy.get('p').contains('Name').next('input').clear()
-    cy.get('p').contains('Name').next('input').type('Jim Halpert')
-    cy.get('p').contains('Email').next('input').clear()
-    cy.get('p').contains('Email').next('input').type('jimhalpert@dundermifflin.com')
-    cy.get('input[type=file]').selectFile('cypress/fixtures/images/office-avatars/jim-halpert.png')
-    cy.get('button').click()
-    cy.url().should('match', /http:\/\/localhost:3001\/users\/2/)
-    cy.get('h2').should('contain', 'Jim Halpert')
-    cy.get('p').contains('email').should('contain', 'jimhalpert@dundermifflin.com')
-    cy.get('p').contains('avatar:').next('img').should('have.attr', 'src').should('match', /http.*jim-halpert.png/)
-    cy.get('p').contains('admin').should('not.exist')
-    cy.logoutNonAdmin()
-  })
-})
+# describe('Edit self as non-admin', () => {
+#   it('Edit should be successful', () => {
+#     cy.loginNonAdmin()
+#     cy.url().should('match', /http:\/\/localhost:3001\/users\/2/)
+#     cy.get('h2').contains('Jim Halpert').next('a').click()
+#     cy.url().should('match', /http:\/\/localhost:3001\/users\/2\/edit/)
+#     cy.get('p').contains('Name').next('input').clear()
+#     cy.get('p').contains('Name').next('input').type('name')
+#     cy.get('p').contains('Email').next('input').clear()
+#     cy.get('p').contains('Email').next('input').type('name@mail.com')
+#     cy.get('input[type=file]').selectFile('cypress/fixtures/images/office-avatars/dwight-schrute.png')
+#     cy.get('button').click()
+#     cy.url().should('match', /http:\/\/localhost:3001\/users\/2/)
+#     cy.get('h2').should('contain', 'name')
+#     cy.get('p').contains('email').should('contain', 'name@mail.com')
+#     cy.get('p').contains('avatar:').next('img').should('have.attr', 'src').should('match', /http.*dwight-schrute.png/)
+#     cy.get('p').contains('admin').should('not.exist')
+#     cy.get('h2').children().eq(1).click()
+#     cy.url().should('match', /http:\/\/localhost:3001\/users\/2\/edit/)
+#     cy.get('p').contains('Name').next('input').clear()
+#     cy.get('p').contains('Name').next('input').type('Jim Halpert')
+#     cy.get('p').contains('Email').next('input').clear()
+#     cy.get('p').contains('Email').next('input').type('jimhalpert@dundermifflin.com')
+#     cy.get('input[type=file]').selectFile('cypress/fixtures/images/office-avatars/jim-halpert.png')
+#     cy.get('button').click()
+#     cy.url().should('match', /http:\/\/localhost:3001\/users\/2/)
+#     cy.get('h2').should('contain', 'Jim Halpert')
+#     cy.get('p').contains('email').should('contain', 'jimhalpert@dundermifflin.com')
+#     cy.get('p').contains('avatar:').next('img').should('have.attr', 'src').should('match', /http.*jim-halpert.png/)
+#     cy.get('p').contains('admin').should('not.exist')
+#     cy.logoutNonAdmin()
+#   })
+# })
 
-describe('Non-admin visiting /cars', () => {
-  context('No query string', () => {
-    it("Should redirect to home", () => {
-      cy.loginNonAdmin()
-      cy.url().should('match', /http:\/\/localhost:3001\/users\/2/)
-      cy.visit('http://localhost:3001/cars')
-      cy.url().should('match', /http:\/\/localhost:3001\//)
-      cy.logoutNonAdmin()
-    })
-  })
-  context('?admin=true query string', () => {
-    it("Should redirect to home", () => {
-      cy.loginNonAdmin()
-      cy.url().should('match', /http:\/\/localhost:3001\/users\/2/)
-      cy.visit('http://localhost:3001/cars?admin=true')
-      cy.url().should('match', /http:\/\/localhost:3001\//)
-      cy.logoutNonAdmin()
-    })
-  })
-  context('?user_id=1 query string', () => {
-    it("Should redirect to to ?user_id=2", () => {
-      cy.loginNonAdmin()
-      cy.url().should('match', /http:\/\/localhost:3001\/users\/2/)
-      cy.visit('http://localhost:3001/cars?user_id=1')
-      cy.url().should('match', /http:\/\/localhost:3001\/cars\?user_id=2/)
-      cy.get('article').should('have.length', 3)
-      cy.get('article').eq(0).should('contain', "Jim's bracket")
-      cy.get('article').eq(1).should('contain', "Jim's nut")
-      cy.get('article').eq(2).should('contain', "Jim's pipe")
-      cy.logoutNonAdmin()
-    })
-  })
-  context('?user_id=2 query string', () => {
-    it("Should show user's three cars", () => {
-      cy.loginNonAdmin()
-      cy.url().should('match', /http:\/\/localhost:3001\/users\/2/)
-      cy.visit('http://localhost:3001/cars?user_id=2')
-      cy.url().should('match', /http:\/\/localhost:3001\/cars\?user_id=2/)
-      cy.get('article').should('have.length', 3)
-      cy.get('article').eq(0).should('contain', "Jim's bracket")
-      cy.get('article').eq(1).should('contain', "Jim's nut")
-      cy.get('article').eq(2).should('contain', "Jim's pipe")
-      cy.logoutNonAdmin()
-    })
-  })
-  context('?user_id=3 query string', () => {
-    it("Should redirect to to ?user_id=2", () => {
-      cy.loginNonAdmin()
-      cy.url().should('match', /http:\/\/localhost:3001\/users\/2/)
-      cy.visit('http://localhost:3001/cars?user_id=3')
-      cy.url().should('match', /http:\/\/localhost:3001\/cars\?user_id=2/)
-      cy.get('article').should('have.length', 3)
-      cy.get('article').eq(0).should('contain', "Jim's bracket")
-      cy.get('article').eq(1).should('contain', "Jim's nut")
-      cy.get('article').eq(2).should('contain', "Jim's pipe")
-      cy.logoutNonAdmin()
-    })
-  })
-})
-~
-EOF
+# describe('Non-admin visiting /cars', () => {
+#   context('No query string', () => {
+#     it("Should redirect to home", () => {
+#       cy.loginNonAdmin()
+#       cy.url().should('match', /http:\/\/localhost:3001\/users\/2/)
+#       cy.visit('http://localhost:3001/cars')
+#       cy.url().should('match', /http:\/\/localhost:3001\//)
+#       cy.logoutNonAdmin()
+#     })
+#   })
+#   context('?admin=true query string', () => {
+#     it("Should redirect to home", () => {
+#       cy.loginNonAdmin()
+#       cy.url().should('match', /http:\/\/localhost:3001\/users\/2/)
+#       cy.visit('http://localhost:3001/cars?admin=true')
+#       cy.url().should('match', /http:\/\/localhost:3001\//)
+#       cy.logoutNonAdmin()
+#     })
+#   })
+#   context('?user_id=1 query string', () => {
+#     it("Should redirect to to ?user_id=2", () => {
+#       cy.loginNonAdmin()
+#       cy.url().should('match', /http:\/\/localhost:3001\/users\/2/)
+#       cy.visit('http://localhost:3001/cars?user_id=1')
+#       cy.url().should('match', /http:\/\/localhost:3001\/cars\?user_id=2/)
+#       cy.get('article').should('have.length', 3)
+#       cy.get('article').eq(0).should('contain', "Jim's bracket")
+#       cy.get('article').eq(1).should('contain', "Jim's nut")
+#       cy.get('article').eq(2).should('contain', "Jim's pipe")
+#       cy.logoutNonAdmin()
+#     })
+#   })
+#   context('?user_id=2 query string', () => {
+#     it("Should show user's three cars", () => {
+#       cy.loginNonAdmin()
+#       cy.url().should('match', /http:\/\/localhost:3001\/users\/2/)
+#       cy.visit('http://localhost:3001/cars?user_id=2')
+#       cy.url().should('match', /http:\/\/localhost:3001\/cars\?user_id=2/)
+#       cy.get('article').should('have.length', 3)
+#       cy.get('article').eq(0).should('contain', "Jim's bracket")
+#       cy.get('article').eq(1).should('contain', "Jim's nut")
+#       cy.get('article').eq(2).should('contain', "Jim's pipe")
+#       cy.logoutNonAdmin()
+#     })
+#   })
+#   context('?user_id=3 query string', () => {
+#     it("Should redirect to to ?user_id=2", () => {
+#       cy.loginNonAdmin()
+#       cy.url().should('match', /http:\/\/localhost:3001\/users\/2/)
+#       cy.visit('http://localhost:3001/cars?user_id=3')
+#       cy.url().should('match', /http:\/\/localhost:3001\/cars\?user_id=2/)
+#       cy.get('article').should('have.length', 3)
+#       cy.get('article').eq(0).should('contain', "Jim's bracket")
+#       cy.get('article').eq(1).should('contain', "Jim's nut")
+#       cy.get('article').eq(2).should('contain', "Jim's pipe")
+#       cy.logoutNonAdmin()
+#     })
+#   })
+# })
+# ~
+# EOF
 
 
 # echo -e "\n\n🦄 Deploy\n\n"
