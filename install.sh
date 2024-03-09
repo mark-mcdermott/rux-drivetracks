@@ -647,11 +647,13 @@ class ApplicationController < ActionController::API
     car = Car.find(maintenance.car_id)
     user = User.find(car.user_id)
     # images = maintenance.images.present? ? maintenance.images.map { |image| url_for(image) } : nil
+    documents = Document.where(documentable_id: maintenance.id, documentable_type: "Maintenance").map { |document| prep_raw_document(document) }
     maintenance = maintenance.slice(:id,:date,:description,:vendor,:cost,:car_id)
     maintenance['carId'] = car.id
     maintenance['carName'] = car.name
     maintenance['userId'] = user.id
     maintenance['userName'] = user.name
+    maintenance['documents'] = documents
     # maintenance['images'] = images
     maintenance
   end
@@ -1057,11 +1059,13 @@ class ApplicationController < ActionController::API
     car = Car.find(maintenance.car_id)
     user = User.find(car.user_id)
     # images = maintenance.images.present? ? maintenance.images.map { |image| url_for(image) } : nil
+    documents = Document.where(documentable_id: maintenance.id, documentable_type: "Maintenance").map { |document| prep_raw_document(document) }
     maintenance = maintenance.slice(:id,:date,:description,:vendor,:cost,:car_id)
     maintenance['carId'] = car.id
     maintenance['carName'] = car.name
     maintenance['userId'] = user.id
     maintenance['userName'] = user.name
+    maintenance['documents'] = documents
     # maintenance['images'] = images
     maintenance
   end
@@ -2120,11 +2124,13 @@ class ApplicationController < ActionController::API
     car = Car.find(maintenance.car_id)
     user = User.find(car.user_id)
     # images = maintenance.images.present? ? maintenance.images.map { |image| url_for(image) } : nil
+    documents = Document.where(documentable_id: maintenance.id, documentable_type: "Maintenance").map { |document| prep_raw_document(document) }
     maintenance = maintenance.slice(:id,:date,:description,:vendor,:cost,:car_id)
     maintenance['carId'] = car.id
     maintenance['carName'] = car.name
     maintenance['userId'] = user.id
     maintenance['userName'] = user.name
+    maintenance['documents'] = documents
     # maintenance['images'] = images
     maintenance
   end
@@ -2765,11 +2771,13 @@ class ApplicationController < ActionController::API
     car = Car.find(maintenance.car_id)
     user = User.find(car.user_id)
     # images = maintenance.images.present? ? maintenance.images.map { |image| url_for(image) } : nil
+    documents = Document.where(documentable_id: maintenance.id, documentable_type: "Maintenance").map { |document| prep_raw_document(document) }
     maintenance = maintenance.slice(:id,:date,:description,:vendor,:cost,:car_id)
     maintenance['carId'] = car.id
     maintenance['carName'] = car.name
     maintenance['userId'] = user.id
     maintenance['userName'] = user.name
+    maintenance['documents'] = documents
     # maintenance['images'] = images
     maintenance
   end
@@ -4093,13 +4101,19 @@ cat <<'EOF' | puravida components/maintenance/Card.vue ~
     <p>description: {{ maintenance.description }}</p>
     <p>vendor: {{ maintenance.vendor }}</p>
     <p>cost: {{ maintenance.cost }}</p>
+        <p>car: <NuxtLink :to="`/cars/${maintenance.carId}`">{{ maintenance.carName }}</NuxtLink></p>
+    <h4 v-if="maintenance.documents !== null">Documents</h4>
+    <ul v-if="maintenance.documents !== null">
+      <li v-for="document in maintenance.documents" :key="document.id">
+        <NuxtLink :to="`/documents/${document.id}`">{{ document.name }}</NuxtLink>
+      </li>
+    </ul>
     <!-- <p v-if="maintenance.images !== null" class="no-margin">images:</p>
     <div v-if="maintenance.images !== null" :src="maintenance.image">
       <div v-for="image in maintenance.images" :key="image">
         <img :src="image" />
       </div>
     </div> -->
-    <p>car: <NuxtLink :to="`/cars/${maintenance.carId}`">{{ maintenance.carName }}</NuxtLink></p>
   </article>
 </template>
 
