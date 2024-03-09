@@ -1,0 +1,23 @@
+michael:
+  name: Michael Scott
+  email: michaelscott@dundermifflin.com
+  password_digest: <%= BCrypt::Password.create('password') %>
+  admin: true
+
+jim:
+  name: Jim Halpert
+  email: jimhalpert@dundermifflin.com
+  password_digest: <%= BCrypt::Password.create('password') %>
+  admin: false
+
+pam:
+  name: Pam Beesly
+  email: pambeesly@dundermifflin.com
+  password_digest: <%= BCrypt::Password.create('password') %>
+  admin: false
+
+ryan:
+  name: Ryan Howard
+  email: ryanhoward@dundermifflin.com
+  password_digest: <%= BCrypt::Password.create('password') %>
+  admin: true
