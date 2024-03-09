@@ -5315,7 +5315,7 @@ describe('Sign Up Flow', () => {
       cy.visit('http://localhost:3001/users/')
       cy.url().should('match', /http:\/\/localhost:3001\/users/)
       cy.get('section').children('div').should('have.length', 3)
-      cy.logout()
+      cy.logoutAdmin()
     })    
   })
 })
