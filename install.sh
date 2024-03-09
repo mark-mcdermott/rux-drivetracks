@@ -5204,7 +5204,7 @@ Cypress.Commands.add('logoutAdmin', (admin) => {
 })
 
 Cypress.Commands.add('logout', (admin) => { 
-  const num = admin ? 4 : 2
+  const num = admin ? 4 : 3
   cy.get('nav ul.menu').find('li').eq(num).click()
     .then(() => { cy.get('nav details ul').find('li').eq(2).click() })
 })
@@ -5306,8 +5306,11 @@ describe('Sign Up Flow', () => {
       userId = url.split('/')[url.split('/').length - 1]
       cy.logout()
       cy.loginAdmin()
-      cy.visit('http://localhost:3001/users/' + userId)
-      cy.url().should('match', /http:\/\/localhost:3001\/users/`${userId}`)
+      const userShowUrl = `http://localhost:3001/users/${userId}`
+      cy.wait(1000)
+      cy.visit(userShowUrl)
+      const userShowRegex = new RegExp(userShowUrl)
+      cy.url().should('match', userShowRegex)
       cy.get('h2').children().eq(2).click() // deletes user
       cy.visit('http://localhost:3001/users/')
       cy.url().should('match', /http:\/\/localhost:3001\/users/)
