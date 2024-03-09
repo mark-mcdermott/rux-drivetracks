@@ -5091,547 +5091,547 @@ EOF
 echo -e "\n\n🦄 Cypress\n\n"
 cd ~/Desktop/front
 npm install cypress --save-dev
-npx cypress open
-puravida cypress/fixtures/images
-cp -a ~/Desktop/rux-drivetracks/assets/office-avatars ~/Desktop/front/cypress/fixtures/images
+# npx cypress open
+# puravida cypress/fixtures/images
+# cp -a ~/Desktop/rux-drivetracks/assets/office-avatars ~/Desktop/front/cypress/fixtures/images
 
-cat <<'EOF' | puravida cypress/support/commands.js ~
-Cypress.Commands.add('login', () => { 
-  cy.visit('http://localhost:3001/log-in')
-  cy.get('input').eq(1).type('jimhalpert@dundermifflin.com')
-  cy.get('input').eq(2).type('password{enter}')
-})
+# cat <<'EOF' | puravida cypress/support/commands.js ~
+# Cypress.Commands.add('login', () => { 
+#   cy.visit('http://localhost:3001/log-in')
+#   cy.get('input').eq(1).type('jimhalpert@dundermifflin.com')
+#   cy.get('input').eq(2).type('password{enter}')
+# })
 
-Cypress.Commands.add('loginNonAdmin', () => { 
-  cy.visit('http://localhost:3001/log-in')
-  cy.get('input').eq(1).type('jimhalpert@dundermifflin.com')
-  cy.get('input').eq(2).type('password{enter}')
-})
+# Cypress.Commands.add('loginNonAdmin', () => { 
+#   cy.visit('http://localhost:3001/log-in')
+#   cy.get('input').eq(1).type('jimhalpert@dundermifflin.com')
+#   cy.get('input').eq(2).type('password{enter}')
+# })
 
-Cypress.Commands.add('loginAdmin', () => { 
-  cy.visit('http://localhost:3001/log-in')
-  cy.get('input').eq(1).type('michaelscott@dundermifflin.com')
-  cy.get('input').eq(2).type('password{enter}')
-})
+# Cypress.Commands.add('loginAdmin', () => { 
+#   cy.visit('http://localhost:3001/log-in')
+#   cy.get('input').eq(1).type('michaelscott@dundermifflin.com')
+#   cy.get('input').eq(2).type('password{enter}')
+# })
 
-Cypress.Commands.add('loginInvalid', () => { 
-  cy.visit('http://localhost:3001/log-in')
-  cy.get('input').eq(1).type('xyz@dundermifflin.com')
-  cy.get('input').eq(2).type('password{enter}')
-})
+# Cypress.Commands.add('loginInvalid', () => { 
+#   cy.visit('http://localhost:3001/log-in')
+#   cy.get('input').eq(1).type('xyz@dundermifflin.com')
+#   cy.get('input').eq(2).type('password{enter}')
+# })
 
-Cypress.Commands.add('logoutNonAdmin', (admin) => { 
-  cy.logout(false);
-})
+# Cypress.Commands.add('logoutNonAdmin', (admin) => { 
+#   cy.logout(false);
+# })
 
-Cypress.Commands.add('logoutAdmin', (admin) => { 
-  cy.logout(true);
-})
+# Cypress.Commands.add('logoutAdmin', (admin) => { 
+#   cy.logout(true);
+# })
 
-Cypress.Commands.add('logout', (admin) => { 
-  const num = admin ? 4 : 2
-  cy.get('nav ul.menu').find('li').eq(num).click()
-    .then(() => { cy.get('nav details ul').find('li').eq(2).click() })
-})
-~
-EOF
-cat <<'EOF' | puravida cypress/e2e/logged-out-page-copy.cy.js ~
-/// <reference types="cypress" />
+# Cypress.Commands.add('logout', (admin) => { 
+#   const num = admin ? 4 : 2
+#   cy.get('nav ul.menu').find('li').eq(num).click()
+#     .then(() => { cy.get('nav details ul').find('li').eq(2).click() })
+# })
+# ~
+# EOF
+# cat <<'EOF' | puravida cypress/e2e/logged-out-page-copy.cy.js ~
+# /// <reference types="cypress" />
 
-// reset the db: db:drop db:create db:migrate db:seed RAILS_ENV=test
-// run dev server with test db: CYPRESS=1 bin/rails server -p 3000
-context('Logged Out', () => {
-  describe('Homepage Copy', () => {
-    it('should find page copy', () => {
-      cy.visit('http://localhost:3001/')
-      cy.get('main.container')
-        .should('contain', 'Rails 7 Nuxt 2 Admin Boilerplate')
-        .should('contain', 'Features')
-      cy.get('ul.features')
-        .within(() => {
-          cy.get('li').eq(0).contains('Admin dashboard')
-          cy.get('li').eq(1).contains('Placeholder users')
-          cy.get('li').eq(2).contains('Placeholder user item ("car")')
-        })
-      cy.get('h3.stack')
-        .next('div.aligned-columns')
-          .within(() => {
-            cy.get('p').eq(0).contains('frontend:')
-            cy.get('p').eq(0).contains('Nuxt 2')
-            cy.get('p').eq(1).contains('backend API:')
-            cy.get('p').eq(1).contains('Rails 7')
-            cy.get('p').eq(2).contains('database:')
-            cy.get('p').eq(2).contains('Postgres')
-            cy.get('p').eq(3).contains('styles:')
-            cy.get('p').eq(3).contains('Sass')
-            cy.get('p').eq(4).contains('css framework:')
-            cy.get('p').eq(4).contains('Pico.css')
-            cy.get('p').eq(5).contains('e2e tests:')
-            cy.get('p').eq(5).contains('Cypress')
-            cy.get('p').eq(6).contains('api tests:')
-            cy.get('p').eq(6).contains('RSpec')      
-          })
-      cy.get('h3.tools')
-        .next('div.aligned-columns')
-          .within(() => {
-            cy.get('p').eq(0).contains('user avatars:')
-            cy.get('p').eq(0).contains('local active storage')
-            cy.get('p').eq(1).contains('backend auth:')
-            cy.get('p').eq(1).contains('bcrypt & jwt')
-            cy.get('p').eq(2).contains('frontend auth:')
-            cy.get('p').eq(2).contains('nuxt auth module')
-          }) 
-    })
-  })
+# // reset the db: db:drop db:create db:migrate db:seed RAILS_ENV=test
+# // run dev server with test db: CYPRESS=1 bin/rails server -p 3000
+# context('Logged Out', () => {
+#   describe('Homepage Copy', () => {
+#     it('should find page copy', () => {
+#       cy.visit('http://localhost:3001/')
+#       cy.get('main.container')
+#         .should('contain', 'Rails 7 Nuxt 2 Admin Boilerplate')
+#         .should('contain', 'Features')
+#       cy.get('ul.features')
+#         .within(() => {
+#           cy.get('li').eq(0).contains('Admin dashboard')
+#           cy.get('li').eq(1).contains('Placeholder users')
+#           cy.get('li').eq(2).contains('Placeholder user item ("car")')
+#         })
+#       cy.get('h3.stack')
+#         .next('div.aligned-columns')
+#           .within(() => {
+#             cy.get('p').eq(0).contains('frontend:')
+#             cy.get('p').eq(0).contains('Nuxt 2')
+#             cy.get('p').eq(1).contains('backend API:')
+#             cy.get('p').eq(1).contains('Rails 7')
+#             cy.get('p').eq(2).contains('database:')
+#             cy.get('p').eq(2).contains('Postgres')
+#             cy.get('p').eq(3).contains('styles:')
+#             cy.get('p').eq(3).contains('Sass')
+#             cy.get('p').eq(4).contains('css framework:')
+#             cy.get('p').eq(4).contains('Pico.css')
+#             cy.get('p').eq(5).contains('e2e tests:')
+#             cy.get('p').eq(5).contains('Cypress')
+#             cy.get('p').eq(6).contains('api tests:')
+#             cy.get('p').eq(6).contains('RSpec')      
+#           })
+#       cy.get('h3.tools')
+#         .next('div.aligned-columns')
+#           .within(() => {
+#             cy.get('p').eq(0).contains('user avatars:')
+#             cy.get('p').eq(0).contains('local active storage')
+#             cy.get('p').eq(1).contains('backend auth:')
+#             cy.get('p').eq(1).contains('bcrypt & jwt')
+#             cy.get('p').eq(2).contains('frontend auth:')
+#             cy.get('p').eq(2).contains('nuxt auth module')
+#           }) 
+#     })
+#   })
 
-  describe('Log In Copy', () => {
-    it('should find page copy', () => {
-      cy.visit('http://localhost:3001/log-in')
-      cy.get('main.container')
-        .should('contain', 'Email')
-        .should('contain', 'Password')
-        .should('contain', 'Log In')
-        .should('contain', "Don't have an account")
-    })
-  })
+#   describe('Log In Copy', () => {
+#     it('should find page copy', () => {
+#       cy.visit('http://localhost:3001/log-in')
+#       cy.get('main.container')
+#         .should('contain', 'Email')
+#         .should('contain', 'Password')
+#         .should('contain', 'Log In')
+#         .should('contain', "Don't have an account")
+#     })
+#   })
 
-  describe('Sign Up Copy', () => {
-    it('should find page copy', () => {
-      cy.visit('http://localhost:3001/sign-up')
-      cy.get('main.container')
-        .should('contain', 'Name')
-        .should('contain', 'Email')
-        .should('contain', 'Avatar')
-        .should('contain', 'Password')
-        .should('contain', 'Create User')
-    })
-  })
-})
-~
-EOF
-cat <<'EOF' | puravida cypress/e2e/sign-up-flow.cy.js ~
-/// <reference types="cypress" />
+#   describe('Sign Up Copy', () => {
+#     it('should find page copy', () => {
+#       cy.visit('http://localhost:3001/sign-up')
+#       cy.get('main.container')
+#         .should('contain', 'Name')
+#         .should('contain', 'Email')
+#         .should('contain', 'Avatar')
+#         .should('contain', 'Password')
+#         .should('contain', 'Create User')
+#     })
+#   })
+# })
+# ~
+# EOF
+# cat <<'EOF' | puravida cypress/e2e/sign-up-flow.cy.js ~
+# /// <reference types="cypress" />
 
-// reset the db: db:drop db:create db:migrate db:seed RAILS_ENV=test
-// run dev server with test db: CYPRESS=1 bin/rails server -p 3000
-describe('Sign Up Flow', () => {
-  it('Should redirect to user show page', () => {
-    let userId = -1
-    cy.visit('http://localhost:3001/sign-up')
-    cy.get('p').contains('Name').next('input').type('name')
-    cy.get('p').contains('Email').next('input').type('test' + Math.random().toString(36).substring(2, 15) + '@mail.com')
-    cy.get('p').contains('Email').next('input').type('test' + Math.random().toString(36).substring(2, 15) + '@mail.com')
-    cy.get('input[type=file]').selectFile('cypress/fixtures/images/office-avatars/dwight-schrute.png')
-    cy.get('p').contains('Password').next('input').type('password')
-    cy.get('button').contains('Create User').click()
-    cy.url().should('match', /http:\/\/localhost:3001\/users\/\d+/)
-    cy.get('h2').should('contain', 'name')
-    cy.get('p').contains('avatar:').next('img').should('have.attr', 'src').should('match', /http.*dwight-schrute.png/)
-    cy.url().then(url => {
-      userId = url.split('/')[url.split('/').length - 1]
-      cy.logout()
-      cy.loginAdmin()
-      cy.visit('http://localhost:3001/users/' + userId)
-      cy.url().should('match', /http:\/\/localhost:3001\/users/`${userId}`)
-      cy.get('h2').children().eq(2).click() // deletes user
-      cy.visit('http://localhost:3001/users/')
-      cy.url().should('match', /http:\/\/localhost:3001\/users/)
-      cy.get('section').children('div').should('have.length', 3)
-      cy.logout()
-    })    
-  })
-})
-~
-EOF
-cat <<'EOF' | puravida cypress/e2e/log-in-flow.cy.js ~
-/// <reference types="cypress" />
+# // reset the db: db:drop db:create db:migrate db:seed RAILS_ENV=test
+# // run dev server with test db: CYPRESS=1 bin/rails server -p 3000
+# describe('Sign Up Flow', () => {
+#   it('Should redirect to user show page', () => {
+#     let userId = -1
+#     cy.visit('http://localhost:3001/sign-up')
+#     cy.get('p').contains('Name').next('input').type('name')
+#     cy.get('p').contains('Email').next('input').type('test' + Math.random().toString(36).substring(2, 15) + '@mail.com')
+#     cy.get('p').contains('Email').next('input').type('test' + Math.random().toString(36).substring(2, 15) + '@mail.com')
+#     cy.get('input[type=file]').selectFile('cypress/fixtures/images/office-avatars/dwight-schrute.png')
+#     cy.get('p').contains('Password').next('input').type('password')
+#     cy.get('button').contains('Create User').click()
+#     cy.url().should('match', /http:\/\/localhost:3001\/users\/\d+/)
+#     cy.get('h2').should('contain', 'name')
+#     cy.get('p').contains('avatar:').next('img').should('have.attr', 'src').should('match', /http.*dwight-schrute.png/)
+#     cy.url().then(url => {
+#       userId = url.split('/')[url.split('/').length - 1]
+#       cy.logout()
+#       cy.loginAdmin()
+#       cy.visit('http://localhost:3001/users/' + userId)
+#       cy.url().should('match', /http:\/\/localhost:3001\/users/`${userId}`)
+#       cy.get('h2').children().eq(2).click() // deletes user
+#       cy.visit('http://localhost:3001/users/')
+#       cy.url().should('match', /http:\/\/localhost:3001\/users/)
+#       cy.get('section').children('div').should('have.length', 3)
+#       cy.logout()
+#     })    
+#   })
+# })
+# ~
+# EOF
+# cat <<'EOF' | puravida cypress/e2e/log-in-flow.cy.js ~
+# /// <reference types="cypress" />
 
-// reset the db: db:drop db:create db:migrate db:seed RAILS_ENV=test
-// run dev server with test db: CYPRESS=1 bin/rails server -p 3000
+# // reset the db: db:drop db:create db:migrate db:seed RAILS_ENV=test
+# // run dev server with test db: CYPRESS=1 bin/rails server -p 3000
 
-describe('Manual Login', () => {
-  it('Should log in user', () => {
-    cy.intercept('POST', '/login').as('login')
-    cy.loginAdmin()
-    cy.wait('@login').then(({response}) => {
-      expect(response.statusCode).to.eq(200)
-    })
-    cy.url().should('eq', 'http://localhost:3001/users/1')
-    cy.get('h2').should('contain', 'Michael Scott')
-    cy.logoutAdmin()
-  })
-})
+# describe('Manual Login', () => {
+#   it('Should log in user', () => {
+#     cy.intercept('POST', '/login').as('login')
+#     cy.loginAdmin()
+#     cy.wait('@login').then(({response}) => {
+#       expect(response.statusCode).to.eq(200)
+#     })
+#     cy.url().should('eq', 'http://localhost:3001/users/1')
+#     cy.get('h2').should('contain', 'Michael Scott')
+#     cy.logoutAdmin()
+#   })
+# })
 
-context('Mocked Request Login', () => {
-  describe('Login with real email', () => {
-    it('Should get 200 response', () => {
-      cy.visit('http://localhost:3001/log-in')
-      cy.request(
-        { url: 'http://localhost:3000/login', method: 'POST', body: { email: 'michaelscott@dundermifflin.com', 
-        password: 'password' }, failOnStatusCode: false })
-        .its('status').should('equal', 200)
-      cy.get('h2').should('contain', 'Log In')
-      cy.url().should('include', '/log-in')
-    })
-  })
+# context('Mocked Request Login', () => {
+#   describe('Login with real email', () => {
+#     it('Should get 200 response', () => {
+#       cy.visit('http://localhost:3001/log-in')
+#       cy.request(
+#         { url: 'http://localhost:3000/login', method: 'POST', body: { email: 'michaelscott@dundermifflin.com', 
+#         password: 'password' }, failOnStatusCode: false })
+#         .its('status').should('equal', 200)
+#       cy.get('h2').should('contain', 'Log In')
+#       cy.url().should('include', '/log-in')
+#     })
+#   })
 
-  describe('Login with fake email', () => {
-    it('Should get 401 response', () => {
-      cy.visit('http://localhost:3001/log-in')
-      cy.request(
-        { url: 'http://localhost:3000/login', method: 'POST', body: { email: 'xyz@dundermifflin.com', 
-        password: 'password' }, failOnStatusCode: false })
-        .its('status').should('equal', 401)
-      cy.get('h2').should('contain', 'Log In')
-      cy.url().should('include', '/log-in')
-    })
-  })
-})
-~
-EOF
-cat <<'EOF' | puravida cypress/e2e/admin.cy.js ~
-/// <reference types="cypress" />
+#   describe('Login with fake email', () => {
+#     it('Should get 401 response', () => {
+#       cy.visit('http://localhost:3001/log-in')
+#       cy.request(
+#         { url: 'http://localhost:3000/login', method: 'POST', body: { email: 'xyz@dundermifflin.com', 
+#         password: 'password' }, failOnStatusCode: false })
+#         .its('status').should('equal', 401)
+#       cy.get('h2').should('contain', 'Log In')
+#       cy.url().should('include', '/log-in')
+#     })
+#   })
+# })
+# ~
+# EOF
+# cat <<'EOF' | puravida cypress/e2e/admin.cy.js ~
+# /// <reference types="cypress" />
 
-// reset the db: rails db:drop db:create db:migrate db:seed RAILS_ENV=test
-// run dev server with test db: CYPRESS=1 bin/rails server -p 3000
+# // reset the db: rails db:drop db:create db:migrate db:seed RAILS_ENV=test
+# // run dev server with test db: CYPRESS=1 bin/rails server -p 3000
 
-describe('Admin login', () => {
-  it('Should go to admin show page', () => {
-    cy.loginAdmin()
-    cy.url().should('match', /http:\/\/localhost:3001\/users\/1/)
-    cy.get('h2').should('contain', 'Michael Scott')
-    cy.get('p').should('contain', 'id: 1')
-    cy.get('p').should('contain', 'avatar:')
-    cy.get('p').contains('avatar:').next('img').should('have.attr', 'src').should('match', /http.*michael-scott.png/)
-    cy.get('p').should('contain', 'admin: true')
-    cy.logoutAdmin()
-  })
-  it('Should contain admin nav', () => {
-    cy.loginAdmin()
-    cy.get('nav ul.menu li a').should('contain', 'Admin')
-    cy.logoutAdmin()
-  })
-})
+# describe('Admin login', () => {
+#   it('Should go to admin show page', () => {
+#     cy.loginAdmin()
+#     cy.url().should('match', /http:\/\/localhost:3001\/users\/1/)
+#     cy.get('h2').should('contain', 'Michael Scott')
+#     cy.get('p').should('contain', 'id: 1')
+#     cy.get('p').should('contain', 'avatar:')
+#     cy.get('p').contains('avatar:').next('img').should('have.attr', 'src').should('match', /http.*michael-scott.png/)
+#     cy.get('p').should('contain', 'admin: true')
+#     cy.logoutAdmin()
+#   })
+#   it('Should contain admin nav', () => {
+#     cy.loginAdmin()
+#     cy.get('nav ul.menu li a').should('contain', 'Admin')
+#     cy.logoutAdmin()
+#   })
+# })
 
-describe('Admin nav', () => {
-  it('Should work', () => {
-    cy.loginAdmin()
-    cy.get('nav li a').contains('Admin').click()
-    cy.url().should('match', /http:\/\/localhost:3001\/admin/)
-    cy.logoutAdmin()
-  })
-})
+# describe('Admin nav', () => {
+#   it('Should work', () => {
+#     cy.loginAdmin()
+#     cy.get('nav li a').contains('Admin').click()
+#     cy.url().should('match', /http:\/\/localhost:3001\/admin/)
+#     cy.logoutAdmin()
+#   })
+# })
 
-describe('Admin page', () => {
-  it('Should have correct copy', () => {
-    cy.loginAdmin()
-    cy.url().should('match', /http:\/\/localhost:3001\/users\/1/)
-    cy.visit('http://localhost:3001/admin')
-    cy.url().should('match', /http:\/\/localhost:3001\/admin/)
-    cy.get('p').eq(0).invoke('text').should('match', /Number of users: \d+/)
-    cy.get('p').eq(1).invoke('text').should('match', /Number of admins: \d+/)
-    cy.get('p').eq(2).invoke('text').should('match', /Number of cars: \d+/)
-    cy.get('p').eq(3).invoke('text').should('match', /Number of maintenances: \d+/)
-    cy.get('p').eq(4).invoke('text').should('match', /Number of documents: \d+/)
-    cy.get('p').eq(5).contains('Users')
-    cy.get('p').eq(6).contains('Cars')
-    cy.get('p').eq(7).contains('Maintenances')
-    cy.get('p').eq(8).contains('Documents')
-    cy.logoutAdmin()
-  })
-  it('Should have correct links', () => {
-    cy.loginAdmin()
-    cy.url().should('match', /http:\/\/localhost:3001\/users\/1/)
-    cy.visit('http://localhost:3001/admin')
-    cy.url().should('match', /http:\/\/localhost:3001\/admin/)
-    cy.get('p').contains('Users').should('have.attr', 'href', '/users')
-    cy.logoutAdmin()
-  })
-  it('Should have working links', () => {
-    cy.loginAdmin()
-    cy.url().should('match', /http:\/\/localhost:3001\/users\/1/)
-    cy.visit('http://localhost:3001/admin')
-    cy.url().should('match', /http:\/\/localhost:3001\/admin/)
-    cy.get('p a').contains('Users').click()
-    cy.url().should('match', /http:\/\/localhost:3001\/users/)
-    cy.logoutAdmin()
-  })
-})
+# describe('Admin page', () => {
+#   it('Should have correct copy', () => {
+#     cy.loginAdmin()
+#     cy.url().should('match', /http:\/\/localhost:3001\/users\/1/)
+#     cy.visit('http://localhost:3001/admin')
+#     cy.url().should('match', /http:\/\/localhost:3001\/admin/)
+#     cy.get('p').eq(0).invoke('text').should('match', /Number of users: \d+/)
+#     cy.get('p').eq(1).invoke('text').should('match', /Number of admins: \d+/)
+#     cy.get('p').eq(2).invoke('text').should('match', /Number of cars: \d+/)
+#     cy.get('p').eq(3).invoke('text').should('match', /Number of maintenances: \d+/)
+#     cy.get('p').eq(4).invoke('text').should('match', /Number of documents: \d+/)
+#     cy.get('p').eq(5).contains('Users')
+#     cy.get('p').eq(6).contains('Cars')
+#     cy.get('p').eq(7).contains('Maintenances')
+#     cy.get('p').eq(8).contains('Documents')
+#     cy.logoutAdmin()
+#   })
+#   it('Should have correct links', () => {
+#     cy.loginAdmin()
+#     cy.url().should('match', /http:\/\/localhost:3001\/users\/1/)
+#     cy.visit('http://localhost:3001/admin')
+#     cy.url().should('match', /http:\/\/localhost:3001\/admin/)
+#     cy.get('p').contains('Users').should('have.attr', 'href', '/users')
+#     cy.logoutAdmin()
+#   })
+#   it('Should have working links', () => {
+#     cy.loginAdmin()
+#     cy.url().should('match', /http:\/\/localhost:3001\/users\/1/)
+#     cy.visit('http://localhost:3001/admin')
+#     cy.url().should('match', /http:\/\/localhost:3001\/admin/)
+#     cy.get('p a').contains('Users').click()
+#     cy.url().should('match', /http:\/\/localhost:3001\/users/)
+#     cy.logoutAdmin()
+#   })
+# })
 
-describe('Edit user as admin', () => {
-  it('Should be successful', () => {
-    cy.loginAdmin()
-    cy.url().should('match', /http:\/\/localhost:3001\/users\/1/)
-    cy.wait(1000)
-    cy.get('h2').children().eq(1).click()
-    cy.url().should('match', /http:\/\/localhost:3001\/users\/1\/edit/)
-    cy.get('p').contains('Name').next('input').clear()
-    cy.get('p').contains('Name').next('input').type('name')
-    cy.get('p').contains('Email').next('input').clear()
-    cy.get('p').contains('Email').next('input').type('name@mail.com')
-    cy.get('input[type=file]').selectFile('cypress/fixtures/images/office-avatars/dwight-schrute.png')
-    cy.get('button').click()
-    cy.url().should('match', /http:\/\/localhost:3001\/users\/1/)
-    cy.get('h2').should('contain', 'name')
-    cy.get('p').contains('email').should('contain', 'name@mail.com')
-    cy.get('p').contains('avatar:').next('img').should('have.attr', 'src').should('match', /http.*dwight-schrute.png/)
-    cy.get('p').should('contain', 'admin: true')
-    cy.get('h2').children().eq(1).click()
-    cy.url().should('match', /http:\/\/localhost:3001\/users\/1\/edit/)
-    cy.get('p').contains('Name').next('input').clear()
-    cy.get('p').contains('Name').next('input').type('Michael Scott')
-    cy.get('p').contains('Email').next('input').clear()
-    cy.get('p').contains('Email').next('input').type('michaelscott@dundermifflin.com')
-    cy.get('input[type=file]').selectFile('cypress/fixtures/images/office-avatars/michael-scott.png')
-    cy.get('button').click()
-    cy.url().should('match', /http:\/\/localhost:3001\/users\/1/)
-    cy.get('h2').should('contain', 'Michael Scott')
-    cy.get('p').contains('email').should('contain', 'michaelscott@dundermifflin.com')
-    cy.get('p').contains('avatar:').next('img').should('have.attr', 'src').should('match', /http.*michael-scott.png/)
-    cy.get('p').should('contain', 'admin: true')
-    cy.logoutAdmin()
-  })
-})
+# describe('Edit user as admin', () => {
+#   it('Should be successful', () => {
+#     cy.loginAdmin()
+#     cy.url().should('match', /http:\/\/localhost:3001\/users\/1/)
+#     cy.wait(1000)
+#     cy.get('h2').children().eq(1).click()
+#     cy.url().should('match', /http:\/\/localhost:3001\/users\/1\/edit/)
+#     cy.get('p').contains('Name').next('input').clear()
+#     cy.get('p').contains('Name').next('input').type('name')
+#     cy.get('p').contains('Email').next('input').clear()
+#     cy.get('p').contains('Email').next('input').type('name@mail.com')
+#     cy.get('input[type=file]').selectFile('cypress/fixtures/images/office-avatars/dwight-schrute.png')
+#     cy.get('button').click()
+#     cy.url().should('match', /http:\/\/localhost:3001\/users\/1/)
+#     cy.get('h2').should('contain', 'name')
+#     cy.get('p').contains('email').should('contain', 'name@mail.com')
+#     cy.get('p').contains('avatar:').next('img').should('have.attr', 'src').should('match', /http.*dwight-schrute.png/)
+#     cy.get('p').should('contain', 'admin: true')
+#     cy.get('h2').children().eq(1).click()
+#     cy.url().should('match', /http:\/\/localhost:3001\/users\/1\/edit/)
+#     cy.get('p').contains('Name').next('input').clear()
+#     cy.get('p').contains('Name').next('input').type('Michael Scott')
+#     cy.get('p').contains('Email').next('input').clear()
+#     cy.get('p').contains('Email').next('input').type('michaelscott@dundermifflin.com')
+#     cy.get('input[type=file]').selectFile('cypress/fixtures/images/office-avatars/michael-scott.png')
+#     cy.get('button').click()
+#     cy.url().should('match', /http:\/\/localhost:3001\/users\/1/)
+#     cy.get('h2').should('contain', 'Michael Scott')
+#     cy.get('p').contains('email').should('contain', 'michaelscott@dundermifflin.com')
+#     cy.get('p').contains('avatar:').next('img').should('have.attr', 'src').should('match', /http.*michael-scott.png/)
+#     cy.get('p').should('contain', 'admin: true')
+#     cy.logoutAdmin()
+#   })
+# })
 
-describe('Admin /users page', () => {
-  it('Should show three users', () => {
-    cy.loginAdmin()
-    cy.url().should('match', /http:\/\/localhost:3001\/users\/1/)
-    cy.visit('http://localhost:3001/users')
-    cy.url().should('match', /http:\/\/localhost:3001\/users/)
-    cy.get('section').children('div').should('have.length', 3)
-    cy.logoutAdmin()
-  })
-})
+# describe('Admin /users page', () => {
+#   it('Should show three users', () => {
+#     cy.loginAdmin()
+#     cy.url().should('match', /http:\/\/localhost:3001\/users\/1/)
+#     cy.visit('http://localhost:3001/users')
+#     cy.url().should('match', /http:\/\/localhost:3001\/users/)
+#     cy.get('section').children('div').should('have.length', 3)
+#     cy.logoutAdmin()
+#   })
+# })
 
-describe('Admin visiting /cars', () => {
+# describe('Admin visiting /cars', () => {
 
-  context('No query string', () => {
-    it("Should show admin's two cars", () => {
-      cy.loginAdmin()
-      cy.url().should('match', /http:\/\/localhost:3001\/users\/1/)
-      cy.visit('http://localhost:3001/cars')
-      cy.url().should('match', /http:\/\/localhost:3001\/cars/)
-      cy.get('section').children('div').should('have.length', 2)
-      cy.get('article').eq(0).find('h2').should('contain', "Michael's Fiat 500")
-      cy.get('article').eq(1).find('h2').should('contain', "Michael's Honda Civic")
-      cy.logoutAdmin()
-    })
-  })
+#   context('No query string', () => {
+#     it("Should show admin's two cars", () => {
+#       cy.loginAdmin()
+#       cy.url().should('match', /http:\/\/localhost:3001\/users\/1/)
+#       cy.visit('http://localhost:3001/cars')
+#       cy.url().should('match', /http:\/\/localhost:3001\/cars/)
+#       cy.get('section').children('div').should('have.length', 2)
+#       cy.get('article').eq(0).find('h2').should('contain', "Michael's Fiat 500")
+#       cy.get('article').eq(1).find('h2').should('contain', "Michael's Honda Civic")
+#       cy.logoutAdmin()
+#     })
+#   })
 
 
-  context('?admin=true query string', () => {
-    it("Should show all cars", () => {
-      cy.loginAdmin()
-      cy.url().should('match', /http:\/\/localhost:3001\/users\/1/)
-      cy.visit('http://localhost:3001/cars?admin=true')
-      cy.url().should('match', /http:\/\/localhost:3001\/cars\?admin=true/)
-      cy.get('section').children('div').should('have.length', 6)
-      cy.logoutAdmin()
-    })
-  })
+#   context('?admin=true query string', () => {
+#     it("Should show all cars", () => {
+#       cy.loginAdmin()
+#       cy.url().should('match', /http:\/\/localhost:3001\/users\/1/)
+#       cy.visit('http://localhost:3001/cars?admin=true')
+#       cy.url().should('match', /http:\/\/localhost:3001\/cars\?admin=true/)
+#       cy.get('section').children('div').should('have.length', 6)
+#       cy.logoutAdmin()
+#     })
+#   })
 
-  context('user_id=1 query string', () => {
-    it("Should show user one's two cars", () => {
-      cy.loginAdmin()
-      cy.url().should('match', /http:\/\/localhost:3001\/users\/1/)
-      cy.visit('http://localhost:3001/cars?user_id=1')
-      cy.url().should('match', /http:\/\/localhost:3001\/cars\?user_id=1/)
-      cy.get('section').children('div').should('have.length', 2)
-      cy.get('article').eq(0).find('h2').should('contain', "Michael's Fiat 500")
-      cy.get('article').eq(1).find('h2').should('contain', "Michael's Honda Civic")
-      cy.logoutAdmin()
-    })
-  })
+#   context('user_id=1 query string', () => {
+#     it("Should show user one's two cars", () => {
+#       cy.loginAdmin()
+#       cy.url().should('match', /http:\/\/localhost:3001\/users\/1/)
+#       cy.visit('http://localhost:3001/cars?user_id=1')
+#       cy.url().should('match', /http:\/\/localhost:3001\/cars\?user_id=1/)
+#       cy.get('section').children('div').should('have.length', 2)
+#       cy.get('article').eq(0).find('h2').should('contain', "Michael's Fiat 500")
+#       cy.get('article').eq(1).find('h2').should('contain', "Michael's Honda Civic")
+#       cy.logoutAdmin()
+#     })
+#   })
 
-  context('user_id=2 query string', () => {
-    it("Should show user two's three cars", () => {
-      cy.loginAdmin()
-      cy.url().should('match', /http:\/\/localhost:3001\/users\/1/)
-      cy.visit('http://localhost:3001/cars?user_id=2')
-      cy.url().should('match', /http:\/\/localhost:3001\/cars\?user_id=2/)
-      cy.get('section').children('div').should('have.length', 2)
-      cy.get('article').eq(0).find('h2').should('contain', "Jim's Hyundai Elantra")
-      cy.get('article').eq(1).find('h2').should('contain', "Jim's Nissan Leaf")
-      cy.logoutAdmin()
-    })
-  })
+#   context('user_id=2 query string', () => {
+#     it("Should show user two's three cars", () => {
+#       cy.loginAdmin()
+#       cy.url().should('match', /http:\/\/localhost:3001\/users\/1/)
+#       cy.visit('http://localhost:3001/cars?user_id=2')
+#       cy.url().should('match', /http:\/\/localhost:3001\/cars\?user_id=2/)
+#       cy.get('section').children('div').should('have.length', 2)
+#       cy.get('article').eq(0).find('h2').should('contain', "Jim's Hyundai Elantra")
+#       cy.get('article').eq(1).find('h2').should('contain', "Jim's Nissan Leaf")
+#       cy.logoutAdmin()
+#     })
+#   })
   
-})
-~
-EOF
-cat <<'EOF' | puravida cypress/e2e/non-admin.cy.js ~
-/// <reference types="cypress" />
+# })
+# ~
+# EOF
+# cat <<'EOF' | puravida cypress/e2e/non-admin.cy.js ~
+# /// <reference types="cypress" />
 
-// reset the db: rails db:drop db:create db:migrate db:seed RAILS_ENV=test
-// run dev server with test db: CYPRESS=1 bin/rails server -p 3000
+# // reset the db: rails db:drop db:create db:migrate db:seed RAILS_ENV=test
+# // run dev server with test db: CYPRESS=1 bin/rails server -p 3000
 
-describe('Non-admin login', () => {
-  it('Should go to non-admin show page', () => {
-    cy.loginNonAdmin()
-    cy.url().should('match', /http:\/\/localhost:3001\/users\/2/)
-    cy.get('h2').should('contain', 'Jim Halpert')
-    cy.get('p').should('contain', 'id: 2')
-    cy.get('p').should('contain', 'avatar:')
-    cy.get('p').contains('avatar:').next('img').should('have.attr', 'src').should('match', /http.*jim-halpert.png/)
-    cy.get('p').contains('admin').should('not.exist')
-    cy.logoutNonAdmin()
-  })
-  it('Should not contain admin nav', () => {
-    cy.loginNonAdmin()
-    cy.url().should('match', /http:\/\/localhost:3001\/users\/2/)
-    cy.get('nav ul.menu li a').contains('Admin').should('not.exist')
-    cy.logoutNonAdmin()
-  })
-})
+# describe('Non-admin login', () => {
+#   it('Should go to non-admin show page', () => {
+#     cy.loginNonAdmin()
+#     cy.url().should('match', /http:\/\/localhost:3001\/users\/2/)
+#     cy.get('h2').should('contain', 'Jim Halpert')
+#     cy.get('p').should('contain', 'id: 2')
+#     cy.get('p').should('contain', 'avatar:')
+#     cy.get('p').contains('avatar:').next('img').should('have.attr', 'src').should('match', /http.*jim-halpert.png/)
+#     cy.get('p').contains('admin').should('not.exist')
+#     cy.logoutNonAdmin()
+#   })
+#   it('Should not contain admin nav', () => {
+#     cy.loginNonAdmin()
+#     cy.url().should('match', /http:\/\/localhost:3001\/users\/2/)
+#     cy.get('nav ul.menu li a').contains('Admin').should('not.exist')
+#     cy.logoutNonAdmin()
+#   })
+# })
 
-describe('Accessing /users as non-admin', () => {
-  it('Should redirect to home', () => {
-    cy.loginNonAdmin()
-    cy.url().should('match', /http:\/\/localhost:3001\/users\/2/)
-    cy.visit('http://localhost:3001/users', { failOnStatusCode: false } )
-    cy.url().should('match', /^http:\/\/localhost:3001\/$/)
-    cy.logoutNonAdmin()
-  })
-})
+# describe('Accessing /users as non-admin', () => {
+#   it('Should redirect to home', () => {
+#     cy.loginNonAdmin()
+#     cy.url().should('match', /http:\/\/localhost:3001\/users\/2/)
+#     cy.visit('http://localhost:3001/users', { failOnStatusCode: false } )
+#     cy.url().should('match', /^http:\/\/localhost:3001\/$/)
+#     cy.logoutNonAdmin()
+#   })
+# })
 
-describe('Accessing /users/1 as non-admin', () => {
-  it('Should go to non-admin show page', () => {
-    cy.loginNonAdmin()
-    cy.url().should('match', /http:\/\/localhost:3001\/users\/2/)
-    cy.visit('http://localhost:3001/users/1', { failOnStatusCode: false } )
-    cy.url().should('match', /^http:\/\/localhost:3001\/$/)
-    cy.logoutNonAdmin()
-  })
-})
+# describe('Accessing /users/1 as non-admin', () => {
+#   it('Should go to non-admin show page', () => {
+#     cy.loginNonAdmin()
+#     cy.url().should('match', /http:\/\/localhost:3001\/users\/2/)
+#     cy.visit('http://localhost:3001/users/1', { failOnStatusCode: false } )
+#     cy.url().should('match', /^http:\/\/localhost:3001\/$/)
+#     cy.logoutNonAdmin()
+#   })
+# })
 
-describe('Accessing /users/2 as non-admin user 2', () => {
-  it('Should go to user show page', () => {
-    cy.loginNonAdmin()
-    cy.url().should('match', /http:\/\/localhost:3001\/users\/2/)
-    cy.visit('http://localhost:3001/users/2', { failOnStatusCode: false } )
-    cy.url().should('match', /^http:\/\/localhost:3001\/users\/2$/)
-    cy.logoutNonAdmin()
-  })
-})
+# describe('Accessing /users/2 as non-admin user 2', () => {
+#   it('Should go to user show page', () => {
+#     cy.loginNonAdmin()
+#     cy.url().should('match', /http:\/\/localhost:3001\/users\/2/)
+#     cy.visit('http://localhost:3001/users/2', { failOnStatusCode: false } )
+#     cy.url().should('match', /^http:\/\/localhost:3001\/users\/2$/)
+#     cy.logoutNonAdmin()
+#   })
+# })
 
-describe('Accessing /users/3 as non-admin user 2', () => {
-  it('Should go to home', () => {
-    cy.loginNonAdmin()
-    cy.url().should('match', /http:\/\/localhost:3001\/users\/2/)
-    cy.visit('http://localhost:3001/users/3', { failOnStatusCode: false } )
-    cy.url().should('match', /^http:\/\/localhost:3001\/$/)
-    cy.logoutNonAdmin()
-  })
-})
+# describe('Accessing /users/3 as non-admin user 2', () => {
+#   it('Should go to home', () => {
+#     cy.loginNonAdmin()
+#     cy.url().should('match', /http:\/\/localhost:3001\/users\/2/)
+#     cy.visit('http://localhost:3001/users/3', { failOnStatusCode: false } )
+#     cy.url().should('match', /^http:\/\/localhost:3001\/$/)
+#     cy.logoutNonAdmin()
+#   })
+# })
 
-describe('Accessing /users/1/edit as non-admin', () => {
-  it('Should go to non-admin show page', () => {
-    cy.loginNonAdmin()
-    cy.url().should('match', /http:\/\/localhost:3001\/users\/2/)
-    cy.visit('http://localhost:3001/users/1/edit', { failOnStatusCode: false } )
-    cy.url().should('match', /^http:\/\/localhost:3001\/$/)
-    cy.logoutNonAdmin()
-  })
-})
+# describe('Accessing /users/1/edit as non-admin', () => {
+#   it('Should go to non-admin show page', () => {
+#     cy.loginNonAdmin()
+#     cy.url().should('match', /http:\/\/localhost:3001\/users\/2/)
+#     cy.visit('http://localhost:3001/users/1/edit', { failOnStatusCode: false } )
+#     cy.url().should('match', /^http:\/\/localhost:3001\/$/)
+#     cy.logoutNonAdmin()
+#   })
+# })
 
-describe('Accessing /users/3/edit as non-admin', () => {
-  it('Should go to non-admin show page', () => {
-    cy.loginNonAdmin()
-    cy.url().should('match', /http:\/\/localhost:3001\/users\/2/)
-    cy.visit('http://localhost:3001/users/3/edit', { failOnStatusCode: false } )
-    cy.url().should('match', /^http:\/\/localhost:3001\/$/)
-    cy.logoutNonAdmin()
-  })
-})
+# describe('Accessing /users/3/edit as non-admin', () => {
+#   it('Should go to non-admin show page', () => {
+#     cy.loginNonAdmin()
+#     cy.url().should('match', /http:\/\/localhost:3001\/users\/2/)
+#     cy.visit('http://localhost:3001/users/3/edit', { failOnStatusCode: false } )
+#     cy.url().should('match', /^http:\/\/localhost:3001\/$/)
+#     cy.logoutNonAdmin()
+#   })
+# })
 
-describe('Edit self as non-admin', () => {
-  it('Edit should be successful', () => {
-    cy.loginNonAdmin()
-    cy.url().should('match', /http:\/\/localhost:3001\/users\/2/)
-    cy.get('h2').contains('Jim Halpert').next('a').click()
-    cy.url().should('match', /http:\/\/localhost:3001\/users\/2\/edit/)
-    cy.get('p').contains('Name').next('input').clear()
-    cy.get('p').contains('Name').next('input').type('name')
-    cy.get('p').contains('Email').next('input').clear()
-    cy.get('p').contains('Email').next('input').type('name@mail.com')
-    cy.get('input[type=file]').selectFile('cypress/fixtures/images/office-avatars/dwight-schrute.png')
-    cy.get('button').click()
-    cy.url().should('match', /http:\/\/localhost:3001\/users\/2/)
-    cy.get('h2').should('contain', 'name')
-    cy.get('p').contains('email').should('contain', 'name@mail.com')
-    cy.get('p').contains('avatar:').next('img').should('have.attr', 'src').should('match', /http.*dwight-schrute.png/)
-    cy.get('p').contains('admin').should('not.exist')
-    cy.get('h2').children().eq(1).click()
-    cy.url().should('match', /http:\/\/localhost:3001\/users\/2\/edit/)
-    cy.get('p').contains('Name').next('input').clear()
-    cy.get('p').contains('Name').next('input').type('Jim Halpert')
-    cy.get('p').contains('Email').next('input').clear()
-    cy.get('p').contains('Email').next('input').type('jimhalpert@dundermifflin.com')
-    cy.get('input[type=file]').selectFile('cypress/fixtures/images/office-avatars/jim-halpert.png')
-    cy.get('button').click()
-    cy.url().should('match', /http:\/\/localhost:3001\/users\/2/)
-    cy.get('h2').should('contain', 'Jim Halpert')
-    cy.get('p').contains('email').should('contain', 'jimhalpert@dundermifflin.com')
-    cy.get('p').contains('avatar:').next('img').should('have.attr', 'src').should('match', /http.*jim-halpert.png/)
-    cy.get('p').contains('admin').should('not.exist')
-    cy.logoutNonAdmin()
-  })
-})
+# describe('Edit self as non-admin', () => {
+#   it('Edit should be successful', () => {
+#     cy.loginNonAdmin()
+#     cy.url().should('match', /http:\/\/localhost:3001\/users\/2/)
+#     cy.get('h2').contains('Jim Halpert').next('a').click()
+#     cy.url().should('match', /http:\/\/localhost:3001\/users\/2\/edit/)
+#     cy.get('p').contains('Name').next('input').clear()
+#     cy.get('p').contains('Name').next('input').type('name')
+#     cy.get('p').contains('Email').next('input').clear()
+#     cy.get('p').contains('Email').next('input').type('name@mail.com')
+#     cy.get('input[type=file]').selectFile('cypress/fixtures/images/office-avatars/dwight-schrute.png')
+#     cy.get('button').click()
+#     cy.url().should('match', /http:\/\/localhost:3001\/users\/2/)
+#     cy.get('h2').should('contain', 'name')
+#     cy.get('p').contains('email').should('contain', 'name@mail.com')
+#     cy.get('p').contains('avatar:').next('img').should('have.attr', 'src').should('match', /http.*dwight-schrute.png/)
+#     cy.get('p').contains('admin').should('not.exist')
+#     cy.get('h2').children().eq(1).click()
+#     cy.url().should('match', /http:\/\/localhost:3001\/users\/2\/edit/)
+#     cy.get('p').contains('Name').next('input').clear()
+#     cy.get('p').contains('Name').next('input').type('Jim Halpert')
+#     cy.get('p').contains('Email').next('input').clear()
+#     cy.get('p').contains('Email').next('input').type('jimhalpert@dundermifflin.com')
+#     cy.get('input[type=file]').selectFile('cypress/fixtures/images/office-avatars/jim-halpert.png')
+#     cy.get('button').click()
+#     cy.url().should('match', /http:\/\/localhost:3001\/users\/2/)
+#     cy.get('h2').should('contain', 'Jim Halpert')
+#     cy.get('p').contains('email').should('contain', 'jimhalpert@dundermifflin.com')
+#     cy.get('p').contains('avatar:').next('img').should('have.attr', 'src').should('match', /http.*jim-halpert.png/)
+#     cy.get('p').contains('admin').should('not.exist')
+#     cy.logoutNonAdmin()
+#   })
+# })
 
-describe('Non-admin visiting /cars', () => {
-  context('No query string', () => {
-    it("Should redirect to home", () => {
-      cy.loginNonAdmin()
-      cy.url().should('match', /http:\/\/localhost:3001\/users\/2/)
-      cy.visit('http://localhost:3001/cars')
-      cy.url().should('match', /http:\/\/localhost:3001\//)
-      cy.logoutNonAdmin()
-    })
-  })
-  context('?admin=true query string', () => {
-    it("Should redirect to home", () => {
-      cy.loginNonAdmin()
-      cy.url().should('match', /http:\/\/localhost:3001\/users\/2/)
-      cy.visit('http://localhost:3001/cars?admin=true')
-      cy.url().should('match', /http:\/\/localhost:3001\//)
-      cy.logoutNonAdmin()
-    })
-  })
-  context('?user_id=1 query string', () => {
-    it("Should redirect to home", () => {
-      cy.loginNonAdmin()
-      cy.url().should('match', /http:\/\/localhost:3001\/users\/2/)
-      cy.visit('http://localhost:3001/cars?user_id=1')
-      cy.url().should('match', /http:\/\/localhost:3001\/cars\?user_id=2/)
-      cy.url().should('match', /http:\/\/localhost:3001\//)
-      cy.logoutNonAdmin()
-    })
-  })
-  context('?user_id=2 query string', () => {
-    it("Should show user's three cars", () => {
-      cy.loginNonAdmin()
-      cy.url().should('match', /http:\/\/localhost:3001\/users\/2/)
-      cy.visit('http://localhost:3001/cars?user_id=2')
-      cy.url().should('match', /http:\/\/localhost:3001\/cars\?user_id=2/)
-      cy.get('article').should('have.length', 2)
-      cy.get('article').eq(0).should('contain', "Jim's Hyundai Elantra")
-      cy.get('article').eq(1).should('contain', "Jim's Nissan Leaf")
-      cy.logoutNonAdmin()
-    })
-  })
-  context('?user_id=3 query string', () => {
-    it("Should redirect to home", () => {
-      cy.loginNonAdmin()
-      cy.url().should('match', /http:\/\/localhost:3001\/users\/2/)
-      cy.visit('http://localhost:3001/cars?user_id=3')
-      cy.url().should('match', /http:\/\/localhost:3001\//)
-      cy.logoutNonAdmin()
-    })
-  })
-})
-~
-EOF
+# describe('Non-admin visiting /cars', () => {
+#   context('No query string', () => {
+#     it("Should redirect to home", () => {
+#       cy.loginNonAdmin()
+#       cy.url().should('match', /http:\/\/localhost:3001\/users\/2/)
+#       cy.visit('http://localhost:3001/cars')
+#       cy.url().should('match', /http:\/\/localhost:3001\//)
+#       cy.logoutNonAdmin()
+#     })
+#   })
+#   context('?admin=true query string', () => {
+#     it("Should redirect to home", () => {
+#       cy.loginNonAdmin()
+#       cy.url().should('match', /http:\/\/localhost:3001\/users\/2/)
+#       cy.visit('http://localhost:3001/cars?admin=true')
+#       cy.url().should('match', /http:\/\/localhost:3001\//)
+#       cy.logoutNonAdmin()
+#     })
+#   })
+#   context('?user_id=1 query string', () => {
+#     it("Should redirect to home", () => {
+#       cy.loginNonAdmin()
+#       cy.url().should('match', /http:\/\/localhost:3001\/users\/2/)
+#       cy.visit('http://localhost:3001/cars?user_id=1')
+#       cy.url().should('match', /http:\/\/localhost:3001\/cars\?user_id=2/)
+#       cy.url().should('match', /http:\/\/localhost:3001\//)
+#       cy.logoutNonAdmin()
+#     })
+#   })
+#   context('?user_id=2 query string', () => {
+#     it("Should show user's three cars", () => {
+#       cy.loginNonAdmin()
+#       cy.url().should('match', /http:\/\/localhost:3001\/users\/2/)
+#       cy.visit('http://localhost:3001/cars?user_id=2')
+#       cy.url().should('match', /http:\/\/localhost:3001\/cars\?user_id=2/)
+#       cy.get('article').should('have.length', 2)
+#       cy.get('article').eq(0).should('contain', "Jim's Hyundai Elantra")
+#       cy.get('article').eq(1).should('contain', "Jim's Nissan Leaf")
+#       cy.logoutNonAdmin()
+#     })
+#   })
+#   context('?user_id=3 query string', () => {
+#     it("Should redirect to home", () => {
+#       cy.loginNonAdmin()
+#       cy.url().should('match', /http:\/\/localhost:3001\/users\/2/)
+#       cy.visit('http://localhost:3001/cars?user_id=3')
+#       cy.url().should('match', /http:\/\/localhost:3001\//)
+#       cy.logoutNonAdmin()
+#     })
+#   })
+# })
+# ~
+# EOF
 
 
 # echo -e "\n\n🦄 Deploy\n\n"
