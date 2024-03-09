@@ -1,0 +1,83 @@
+fiat_alignment:
+  date: Date.parse("20200713")
+  description: "Alignment"
+  vendor: "Pep Boys"
+  cost: 350.00
+  car: fiat
+
+fiat_oil_change:
+  date: Date.parse("20210812")
+  description: "Oil Change"
+  vendor: "Jiffy Lube"
+  cost: 78.00
+  car: fiat
+
+civic_brake_repair:
+  date: Date.parse("20170123")
+  description: "Brake Repair"
+  vendor: "WalMart"
+  cost: 400.00
+  car: civic
+
+civic_tire_rotation:
+  date: Date.parse("20200311")
+  description: "Tire Rotation"
+  vendor: "Goodyear"
+  cost: 105.00
+  car: civic
+
+elantra_new_tires:
+  date: Date.parse("20200111")
+  description: "New Tires"
+  vendor: "Scott's"
+  cost: 812.00
+  car: elantra
+
+elantra_repaired_body:
+  date: Date.parse("20230627")
+  description: "Repaired Body Dents"
+  vendor: "Tenede Auto"
+  cost: 1343.00
+  car: elantra
+
+leaf_windshield_replacement:
+  date: Date.parse("20150614")
+  description: "Windshield Replacement"
+  vendor: "45th St. Car Repair"
+  cost: 800.00
+  car: leaf
+
+leaf_new_spark_plugs:
+  date: Date.parse("20170811")
+  description: "New Spark Plugs"
+  vendor: "Jim & Tony's Automotive Service"
+  cost: 5.00
+  car: leaf
+
+scion_engine_overhaul:
+  date: Date.parse("20200909")
+  description: "Engine Overhaul"
+  vendor: "Auto Stoppe"
+  cost: 5932.00
+  car: scion
+
+scion_5k_mile_maintenance:
+  date: Date.parse("20201030")
+  description: "50,000 Mile Maintenance"
+  vendor: "Dealership"
+  cost: 0
+  car: scion
+
+camry_fuel_line:
+  date: Date.parse("20220903")
+  description: "Fuel Line Replacement"
+  vendor: "Foreign Auto Austin"
+  cost: 37.00
+  car: camry
+
+camry_replaced_radiator:
+  date: Date.parse("20230601")
+  description: "Replaced Radiator"
+  vendor: "Blan's Auto Repair"
+  cost: 400.00
+  car: camry
