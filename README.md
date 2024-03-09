@@ -5166,6 +5166,7 @@ html, body
   height: 100%
 
 .top-nav 
+  margin: 0 0 50px
   height: 50px
 
 .top-nav > ul 
