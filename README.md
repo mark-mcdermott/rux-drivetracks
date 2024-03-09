@@ -5553,7 +5553,7 @@ export default {
 ### Cypress
 - `cd ~/Desktop/front`
 - `npm install cypress --save-dev`
-- `puravida cypress/cypress.config.js ~`
+- `puravida cypress.config.js ~`
 ```
 const { defineConfig } = require("cypress");
 
