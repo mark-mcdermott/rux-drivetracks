@@ -687,13 +687,13 @@ class ApplicationController < ActionController::API
     car = Car.find(maintenance.car_id)
     user = User.find(car.user_id)
     # images = maintenance.images.present? ? maintenance.images.map { |image| url_for(image) } : nil
-    documents = Document.where(documentable_id: maintenance.id, documentable_type: "Maintenance").map { |document| prep_raw_document(document) }
+    # documents = Document.where(documentable_id: maintenance.id, documentable_type: "Maintenance").map { |document| prep_raw_document(document) }
     maintenance = maintenance.slice(:id,:date,:description,:vendor,:cost,:car_id)
     maintenance['carId'] = car.id
     maintenance['carName'] = car.name
     maintenance['userId'] = user.id
     maintenance['userName'] = user.name
-    maintenance['documents'] = documents
+    # maintenance['documents'] = documents
     # maintenance['images'] = images
     maintenance
   end
@@ -1429,13 +1429,13 @@ class ApplicationController < ActionController::API
     car = Car.find(maintenance.car_id)
     user = User.find(car.user_id)
     # images = maintenance.images.present? ? maintenance.images.map { |image| url_for(image) } : nil
-    documents = Document.where(documentable_id: maintenance.id, documentable_type: "Maintenance").map { |document| prep_raw_document(document) }
+    # documents = Document.where(documentable_id: maintenance.id, documentable_type: "Maintenance").map { |document| prep_raw_document(document) }
     maintenance = maintenance.slice(:id,:date,:description,:vendor,:cost,:car_id)
     maintenance['carId'] = car.id
     maintenance['carName'] = car.name
     maintenance['userId'] = user.id
     maintenance['userName'] = user.name
-    maintenance['documents'] = documents
+    # maintenance['documents'] = documents
     # maintenance['images'] = images
     maintenance
   end
@@ -2508,13 +2508,13 @@ class ApplicationController < ActionController::API
     car = Car.find(maintenance.car_id)
     user = User.find(car.user_id)
     # images = maintenance.images.present? ? maintenance.images.map { |image| url_for(image) } : nil
-    documents = Document.where(documentable_id: maintenance.id, documentable_type: "Maintenance").map { |document| prep_raw_document(document) }
+    # documents = Document.where(documentable_id: maintenance.id, documentable_type: "Maintenance").map { |document| prep_raw_document(document) }
     maintenance = maintenance.slice(:id,:date,:description,:vendor,:cost,:car_id)
     maintenance['carId'] = car.id
     maintenance['carName'] = car.name
     maintenance['userId'] = user.id
     maintenance['userName'] = user.name
-    maintenance['documents'] = documents
+    # maintenance['documents'] = documents
     # maintenance['images'] = images
     maintenance
   end
