@@ -1,7 +1,7 @@
 !/bin/bash
 export PATH=/usr/local/bin:$PATH
 
-# echo -e "\n\n🦄 BACKEND\n\n"
+echo -e "\n\n🦄 BACKEND\n\n"
 cd ~/Desktop
 rails new back --api --database=postgresql --skip-test-unit
 cd back
@@ -4181,10 +4181,10 @@ cat <<'EOF' | puravida components/maintenance/Form.vue ~
         <p>Description: </p><input v-model="description">
         <p>Vendor: </p><input v-model="vendor">
         <p>Cost: </p><input v-model="cost">
-        <p class="no-margin">Image: </p>
+        <!-- <p class="no-margin">Image: </p>
         <img v-if="!hideImage && editOrNew === 'edit'" :src="image" />    
-        <input type="file" ref="inputFile" @change=uploadImage()>
-        <p>Car Id: {{ carId }}</p>
+        <input type="file" ref="inputFile" @change=uploadImage()> -->
+        <p>Car: {{ carId }}</p>
         <select v-if="editOrNew === 'new'" name="car" @change="selectCar($event)">
           <option value=""></option>
           <option v-for="car in cars" :key="car.id" :value="car.id">{{ car.name }} - {{ car.description }}</option>
@@ -4205,7 +4205,7 @@ export default {
       description: "",
       vendor: "",
       cost: "",
-      image: "",
+      // image: "",
       editOrNew: "",
       hideImage: false,
       cars: [],
@@ -4239,10 +4239,10 @@ export default {
     }
   },
   methods: {
-    uploadImage: function() {
-      this.image = this.$refs.inputFile.files[0]
-      this.hideImage = true
-    },
+    // uploadImage: function() {
+    //   this.image = this.$refs.inputFile.files[0]
+    //   this.hideImage = true
+    // },
     createMaintenance: function() {
       const params = {
         'date': this.date,
@@ -5722,80 +5722,80 @@ describe('Non-admin visiting /cars', () => {
 EOF
 
 
-echo -e "\n\n🦄 Deploy\n\n"
+# echo -e "\n\n🦄 Deploy\n\n"
 
-cd ~/Desktop/back
-cat <<'EOF' | puravida fly.toml ~
-app = "ruxtmin-back"
-primary_region = "dfw"
-console_command = "/rails/bin/rails console"
+# cd ~/Desktop/back
+# cat <<'EOF' | puravida fly.toml ~
+# app = "ruxtmin-back"
+# primary_region = "dfw"
+# console_command = "/rails/bin/rails console"
 
-[build]
+# [build]
 
-[env]
-  RAILS_STORAGE = "/data"
+# [env]
+#   RAILS_STORAGE = "/data"
 
-[[mounts]]
-  source = "ruxtmin_data"
-  destination = "/data"
+# [[mounts]]
+#   source = "ruxtmin_data"
+#   destination = "/data"
 
-[http_service]
-  internal_port = 3000
-  force_https = true
-  auto_stop_machines = false
-  auto_start_machines = true
-  min_machines_running = 0
-  processes = ["app"]
+# [http_service]
+#   internal_port = 3000
+#   force_https = true
+#   auto_stop_machines = false
+#   auto_start_machines = true
+#   min_machines_running = 0
+#   processes = ["app"]
 
-[[statics]]
-  guest_path = "/rails/public"
-  url_prefix = "/"
-~
-puravida config/storage.yml ~
-test:
-  service: Disk
-  root: <%= Rails.root.join("tmp/storage") %>
+# [[statics]]
+#   guest_path = "/rails/public"
+#   url_prefix = "/"
+# ~
+# puravida config/storage.yml ~
+# test:
+#   service: Disk
+#   root: <%= Rails.root.join("tmp/storage") %>
 
-local:
-  service: Disk
-  root: <%= Rails.root.join("storage") %>
+# local:
+#   service: Disk
+#   root: <%= Rails.root.join("storage") %>
 
-production:
-  service: Disk
-  root: /data
-~
-EOF
-cat <<'EOF' | puravida config/environmnets/production.rb ~
-require "active_support/core_ext/integer/time"
-Rails.application.configure do
-  config.cache_classes = true
-  config.eager_load = true
-  config.consider_all_requests_local       = false
-  config.public_file_server.enabled = ENV["RAILS_SERVE_STATIC_FILES"].present?
-  config.active_storage.service = :production
-  config.log_level = :info
-  config.log_tags = [ :request_id ]
-  config.action_mailer.perform_caching = false
-  config.i18n.fallbacks = true
-  config.active_support.report_deprecations = false
-  config.log_formatter = ::Logger::Formatter.new
-  if ENV["RAILS_LOG_TO_STDOUT"].present?
-    logger           = ActiveSupport::Logger.new(STDOUT)
-    logger.formatter = config.log_formatter
-    config.logger    = ActiveSupport::TaggedLogging.new(logger)
-  end
-  config.active_record.dump_schema_after_migration = false
-end
-~
-EOF
-fly launch --copy-config --name ruxtmin-back --region dfw --yes
-fly deploy
-cd ~/Desktop/front
-npm run build
-fly launch --name ruxtmin-front --region dfw --yes
-fly deploy
+# production:
+#   service: Disk
+#   root: /data
+# ~
+# EOF
+# cat <<'EOF' | puravida config/environmnets/production.rb ~
+# require "active_support/core_ext/integer/time"
+# Rails.application.configure do
+#   config.cache_classes = true
+#   config.eager_load = true
+#   config.consider_all_requests_local       = false
+#   config.public_file_server.enabled = ENV["RAILS_SERVE_STATIC_FILES"].present?
+#   config.active_storage.service = :production
+#   config.log_level = :info
+#   config.log_tags = [ :request_id ]
+#   config.action_mailer.perform_caching = false
+#   config.i18n.fallbacks = true
+#   config.active_support.report_deprecations = false
+#   config.log_formatter = ::Logger::Formatter.new
+#   if ENV["RAILS_LOG_TO_STDOUT"].present?
+#     logger           = ActiveSupport::Logger.new(STDOUT)
+#     logger.formatter = config.log_formatter
+#     config.logger    = ActiveSupport::TaggedLogging.new(logger)
+#   end
+#   config.active_record.dump_schema_after_migration = false
+# end
+# ~
+# EOF
+# fly launch --copy-config --name ruxtmin-back --region dfw --yes
+# fly deploy
+# cd ~/Desktop/front
+# npm run build
+# fly launch --name ruxtmin-front --region dfw --yes
+# fly deploy
 
 
-echo -e "\n\n🦄 DON'T FORGET TO SEED THE PROD USERS IN THE BACKEND!!!\n\n"
+# echo -e "\n\n🦄 DON'T FORGET TO SEED THE PROD USERS IN THE BACKEND!!!\n\n"
 
-echo -e "\n\n🦄 Have a nice day!\n\n"
+# echo -e "\n\n🦄 Have a nice day!\n\n"
