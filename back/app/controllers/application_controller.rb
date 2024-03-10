@@ -1,5 +1,5 @@
 class ApplicationController < ActionController::API
-  SECRET_KEY_BASE = Rails.application.credentials.secret_key_base
+  SECRET_KEY_BASE = Rails.application.secret_key_base
   before_action :require_login
   rescue_from Exception, with: :response_internal_server_error
 
