@@ -15,12 +15,10 @@ class ApplicationController < ActionController::API
 
   # unsafe/internal: includes password_digest, created_at, updated_at - we don't want those going to the frontend
   def current_user_raw
-    if decoded_token.present?
-      user_id = decoded_token[0]['user_id']
-      @user = User.find_by(id: user_id)
-    else
-      nil
-    end
+    return unless decoded_token.present?
+
+    user_id = decoded_token[0]['user_id']
+    @user = User.find_by(id: user_id)
   end
 
   def encode_token(payload)
@@ -28,22 +26,22 @@ class ApplicationController < ActionController::API
   end
 
   def decoded_token
-    if auth_header and auth_header.split(' ')[0] == "Bearer"
-      token = auth_header.split(' ')[1]
-      begin
-        JWT.decode token, SECRET_KEY_BASE, true, { algorithm: 'HS256' }
-      rescue JWT::DecodeError
-        []
-      end
+    return unless auth_header and auth_header.split(' ')[0] == 'Bearer'
+
+    token = auth_header.split(' ')[1]
+    begin
+      JWT.decode token, SECRET_KEY_BASE, true, { algorithm: 'HS256' }
+    rescue JWT::DecodeError
+      []
     end
   end
 
   def response_unauthorized
-    render status: 401, json: { status: 401, message: 'Unauthorized' }
+    render status: :unauthorized, json: { status: 401, message: 'Unauthorized' }
   end
-  
+
   def response_internal_server_error
-    render status: 500, json: { status: 500, message: 'Internal Server Error' }
+    render status: :internal_server_error, json: { status: 500, message: 'Internal Server Error' }
   end
 
   # We don't want to send the whole user record from the database to the frontend, so we only send what we need.
@@ -55,9 +53,11 @@ class ApplicationController < ActionController::API
     cars = Car.where(user_id: user.id).map { |car| prep_raw_car(car) }
     maintenances_ids = Maintenance.where(car_id: car_ids).map { |maintenance| maintenance.id }
     maintenances = Maintenance.where(car_id: car_ids).map { |maintenance| prep_raw_maintenance(maintenance) }
-    documents_ids = Document.where(documentable_id: car_ids, documentable_type: "Car").map { |document| document.id }
-    documents = Document.where(documentable_id: car_ids, documentable_type: "Car").map { |document| prep_raw_document(document) }
-    user = user.admin ? user.slice(:id,:email,:name,:admin) : user.slice(:id,:email,:name)
+    documents_ids = Document.where(documentable_id: car_ids, documentable_type: 'Car').map { |document| document.id }
+    documents = Document.where(documentable_id: car_ids, documentable_type: 'Car').map do |document|
+      prep_raw_document(document)
+    end
+    user = user.admin ? user.slice(:id, :email, :name, :admin) : user.slice(:id, :email, :name)
     user['avatar'] = avatar
     user['car_ids'] = car_ids
     user['cars'] = cars
@@ -73,9 +73,12 @@ class ApplicationController < ActionController::API
     user_name = User.find(car.user_id).name
     maintenances = Maintenance.where(car_id: car.id).map { |maintenance| prep_raw_maintenance(maintenance) }
     # documents_ids = Document.where(documentable_id: car_ids, documentable_type: "Car").map { |document| document.id }
-    documents = Document.where(documentable_id: car.id, documentable_type: "Car").map { |document| prep_raw_document(document) }
+    documents = Document.where(documentable_id: car.id, documentable_type: 'Car').map do |document|
+      prep_raw_document(document)
+    end
     image = car.image.present? ? url_for(car.image) : nil
-    car = car.slice(:id,:name,:year,:make,:model,:trim,:body,:color,:plate,:vin,:cost,:initial_mileage,:purchase_date,:purchase_vendor)
+    car = car.slice(:id, :name, :year, :make, :model, :trim, :body, :color, :plate, :vin, :cost, :initial_mileage, :purchase_date,
+                    :purchase_vendor)
     car['userId'] = user_id
     car['userName'] = user_name
     car['image'] = image
@@ -88,7 +91,7 @@ class ApplicationController < ActionController::API
     car = Car.find(maintenance.car_id)
     user = User.find(car.user_id)
     images = maintenance.images.present? ? maintenance.images.map { |image| url_for(image) } : nil
-    maintenance = maintenance.slice(:id,:date,:description,:vendor,:cost,:car_id)
+    maintenance = maintenance.slice(:id, :date, :description, :vendor, :cost, :car_id)
     maintenance['carId'] = car.id
     maintenance['carName'] = car.name
     maintenance['userId'] = user.id
@@ -102,13 +105,13 @@ class ApplicationController < ActionController::API
     attachment_file = attachment_path.present? ? File.basename(attachment_path) : nil
     documentable_type = document.documentable_type
     documentable_id = document.documentable_id
-    document = document.slice(:id,:date,:name,:notes)
+    document = document.slice(:id, :date, :name, :notes)
     document['attachment'] = attachment_path
     document['attachmentFile'] = attachment_file
     car_id = nil
-    if documentable_type == "Car"
+    if documentable_type == 'Car'
       car_id = documentable_id
-    elsif documentable_type == "Maintenance"
+    elsif documentable_type == 'Maintenance'
       maintenance_id = documentable_id
       maintenance = Maintenance.find(maintenance_id)
       car_id = maintenance.car_id
@@ -124,11 +127,10 @@ class ApplicationController < ActionController::API
     document['userName'] = user.name
     document
   end
-  
-  private 
-  
-    def auth_header
-      request.headers['Authorization']
-    end
 
+  private
+
+  def auth_header
+    request.headers['Authorization']
+  end
 end

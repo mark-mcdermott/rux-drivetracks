@@ -1,13 +1,13 @@
 class CarsController < ApplicationController
-  before_action :set_car, only: %i[ show update destroy ]
+  before_action :set_car, only: %i[show update destroy]
 
   # GET /cars
   def index
-    if params['user_id'].present?
-      @cars = Car.where(user_id: params['user_id']).map { |car| prep_raw_car(car) }
-    else
-      @cars = Car.all.map { |car| prep_raw_car(car) }
-    end
+    @cars = if params['user_id'].present?
+              Car.where(user_id: params['user_id']).map { |car| prep_raw_car(car) }
+            else
+              Car.all.map { |car| prep_raw_car(car) }
+            end
     render json: @cars
   end
 
@@ -19,7 +19,7 @@ class CarsController < ApplicationController
   # POST /cars
   def create
     create_params = car_params
-    create_params['image'] = params['image'].blank? ? nil : params['image'] # if no image is chosen on new car page, params['image'] comes in as a blank string, which throws a 500 error at User.new(user_params). This changes any params['avatar'] blank string to nil, which is fine in User.new(user_params).
+    create_params['image'] = params['image'].presence # if no image is chosen on new car page, params['image'] comes in as a blank string, which throws a 500 error at User.new(user_params). This changes any params['avatar'] blank string to nil, which is fine in User.new(user_params).
     @car = Car.new(create_params)
     if @car.save
       render json: prep_raw_car(@car), status: :created, location: @car
@@ -43,13 +43,15 @@ class CarsController < ApplicationController
   end
 
   private
-    # Use callbacks to share common setup or constraints between actions.
-    def set_car
-      @car = Car.find(params[:id])
-    end
 
-    # Only allow a list of trusted parameters through.
-    def car_params
-      params.permit(:id, :name, :image, :year, :make, :model, :trim, :body, :color, :plate, :vin, :cost, :initial_mileage, :purchase_date, :purchase_vendor, :user_id)
-    end
+  # Use callbacks to share common setup or constraints between actions.
+  def set_car
+    @car = Car.find(params[:id])
+  end
+
+  # Only allow a list of trusted parameters through.
+  def car_params
+    params.permit(:id, :name, :image, :year, :make, :model, :trim, :body, :color, :plate, :vin, :cost,
+                  :initial_mileage, :purchase_date, :purchase_vendor, :user_id)
+  end
 end
