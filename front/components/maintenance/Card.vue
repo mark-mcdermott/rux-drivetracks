@@ -1,7 +1,7 @@
 <template>
   <article>
     <h2>
-      <NuxtLink :to="`/maintenances/${maintenance.id}`">{{ maintenance.description }}</NuxtLink> 
+      <NuxtLink :to="`/maintenances/${maintenance.id}?user_id=${loggedInUser.id}`">{{ maintenance.description }}</NuxtLink> 
       <NuxtLink :to="`/maintenances/${maintenance.id}/edit`"><font-awesome-icon icon="pencil" /></NuxtLink>
       <a @click.prevent=deleteMaintenance(maintenance.id) href="#"><font-awesome-icon icon="trash" /></a>
     </h2>
@@ -30,7 +30,9 @@
 import { mapGetters } from 'vuex'
 export default {
   name: 'MaintenanceCard',
-  computed: { ...mapGetters(['isAdmin']) },
+  computed: { 
+    ...mapGetters(['isAdmin', 'indexOrShowPage', 'loggedInUser'])
+  },
   props: {
     maintenance: {
       type: Object,
@@ -48,7 +50,8 @@ export default {
     deleteMaintenance: function(id) {
       this.$axios.$delete(`maintenances/${id}`)
       const index = this.maintenances.findIndex((i) => { return i.id === id })
-      this.maintenances.splice(index, 1);
+      this.maintenances.splice(index, 1)
+      this.indexOrShowPage === 'show' ? this.$router.push(`/maintenances?user_id=${this.loggedInUser.id}`) : null
     }
   }
 }
