@@ -55,9 +55,9 @@ class MaintenancesController < ApplicationController
     @maintenance = Maintenance.find(params[:id])
   end
 
-    # Only allow a list of trusted parameters through.
-    def maintenance_params
-      # params.permit(:id, :date, :description, :vendor, :cost, :images, :car_id)
-      params.permit(:id, :date, :description, :vendor, :cost, :car_id)
-    end
+  # Only allow a list of trusted parameters through.
+  def maintenance_params
+    # params.permit(:id, :date, :description, :vendor, :cost, :images, :car_id)
+    params.permit(:id, :date, :description, :vendor, :cost, :car_id)
+  end
 end
