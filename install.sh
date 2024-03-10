@@ -4098,7 +4098,10 @@ cat <<'EOF' | puravida components/car/Card.vue ~
 import { mapGetters } from 'vuex'
 export default {
   name: 'CarCard',
-  computed: { ...mapGetters(['isAdmin']) },
+  computed: { 
+    ...mapGetters(['isAdmin']),
+    ...mapGetters(['indexOrShowPage'])
+  },
   props: {
     car: {
       type: Object,
@@ -4116,7 +4119,8 @@ export default {
     deleteCar: function(id) {
       this.$axios.$delete(`cars/${id}`)
       const index = this.cars.findIndex((i) => { return i.id === id })
-      this.cars.splice(index, 1);
+      this.cars.splice(index, 1)
+      this.indexOrShowPage === 'show' ? this.$router.push('/cars') : null
     }
   }
 }
@@ -5346,6 +5350,13 @@ export const getters = {
 
   loggedInUser(state) {
     return state.auth.user
+  },
+
+  indexOrShowPage() {
+    const splitUrl = $nuxt.$route.path.split('/')
+    const urlEnd = splitUrl[splitUrl.length-1]
+    const regex = /cars|maintenances|documents/
+    return regex.test(urlEnd) ? 'index' : 'show'
   }
 }
 ~
