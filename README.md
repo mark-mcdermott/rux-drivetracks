@@ -4515,7 +4515,7 @@ export default { middleware: 'currentOrAdmin-showEdit' }
     <h2>
       <NuxtLink :to="`/maintenances/${maintenance.id}`">{{ maintenance.description }}</NuxtLink> 
       <NuxtLink :to="`/maintenances/${maintenance.id}/edit`"><font-awesome-icon icon="pencil" /></NuxtLink>
-      <a @click.prevent=deleteCar(maintenance.id) href="#"><font-awesome-icon icon="trash" /></a>
+      <a @click.prevent=deleteMaintenance(maintenance.id) href="#"><font-awesome-icon icon="trash" /></a>
     </h2>
     <p>id: {{ maintenance.id }}</p>
     <p>date: {{ maintenance.date }}</p>
