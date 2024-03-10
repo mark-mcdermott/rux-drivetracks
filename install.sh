@@ -3776,7 +3776,8 @@ function isEditPage(url) {
 }
 
 function isShowPage(url) {
-  const splitUrl = url.split('/')
+  const urlWithoutQuery = url.split('?')[0]
+  const splitUrl = urlWithoutQuery.split('/')
   return (!isNaN(splitUrl[splitUrl.length-1]) && !isEditPage(url)) ? true : false
 }
 ~
