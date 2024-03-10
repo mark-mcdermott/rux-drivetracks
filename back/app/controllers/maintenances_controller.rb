@@ -1,13 +1,17 @@
+# frozen_string_literal: true
+
 class MaintenancesController < ApplicationController
-  before_action :set_maintenance, only: %i[ show update destroy ]
+  before_action :set_maintenance, only: %i[show update destroy]
 
   # GET /maintenances
   def index
-    if params['user_id'].present?
-      @maintenances = Maintenance.joins(car: [:user]).where(users: {id: params['user_id']}).map { |maintenance| prep_raw_maintenance(maintenance) }
-    else
-      @maintenances = Maintenance.all.map { |maintenance| prep_raw_maintenance(maintenance) }
-    end
+    @maintenances = if params['user_id'].present?
+                      Maintenance.joins(car: [:user]).where(users: { id: params['user_id'] }).map do |maintenance|
+                        prep_raw_maintenance(maintenance)
+                      end
+                    else
+                      Maintenance.all.map { |maintenance| prep_raw_maintenance(maintenance) }
+                    end
     render json: @maintenances
   end
 
@@ -45,14 +49,15 @@ class MaintenancesController < ApplicationController
   end
 
   private
-    # Use callbacks to share common setup or constraints between actions.
-    def set_maintenance
-      @maintenance = Maintenance.find(params[:id])
-    end
 
-    # Only allow a list of trusted parameters through.
-    def maintenance_params
-      # params.permit(:id, :date, :description, :vendor, :cost, :images, :car_id)
-      params.permit(:id, :date, :description, :vendor, :cost, :car_id)
-    end
+  # Use callbacks to share common setup or constraints between actions.
+  def set_maintenance
+    @maintenance = Maintenance.find(params[:id])
+  end
+
+  # Only allow a list of trusted parameters through.
+  def maintenance_params
+    # params.permit(:id, :date, :description, :vendor, :cost, :images, :car_id)
+    params.permit(:id, :date, :description, :vendor, :cost, :car_id)
+  end
 end

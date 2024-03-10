@@ -1,8 +1,10 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
 require 'database_cleaner/active_record'
 ENV['RAILS_ENV'] ||= 'test'
 require_relative '../config/environment'
-abort("The Rails environment is running in production mode!") if Rails.env.production?
+abort('The Rails environment is running in production mode!') if Rails.env.production?
 require 'rspec/rails'
 begin
   ActiveRecord::Migration.maintain_test_schema!
@@ -16,7 +18,7 @@ RSpec.configure do |config|
   config.filter_rails_from_backtrace!
 end
 
-def token_from_email_password(email,password)
-  post "/login", params: { email: email, password: password }
+def token_from_email_password(email, password)
+  post '/login', params: { email:, password: }
   JSON.parse(response.body)['data']
 end
