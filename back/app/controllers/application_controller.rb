@@ -87,13 +87,15 @@ class ApplicationController < ActionController::API
   def prep_raw_maintenance(maintenance)
     car = Car.find(maintenance.car_id)
     user = User.find(car.user_id)
-    images = maintenance.images.present? ? maintenance.images.map { |image| url_for(image) } : nil
+    # images = maintenance.images.present? ? maintenance.images.map { |image| url_for(image) } : nil
+    documents = Document.where(documentable_id: maintenance.id, documentable_type: "Maintenance").map { |document| prep_raw_document(document) }
     maintenance = maintenance.slice(:id,:date,:description,:vendor,:cost,:car_id)
     maintenance['carId'] = car.id
     maintenance['carName'] = car.name
     maintenance['userId'] = user.id
     maintenance['userName'] = user.name
-    maintenance['images'] = images
+    maintenance['documents'] = documents
+    # maintenance['images'] = images
     maintenance
   end
 

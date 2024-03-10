@@ -3,7 +3,7 @@
     <h2>
       <NuxtLink :to="`/documents/${document.id}`">{{ document.name }}</NuxtLink> 
       <NuxtLink :to="`/documents/${document.id}/edit`"><font-awesome-icon icon="pencil" /></NuxtLink>
-      <a @click.prevent=deleteCar(document.id) href="#"><font-awesome-icon icon="trash" /></a>
+      <a @click.prevent=deleteDocument(document.id) href="#"><font-awesome-icon icon="trash" /></a>
     </h2>
     <p>id: {{ document.id }}</p>
     <p>date: {{ document.date }}</p>
