@@ -30,7 +30,7 @@ RSpec.describe '/login', type: :request do
   describe 'POST /login' do
     context 'with valid params' do
       it 'returns unauthorized' do
-        user = User.create(create_user_params)
+        User.create(create_user_params)
         post '/login', params: valid_login_params
         expect(response).to have_http_status(:success)
         expect(JSON.parse(response.body)['message']).to eq 'You are logged in successfully'

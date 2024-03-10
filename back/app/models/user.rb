@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class User < ApplicationRecord
   has_many :cars, dependent: :destroy
   has_one_attached :avatar

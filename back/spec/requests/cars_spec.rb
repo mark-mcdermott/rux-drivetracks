@@ -1,8 +1,10 @@
+# frozen_string_literal: true
+
 require 'rails_helper'
 
 RSpec.describe '/cars', type: :request do
   fixtures :users, :cars
-  let(:valid_headers) { { Authorization: 'Bearer ' + @michael_token } }
+  let(:valid_headers) { { Authorization: "Bearer #{@michael_token}" } }
   let(:valid_attributes) do
     {
       name: "Jim's Fiat 500",

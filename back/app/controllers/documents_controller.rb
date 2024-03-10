@@ -1,11 +1,13 @@
+# frozen_string_literal: true
+
 class DocumentsController < ApplicationController
   before_action :set_document, only: %i[show update destroy]
 
   # GET /documents
   def index
     if params['user_id'].present?
-      car_ids = Car.where(user_id: params['user_id']).map { |car| car.id }
-      maintenance_ids = Maintenance.where(car_id: car_ids).map { |maintenance| maintenance.id }
+      car_ids = Car.where(user_id: params['user_id']).map(&:id)
+      maintenance_ids = Maintenance.where(car_id: car_ids).map(&:id)
       car_documents = Document.where(documentable_type: 'Car', documentable_id: car_ids)
       maintenance_documents = Document.where(documentable_type: 'Maintenance', documentable_id: maintenance_ids)
       all_documents = car_documents + maintenance_documents

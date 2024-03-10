@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
 require 'database_cleaner/active_record'
 ENV['RAILS_ENV'] ||= 'test'

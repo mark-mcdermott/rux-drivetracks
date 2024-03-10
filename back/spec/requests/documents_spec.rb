@@ -1,8 +1,10 @@
+# frozen_string_literal: true
+
 require 'rails_helper'
 
 RSpec.describe '/documents', type: :request do
   fixtures :users, :cars, :maintenances, :documents
-  let(:valid_headers) { { Authorization: 'Bearer ' + @michael_token } }
+  let(:valid_headers) { { Authorization: "Bearer #{@michael_token}" } }
   let(:valid_attributes) do
     {
       date: Date.parse('20200713'),
@@ -293,7 +295,7 @@ RSpec.describe '/documents', type: :request do
         michael = users(:michael)
         document = documents(:fiat_title)
         patch document_url(document), params: new_attributes, headers: valid_headers, as: :json
-        fiat_title = JSON.parse(response.body)
+        JSON.parse(response.body)
         fiat_title = JSON.parse(response.body)
         expect(fiat_title['date']).to be_nil
         expect(fiat_title['notes']).to be_nil

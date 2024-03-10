@@ -5,9 +5,9 @@ require 'spec_helper'
 
 RSpec.describe '/me', type: :request do
   fixtures :users
-  let(:valid_headers) { { Authorization: 'Bearer ' + @token } }
+  let(:valid_headers) { { Authorization: "Bearer #{@token}" } }
   let(:invalid_token_header) { { Authorization: 'Bearer xyz' } }
-  let(:poorly_formed_header) { { Authorization: 'Bear ' + @token } }
+  let(:poorly_formed_header) { { Authorization: "Bear #{@token}" } }
 
   before :all do
     @token = token_from_email_password('michaelscott@dundermifflin.com', 'password')

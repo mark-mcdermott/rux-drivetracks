@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class ApplicationController < ActionController::API
   SECRET_KEY_BASE = Rails.application.secret_key_base
   before_action :require_login
@@ -15,7 +17,7 @@ class ApplicationController < ActionController::API
 
   # unsafe/internal: includes password_digest, created_at, updated_at - we don't want those going to the frontend
   def current_user_raw
-    return unless decoded_token.present?
+    return if decoded_token.blank?
 
     user_id = decoded_token[0]['user_id']
     @user = User.find_by(id: user_id)
@@ -26,7 +28,7 @@ class ApplicationController < ActionController::API
   end
 
   def decoded_token
-    return unless auth_header and auth_header.split(' ')[0] == 'Bearer'
+    return unless auth_header && (auth_header.split(' ')[0] == 'Bearer')
 
     token = auth_header.split(' ')[1]
     begin
@@ -49,11 +51,11 @@ class ApplicationController < ActionController::API
   # We also change avatar from a weird active_storage object to just the avatar url before it gets to the frontend.
   def prep_raw_user(user)
     avatar = user.avatar.present? ? url_for(user.avatar) : nil
-    car_ids = Car.where(user_id: user.id).map { |car| car.id }
+    car_ids = Car.where(user_id: user.id).map(&:id)
     cars = Car.where(user_id: user.id).map { |car| prep_raw_car(car) }
-    maintenances_ids = Maintenance.where(car_id: car_ids).map { |maintenance| maintenance.id }
+    maintenances_ids = Maintenance.where(car_id: car_ids).map(&:id)
     maintenances = Maintenance.where(car_id: car_ids).map { |maintenance| prep_raw_maintenance(maintenance) }
-    documents_ids = Document.where(documentable_id: car_ids, documentable_type: 'Car').map { |document| document.id }
+    documents_ids = Document.where(documentable_id: car_ids, documentable_type: 'Car').map(&:id)
     documents = Document.where(documentable_id: car_ids, documentable_type: 'Car').map do |document|
       prep_raw_document(document)
     end

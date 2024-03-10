@@ -5,7 +5,7 @@ RSpec.describe '/maintenances', type: :request do
   fixtures :users
   fixtures :cars
   fixtures :maintenances
-  let(:valid_headers) { { Authorization: 'Bearer ' + @michael_token } }
+  let(:valid_headers) { { Authorization: "Bearer #{@michael_token}" } }
   let(:valid_attributes) do
     {
       date: Date.parse('20200713'),

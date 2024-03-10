@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class MaintenancesController < ApplicationController
   before_action :set_maintenance, only: %i[show update destroy]
 

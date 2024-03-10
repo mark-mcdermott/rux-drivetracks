@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'rails_helper'
 require 'database_cleaner/active_record'
 RSpec.describe User, type: :model do
@@ -11,10 +13,10 @@ RSpec.describe User, type: :model do
   end
 
   it 'is valid with valid attributes' do
-    expect(User.new(mock_1_valid_create_params)).to be_valid
+    expect(described_class.new(mock_1_valid_create_params)).to be_valid
   end
 
   it 'is not valid width poorly formed email' do
-    expect(User.new(mock_1_invalid_create_params_email_poorly_formed)).not_to be_valid
+    expect(described_class.new(mock_1_invalid_create_params_email_poorly_formed)).not_to be_valid
   end
 end

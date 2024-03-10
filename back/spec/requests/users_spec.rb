@@ -5,10 +5,10 @@ require 'spec_helper'
 
 RSpec.describe '/users', type: :request do
   fixtures :users, :cars
-  let(:valid_headers) { { Authorization: 'Bearer ' + @michael_token } }
-  let(:admin_2_headers) { { Authorization: 'Bearer ' + @ryan_token } }
+  let(:valid_headers) { { Authorization: "Bearer #{@michael_token}" } }
+  let(:admin_2_headers) { { Authorization: "Bearer #{@ryan_token}" } }
   let(:invalid_token_header) { { Authorization: 'Bearer xyz' } }
-  let(:poorly_formed_header) { { Authorization: 'Bear ' + @michael_token } }
+  let(:poorly_formed_header) { { Authorization: "Bear #{@michael_token}" } }
   let(:user_valid_create_params_mock_1) do
     { name: 'First1 Last1', email: 'one@mail.com', admin: 'false', password: 'password',
       avatar: fixture_file_upload('spec/fixtures/files/michael-scott.png', 'image/png') }
@@ -62,7 +62,7 @@ RSpec.describe '/users', type: :request do
         get users_url, headers: valid_headers
         users = JSON.parse(response.body)
         michael = users.find { |user| user['email'] == 'michaelscott@dundermifflin.com' }
-        car_ids = michael['car_ids']
+        michael['car_ids']
         cars = michael['cars']
         fiat = cars.find { |car| car['name'] == "Michael's Fiat 500" }
         civic = cars.find { |car| car['name'] == "Michael's Honda Civic" }
@@ -114,7 +114,7 @@ RSpec.describe '/users', type: :request do
         get users_url, headers: valid_headers
         users = JSON.parse(response.body)
         jim = users.find { |user| user['email'] == 'jimhalpert@dundermifflin.com' }
-        car_ids = jim['car_ids']
+        jim['car_ids']
         cars = jim['cars']
         elantra = cars.find { |car| car['name'] == "Jim's Hyundai Elantra" }
         leaf = cars.find { |car| car['name'] == "Jim's Nissan Leaf" }
@@ -178,7 +178,7 @@ RSpec.describe '/users', type: :request do
       it "gets users' correct details" do
         get user_url(@user1), headers: valid_headers
         michael = JSON.parse(response.body)
-        car_ids = michael['car_ids']
+        michael['car_ids']
         cars = michael['cars']
         fiat = cars.find { |car| car['name'] == "Michael's Fiat 500" }
         civic = cars.find { |car| car['name'] == "Michael's Honda Civic" }
@@ -295,7 +295,7 @@ RSpec.describe '/users', type: :request do
         @user1.reload
         get user_url(@user1), headers: valid_headers
         user = JSON.parse(response.body)
-        car_ids = user['car_ids']
+        user['car_ids']
         cars = user['cars']
         fiat = cars.find { |car| car['name'] == "Michael's Fiat 500" }
         civic = cars.find { |car| car['name'] == "Michael's Honda Civic" }
@@ -308,7 +308,7 @@ RSpec.describe '/users', type: :request do
         @user1.reload
         get user_url(@user1), headers: valid_headers
         user = JSON.parse(response.body)
-        car_ids = user['car_ids']
+        user['car_ids']
         cars = user['cars']
         fiat = cars.find { |car| car['name'] == "Michael's Fiat 500" }
         civic = cars.find { |car| car['name'] == "Michael's Honda Civic" }

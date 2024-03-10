@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'rails_helper'
 
 RSpec.describe Maintenance, type: :model do
@@ -22,10 +24,10 @@ RSpec.describe Maintenance, type: :model do
   end
 
   it 'is valid with valid attributes' do
-    expect(Maintenance.new(valid_attributes)).to be_valid
+    expect(described_class.new(valid_attributes)).to be_valid
   end
 
   it 'is not valid width poorly formed email' do
-    expect(Maintenance.new(invalid_attributes)).not_to be_valid
+    expect(described_class.new(invalid_attributes)).not_to be_valid
   end
 end
