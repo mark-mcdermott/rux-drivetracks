@@ -4351,7 +4351,7 @@ export default {
 <template>
   <article>
     <h2>
-      <NuxtLink :to="`/users/${user.id}`">{{ user.name }}</NuxtLink> 
+      <NuxtLink :to="`/users/${user.id}?user_id=${loggedInUser.id}`">{{ user.name }}</NuxtLink> 
       <NuxtLink :to="`/users/${user.id}/edit`"><font-awesome-icon icon="pencil" /></NuxtLink>
       <a @click.prevent=deleteUser(user.id) href="#"><font-awesome-icon icon="trash" /></a>
     </h2>
@@ -4368,8 +4368,7 @@ import { mapGetters } from 'vuex'
 export default {
   name: 'UserCard',
   computed: { 
-    ...mapGetters(['isAdmin']),
-    ...mapGetters(['indexOrShowPage'])
+    ...mapGetters(['isAdmin', 'indexOrShowPage', 'loggedInUser'])
   },
   props: {
     user: {
@@ -4483,7 +4482,7 @@ export default { middleware: 'currentOrAdmin-showEdit' }
 <template>
   <article>
     <h2>
-      <NuxtLink :to="`/cars/${car.id}`">{{ car.name }}</NuxtLink> 
+      <NuxtLink :to="`/cars/${car.id}?user_id=${loggedInUser.id}`">{{ car.name }}</NuxtLink> 
       <NuxtLink :to="`/cars/${car.id}/edit`"><font-awesome-icon icon="pencil" /></NuxtLink>
       <a @click.prevent=deleteCar(car.id) href="#"><font-awesome-icon icon="trash" /></a>
     </h2>
@@ -4522,8 +4521,7 @@ import { mapGetters } from 'vuex'
 export default {
   name: 'CarCard',
   computed: { 
-    ...mapGetters(['isAdmin']),
-    ...mapGetters(['indexOrShowPage'])
+    ...mapGetters(['isAdmin', 'indexOrShowPage', 'loggedInUser']),
   },
   props: {
     car: {
@@ -4799,7 +4797,7 @@ export default { middleware: 'currentOrAdmin-showEdit' }
 <template>
   <article>
     <h2>
-      <NuxtLink :to="`/maintenances/${maintenance.id}`">{{ maintenance.description }}</NuxtLink> 
+      <NuxtLink :to="`/maintenances/${maintenance.id}?user_id=${loggedInUser.id}`">{{ maintenance.description }}</NuxtLink> 
       <NuxtLink :to="`/maintenances/${maintenance.id}/edit`"><font-awesome-icon icon="pencil" /></NuxtLink>
       <a @click.prevent=deleteMaintenance(maintenance.id) href="#"><font-awesome-icon icon="trash" /></a>
     </h2>
@@ -4829,8 +4827,7 @@ import { mapGetters } from 'vuex'
 export default {
   name: 'MaintenanceCard',
   computed: { 
-    ...mapGetters(['isAdmin']),
-    ...mapGetters(['indexOrShowPage'])
+    ...mapGetters(['isAdmin', 'indexOrShowPage', 'loggedInUser'])
   },
   props: {
     maintenance: {
@@ -5086,7 +5083,7 @@ export default { middleware: 'currentOrAdmin-showEdit' }
 <template>
   <article>
     <h2>
-      <NuxtLink :to="`/documents/${document.id}`">{{ document.name }}</NuxtLink> 
+      <NuxtLink :to="`/documents/${document.id}?user_id=${loggedInUser.id}`">{{ document.name }}</NuxtLink> 
       <NuxtLink :to="`/documents/${document.id}/edit`"><font-awesome-icon icon="pencil" /></NuxtLink>
       <a @click.prevent=deleteDocument(document.id) href="#"><font-awesome-icon icon="trash" /></a>
     </h2>
@@ -5104,8 +5101,7 @@ import { mapGetters } from 'vuex'
 export default {
   name: 'DocumentCard',
   computed: { 
-    ...mapGetters(['isAdmin']),
-    ...mapGetters(['indexOrShowPage'])
+    ...mapGetters(['isAdmin', 'indexOrShowPage', 'loggedInUser'])
   },
   props: {
     document: {
