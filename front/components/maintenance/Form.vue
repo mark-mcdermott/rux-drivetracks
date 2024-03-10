@@ -9,10 +9,10 @@
         <p>Description: </p><input v-model="description">
         <p>Vendor: </p><input v-model="vendor">
         <p>Cost: </p><input v-model="cost">
-        <p class="no-margin">Image: </p>
+        <!-- <p class="no-margin">Image: </p>
         <img v-if="!hideImage && editOrNew === 'edit'" :src="image" />    
-        <input type="file" ref="inputFile" @change=uploadImage()>
-        <p>Car Id: {{ carId }}</p>
+        <input type="file" ref="inputFile" @change=uploadImage()> -->
+        <p>Car: {{ carId }}</p>
         <select v-if="editOrNew === 'new'" name="car" @change="selectCar($event)">
           <option value=""></option>
           <option v-for="car in cars" :key="car.id" :value="car.id">{{ car.name }} - {{ car.description }}</option>
@@ -33,7 +33,7 @@ export default {
       description: "",
       vendor: "",
       cost: "",
-      image: "",
+      // image: "",
       editOrNew: "",
       hideImage: false,
       cars: [],
@@ -67,10 +67,10 @@ export default {
     }
   },
   methods: {
-    uploadImage: function() {
-      this.image = this.$refs.inputFile.files[0]
-      this.hideImage = true
-    },
+    // uploadImage: function() {
+    //   this.image = this.$refs.inputFile.files[0]
+    //   this.hideImage = true
+    // },
     createMaintenance: function() {
       const params = {
         'date': this.date,
@@ -91,13 +91,14 @@ export default {
         })
     },
     editMaintenance: function() {
-      let params = {}
-      const filePickerFile = this.$refs.inputFile.files[0]
-      if (!filePickerFile) {
-        params = { 'name': this.name, 'date': this.date, 'description': this.description, 'vendor': this.vendor, 'cost': this.cost }
-      } else {
-        params = { 'name': this.name, 'date': this.date, 'description': this.description, 'vendor': this.vendor, 'cost': this.cost, 'image': this.image }
-      } 
+      // let params = {}
+      let params = { 'name': this.name, 'date': this.date, 'description': this.description, 'vendor': this.vendor, 'cost': this.cost }
+      // const filePickerFile = this.$refs.inputFile.files[0]
+      // if (!filePickerFile) {
+      //   params = { 'name': this.name, 'date': this.date, 'description': this.description, 'vendor': this.vendor, 'cost': this.cost }
+      // } else {
+      //   params = { 'name': this.name, 'date': this.date, 'description': this.description, 'vendor': this.vendor, 'cost': this.cost, 'image': this.image }
+      // } 
       let payload = new FormData()
       Object.entries(params).forEach(
         ([key, value]) => payload.append(key, value)
