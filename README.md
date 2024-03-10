@@ -4700,13 +4700,14 @@ export default {
         })
     },
     editMaintenance: function() {
-      let params = {}
-      const filePickerFile = this.$refs.inputFile.files[0]
-      if (!filePickerFile) {
-        params = { 'name': this.name, 'date': this.date, 'description': this.description, 'vendor': this.vendor, 'cost': this.cost }
-      } else {
-        params = { 'name': this.name, 'date': this.date, 'description': this.description, 'vendor': this.vendor, 'cost': this.cost, 'image': this.image }
-      } 
+      // let params = {}
+      let params = { 'name': this.name, 'date': this.date, 'description': this.description, 'vendor': this.vendor, 'cost': this.cost }
+      // const filePickerFile = this.$refs.inputFile.files[0]
+      // if (!filePickerFile) {
+      //   params = { 'name': this.name, 'date': this.date, 'description': this.description, 'vendor': this.vendor, 'cost': this.cost }
+      // } else {
+      //   params = { 'name': this.name, 'date': this.date, 'description': this.description, 'vendor': this.vendor, 'cost': this.cost, 'image': this.image }
+      // } 
       let payload = new FormData()
       Object.entries(params).forEach(
         ([key, value]) => payload.append(key, value)
