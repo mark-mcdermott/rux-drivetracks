@@ -4367,7 +4367,10 @@ export default {
 import { mapGetters } from 'vuex'
 export default {
   name: 'UserCard',
-  computed: { ...mapGetters(['isAdmin']) },
+  computed: { 
+    ...mapGetters(['isAdmin']),
+    ...mapGetters(['indexOrShowPage'])
+  },
   props: {
     user: {
       type: Object,
@@ -4385,7 +4388,8 @@ export default {
     deleteUser: function(id) {
       this.$axios.$delete(`users/${id}`)
       const index = this.users.findIndex((i) => { return i.id === id })
-      this.users.splice(index, 1);
+      this.users.splice(index, 1)
+      this.indexOrShowPage === 'show' ? this.$router.push('/users') : null
     }
   }
 }
@@ -4824,7 +4828,10 @@ export default { middleware: 'currentOrAdmin-showEdit' }
 import { mapGetters } from 'vuex'
 export default {
   name: 'MaintenanceCard',
-  computed: { ...mapGetters(['isAdmin']) },
+  computed: { 
+    ...mapGetters(['isAdmin']),
+    ...mapGetters(['indexOrShowPage'])
+  },
   props: {
     maintenance: {
       type: Object,
@@ -4842,7 +4849,8 @@ export default {
     deleteMaintenance: function(id) {
       this.$axios.$delete(`maintenances/${id}`)
       const index = this.maintenances.findIndex((i) => { return i.id === id })
-      this.maintenances.splice(index, 1);
+      this.maintenances.splice(index, 1)
+      this.indexOrShowPage === 'show' ? this.$router.push('/maintenances') : null
     }
   }
 }
@@ -5095,6 +5103,10 @@ export default { middleware: 'currentOrAdmin-showEdit' }
 import { mapGetters } from 'vuex'
 export default {
   name: 'DocumentCard',
+  computed: { 
+    ...mapGetters(['isAdmin']),
+    ...mapGetters(['indexOrShowPage'])
+  },
   props: {
     document: {
       type: Object,
@@ -5105,7 +5117,6 @@ export default {
       default: () => ([]),
     },
   },
-  computed: { ...mapGetters(['isAdmin']) },
   methods: {
     uploadImage: function() {
       this.image = this.$refs.inputFile.files[0];
@@ -5113,7 +5124,8 @@ export default {
     deleteDocument: function(id) {
       this.$axios.$delete(`documents/${id}`)
       const index = this.documents.findIndex((i) => { return i.id === id })
-      this.documents.splice(index, 1);
+      this.documents.splice(index, 1)
+      this.indexOrShowPage === 'show' ? this.$router.push('/documents') : null
     }
     
   }
