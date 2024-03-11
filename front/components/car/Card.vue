@@ -57,11 +57,10 @@ export default {
       this.image = this.$refs.inputFile.files[0];
     },
     deleteCar: function(id) {
-      console.log(this.cars)
-      // this.$axios.$delete(`cars/${id}`)
-      // const index = this.cars.findIndex((i) => { return i.id === id })
-      // this.cars.splice(index, 1)
-      // this.indexOrShowPage === 'show' ? this.$router.push(`/cars?user_id=${this.loggedInUser.id}`) : null
+      this.$axios.$delete(`cars/${id}`)
+      const index = this.cars.findIndex((i) => { return i.id === id })
+      this.cars.splice(index, 1)
+      this.indexOrShowPage === 'show' ? this.$router.push(`/cars?user_id=${this.loggedInUser.id}`) : null
     }
   }
 }

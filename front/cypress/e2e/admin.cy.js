@@ -115,18 +115,21 @@ describe('Admin /users page', () => {
 describe('Admin visiting /cars', () => {
 
   context('No query string', () => {
-    it("Should show admin's two cars", () => {
+    it("Should show all users' cars", () => {
       cy.loginAdmin()
       cy.url().should('match', /http:\/\/localhost:3001\/users\/1/)
       cy.visit('http://localhost:3001/cars')
       cy.url().should('match', /http:\/\/localhost:3001\/cars/)
-      cy.get('section').children('div').should('have.length', 2)
+      cy.get('section').children('div').should('have.length', 6)
       cy.get('article').eq(0).find('h2').should('contain', "Michael's Fiat 500")
       cy.get('article').eq(1).find('h2').should('contain', "Michael's Honda Civic")
+      cy.get('article').eq(2).find('h2').should('contain', "Jim's Hyundai Elantra")
+      cy.get('article').eq(3).find('h2').should('contain', "Jim's Nissan Leaf")
+      cy.get('article').eq(4).find('h2').should('contain', "Pam's Scion Xb")
+      cy.get('article').eq(5).find('h2').should('contain', "Pam's Toyota Camry")
       cy.logoutAdmin()
     })
   })
-
 
   context('?admin=true query string', () => {
     it("Should show all cars", () => {

@@ -51,7 +51,7 @@ export default {
       this.$axios.$delete(`maintenances/${id}`)
       const index = this.maintenances.findIndex((i) => { return i.id === id })
       this.maintenances.splice(index, 1)
-      this.indexOrShowPage === 'show' ? this.$router.push(`/maintenances?user_id=${this.loggedInUser.id}`) : null
+      this.indexOrShowPage === 'show' ? this.$router.push('/maintenances') : null
     }
   }
 }

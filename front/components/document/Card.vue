@@ -39,7 +39,7 @@ export default {
       this.$axios.$delete(`documents/${id}`)
       const index = this.documents.findIndex((i) => { return i.id === id })
       this.documents.splice(index, 1)
-      this.indexOrShowPage === 'show' ? this.$router.push(`/documents?user_id=${this.loggedInUser.id}`) : null
+      this.indexOrShowPage === 'show' ? this.$router.push('/documents') : null
     }
     
   }

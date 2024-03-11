@@ -6,6 +6,7 @@ export default function ({ route, store, redirect }) {
   const actual_user_id = loggedInUser.id
   const isUserRequestingOwnData = requested_user_id === actual_user_id
   const pathWithoutQuery = route.path.split('?')[0]
+  const pathWithAdminQuery = `${pathWithoutQuery}?admin=true`
 
   if (!isAuthenticated) {
     return redirect('/')
@@ -13,6 +14,6 @@ export default function ({ route, store, redirect }) {
     const pathWithUserId = `${pathWithoutQuery}?user_id=${loggedInUser.id}`
     return redirect(pathWithUserId)
   } else if (isQueryEmpty) {
-    return redirect(pathWithoutQuery)
+    return redirect(pathWithAdminQuery)
   }
 }
