@@ -23,3 +23,10 @@ def token_from_email_password(email, password)
   post '/login', params: { email:, password: }
   JSON.parse(response.body)['data']
 end
+
+Shoulda::Matchers.configure do |config|
+  config.integrate do |with|
+    with.test_framework :rspec
+    with.library :rails
+  end
+end
