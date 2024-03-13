@@ -3403,8 +3403,8 @@ class ApplicationController < ActionController::API
     cars = Car.where(user_id: user.id).map { |car| prep_raw_car(car) }
     maintenances_ids = Maintenance.where(car_id: car_ids).map { |maintenance| maintenance.id }
     maintenances = Maintenance.where(car_id: car_ids).map { |maintenance| prep_raw_maintenance(maintenance) }
-    documents_ids = Document.where(documentable_id: car_ids, documentable_type: "Car").map { |document| document.id }
-    documents = Document.where(documentable_id: car_ids, documentable_type: "Car").map { |document| prep_raw_document(document) }
+    documents_ids = Document.where(documentable_id: car_ids, documentable_type: "Car").or(Document.where(documentable_id: maintenances_ids, documentable_type: "Maintenance")).map { |document| document.id }
+    documents = Document.where(documentable_id: car_ids, documentable_type: "Car").or(Document.where(documentable_id: maintenances_ids, documentable_type: "Maintenance")).map { |document| prep_raw_document(document) }
     user = user.admin ? user.slice(:id,:email,:name,:admin) : user.slice(:id,:email,:name)
     user['avatar'] = avatar
     user['car_ids'] = car_ids
