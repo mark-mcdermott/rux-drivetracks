@@ -2,6 +2,7 @@ require 'swagger_helper'
 
 RSpec.describe 'cars', type: :request do
   let!(:user) { create(:user) }
+  let!(:car) { create(:car, user: user) }
   let!(:token) { token_from_email_password(user.email, user.password) }
   let!(:Authorization) { "Bearer #{token}" }
 
@@ -47,7 +48,7 @@ RSpec.describe 'cars', type: :request do
       security [Bearer: []]
 
       response(200, 'successful') do
-        let(:id) { '123' }
+        let(:id) { car.id }
 
         after do |example|
           example.metadata[:response][:content] = {
@@ -65,7 +66,7 @@ RSpec.describe 'cars', type: :request do
       security [Bearer: []]
 
       response(200, 'successful') do
-        let(:id) { '123' }
+        let(:id) { car.id }
 
         after do |example|
           example.metadata[:response][:content] = {
@@ -83,7 +84,7 @@ RSpec.describe 'cars', type: :request do
       security [Bearer: []]
 
       response(200, 'successful') do
-        let(:id) { '123' }
+        let(:id) { car.id }
 
         after do |example|
           example.metadata[:response][:content] = {
@@ -101,7 +102,7 @@ RSpec.describe 'cars', type: :request do
       security [Bearer: []]
 
       response(200, 'successful') do
-        let(:id) { '123' }
+        let(:id) { car.id }
 
         after do |example|
           example.metadata[:response][:content] = {
