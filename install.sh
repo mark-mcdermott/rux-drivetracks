@@ -8,6 +8,7 @@ cd back
 rails db:drop db:create
 bundle add rack-cors bcrypt jwt pry
 bundle add rspec-rails --group "development, test"
+bundle add rubocop rubocop-rails rubocop-rspec --group development,test
 bundle add database_cleaner-active_record --group "test"
 bundle
 rails active_storage:install
