@@ -31,7 +31,15 @@ RSpec.configure do |config|
             }
           }
         }
-      ]
+      ],
+      components: {
+        securitySchemes: {
+          Bearer: {
+            type: :http,
+            scheme: :bearer
+          },
+        }
+      }
     }
   }
 

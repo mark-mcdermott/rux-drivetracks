@@ -1,12 +1,15 @@
 require 'swagger_helper'
 
 RSpec.describe 'cars', type: :request do
+  let!(:user) { create(:user) }
+  let!(:token) { token_from_email_password(user.email, user.password) }
+  let!(:Authorization) { "Bearer #{token}" }
 
   path '/cars' do
-
     get('list cars') do
-      response(200, 'successful') do
+      security [Bearer: []]
 
+      response(200, 'successful') do
         after do |example|
           example.metadata[:response][:content] = {
             'application/json' => {
@@ -14,13 +17,15 @@ RSpec.describe 'cars', type: :request do
             }
           }
         end
+
         run_test!
       end
     end
 
     post('create car') do
-      response(200, 'successful') do
+      security [Bearer: []]
 
+      response(200, 'successful') do
         after do |example|
           example.metadata[:response][:content] = {
             'application/json' => {
@@ -28,6 +33,7 @@ RSpec.describe 'cars', type: :request do
             }
           }
         end
+
         run_test!
       end
     end
@@ -38,6 +44,8 @@ RSpec.describe 'cars', type: :request do
     parameter name: 'id', in: :path, type: :string, description: 'id'
 
     get('show car') do
+      security [Bearer: []]
+
       response(200, 'successful') do
         let(:id) { '123' }
 
@@ -48,11 +56,14 @@ RSpec.describe 'cars', type: :request do
             }
           }
         end
+
         run_test!
       end
     end
 
     patch('update car') do
+      security [Bearer: []]
+
       response(200, 'successful') do
         let(:id) { '123' }
 
@@ -63,11 +74,14 @@ RSpec.describe 'cars', type: :request do
             }
           }
         end
+
         run_test!
       end
     end
 
     put('update car') do
+      security [Bearer: []]
+
       response(200, 'successful') do
         let(:id) { '123' }
 
@@ -78,11 +92,14 @@ RSpec.describe 'cars', type: :request do
             }
           }
         end
+
         run_test!
       end
     end
 
     delete('delete car') do
+      security [Bearer: []]
+
       response(200, 'successful') do
         let(:id) { '123' }
 
@@ -93,6 +110,7 @@ RSpec.describe 'cars', type: :request do
             }
           }
         end
+
         run_test!
       end
     end
