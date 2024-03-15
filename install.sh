@@ -454,131 +454,132 @@ RSpec.describe "/users", type: :request do
 end
 ~
 EOF
+rubocop -A
 rspec
 
 
 
-# echo -e "\n\n🦄  /login Route (Authentications Controller)\n\n"
-# rails g controller Authentications
-# cat <<'EOF' | puravida app/controllers/authentications_controller.rb ~
-# class AuthenticationsController < ApplicationController
-#   skip_before_action :require_login
+echo -e "\n\n🦄  /login Route (Authentications Controller)\n\n"
+rails g controller Authentications
+cat <<'EOF' | puravida app/controllers/authentications_controller.rb ~
+class AuthenticationsController < ApplicationController
+  skip_before_action :require_login
   
-#   def create
-#     user = User.find_by(email: params[:email])
-#     if user && user.authenticate(params[:password])
-#       payload = { user_id: user.id, email: user.email }
-#       token = encode_token(payload)
-#       render json: { data: token, status: 200, message: 'You are logged in successfully' }
-#     else
-#       response_unauthorized
-#     end
-#   end
-# end
-# ~
-# EOF
-# cat <<'EOF' | puravida spec/requests/authentications_spec.rb ~
-# # frozen_string_literal: true
-# require 'rails_helper'
+  def create
+    user = User.find_by(email: params[:email])
+    if user && user.authenticate(params[:password])
+      payload = { user_id: user.id, email: user.email }
+      token = encode_token(payload)
+      render json: { data: token, status: 200, message: 'You are logged in successfully' }
+    else
+      response_unauthorized
+    end
+  end
+end
+~
+EOF
+cat <<'EOF' | puravida spec/requests/authentications_spec.rb ~
+# frozen_string_literal: true
+require 'rails_helper'
 
-# RSpec.describe "/login", type: :request do
-#   let(:valid_login_params) { { email: "michaelscott@dundermifflin.com",  password: "password" } }
-#   let(:invalid_login_params) { { email: "michaelscott@dundermifflin.com",  password: "testing" } }
-#   let(:create_user_params) { { name: "Michael Scott", email: "michaelscott@dundermifflin.com", admin: "true", password: "password" }}
-#   describe "POST /login" do
-#     context "without params" do
-#       it "returns unauthorized" do
-#         post "/login"
-#         expect(response).to have_http_status(:unauthorized)
-#       end
-#     end
-#   end
-#   describe "POST /login" do
-#     context "with invalid params" do
-#       it "returns unauthorized" do
-#         post "/login", params: invalid_login_params
-#         expect(response).to have_http_status(:unauthorized)
-#       end
-#     end
-#   end
-#   describe "POST /login" do
-#     context "with valid params" do
-#       it "returns unauthorized" do
-#         user = User.create(create_user_params)
-#         post "/login", params: valid_login_params
-#         expect(response).to have_http_status(:success)
-#         expect(JSON.parse(response.body)['message']).to eq "You are logged in successfully"
-#         expect(JSON.parse(response.body)['data']).to match(/^(?:[\w-]*\.){2}[\w-]*$/)
-#       end
-#     end
-#   end
-# end
-# ~
-# EOF
-# cat <<'EOF' | puravida app/controllers/users_controller.rb ~
-# class UsersController < ApplicationController
-#   before_action :set_user, only: %i[ show update destroy ]
-#   skip_before_action :require_login, only: :create
+RSpec.describe "/login", type: :request do
+  let(:valid_login_params) { { email: "michaelscott@dundermifflin.com",  password: "password" } }
+  let(:invalid_login_params) { { email: "michaelscott@dundermifflin.com",  password: "testing" } }
+  let(:create_user_params) { { name: "Michael Scott", email: "michaelscott@dundermifflin.com", admin: "true", password: "password" }}
+  describe "POST /login" do
+    context "without params" do
+      it "returns unauthorized" do
+        post "/login"
+        expect(response).to have_http_status(:unauthorized)
+      end
+    end
+  end
+  describe "POST /login" do
+    context "with invalid params" do
+      it "returns unauthorized" do
+        post "/login", params: invalid_login_params
+        expect(response).to have_http_status(:unauthorized)
+      end
+    end
+  end
+  describe "POST /login" do
+    context "with valid params" do
+      it "returns unauthorized" do
+        user = User.create(create_user_params)
+        post "/login", params: valid_login_params
+        expect(response).to have_http_status(:success)
+        expect(JSON.parse(response.body)['message']).to eq "You are logged in successfully"
+        expect(JSON.parse(response.body)['data']).to match(/^(?:[\w-]*\.){2}[\w-]*$/)
+      end
+    end
+  end
+end
+~
+EOF
+cat <<'EOF' | puravida app/controllers/users_controller.rb ~
+class UsersController < ApplicationController
+  before_action :set_user, only: %i[ show update destroy ]
+  skip_before_action :require_login, only: :create
 
-#   # GET /users
-#   def index
-#     @users = User.all.map { |user| prep_raw_user(user) }
-#     render json: @users
-#   end
+  # GET /users
+  def index
+    @users = User.all.map { |user| prep_raw_user(user) }
+    render json: @users
+  end
 
-#   # GET /users/1
-#   def show
-#     render json: prep_raw_user(@user)
-#   end
+  # GET /users/1
+  def show
+    render json: prep_raw_user(@user)
+  end
 
-#   # POST /users
-#   def create
-#     @user = User.new(user_params)
-#     if @user.save
-#       render json: prep_raw_user(@user), status: :created, location: @user
-#     else
-#       render json: @user.errors, status: :unprocessable_entity
-#     end
-#   end
+  # POST /users
+  def create
+    @user = User.new(user_params)
+    if @user.save
+      render json: prep_raw_user(@user), status: :created, location: @user
+    else
+      render json: @user.errors, status: :unprocessable_entity
+    end
+  end
 
-#   # PATCH/PUT /users/1
-#   def update
-#     if @user.update(user_params)
-#       render json: prep_raw_user(@user)
-#     else
-#       render json: @user.errors, status: :unprocessable_entity
-#     end
-#   end
+  # PATCH/PUT /users/1
+  def update
+    if @user.update(user_params)
+      render json: prep_raw_user(@user)
+    else
+      render json: @user.errors, status: :unprocessable_entity
+    end
+  end
 
-#   # DELETE /users/1
-#   def destroy
-#     @user.destroy
-#   end
+  # DELETE /users/1
+  def destroy
+    @user.destroy
+  end
 
-#   private
-#     # Use callbacks to share common setup or constraints between actions.
-#     def set_user
-#       @user = User.find(params[:id])
-#     end
+  private
+    # Use callbacks to share common setup or constraints between actions.
+    def set_user
+      @user = User.find(params[:id])
+    end
 
-#     # Only allow a list of trusted parameters through.
-#     def user_params
-#       params['avatar'] = params['avatar'].blank? ? nil : params['avatar'] # if no avatar is chosen on signup page, params['avatar'] comes in as a blank string, which throws a 500 error at User.new(user_params). This changes any params['avatar'] blank string to nil, which is fine in User.new(user_params).
-#       params.permit(:name, :email, :avatar, :admin, :password)
-#     end
+    # Only allow a list of trusted parameters through.
+    def user_params
+      params['avatar'] = params['avatar'].blank? ? nil : params['avatar'] # if no avatar is chosen on signup page, params['avatar'] comes in as a blank string, which throws a 500 error at User.new(user_params). This changes any params['avatar'] blank string to nil, which is fine in User.new(user_params).
+      params.permit(:name, :email, :avatar, :admin, :password)
+    end
     
-# end
-# ~
-# EOF
-# cat <<'EOF' | puravida config/routes.rb ~
-# Rails.application.routes.draw do
-#   resources :users
-#   get "health", to: "health#index"
-#   post "login", to: "authentications#create"
-#   get "me", to: "application#user_from_token"
-# end
-# ~
-# EOF
+end
+~
+EOF
+cat <<'EOF' | puravida config/routes.rb ~
+Rails.application.routes.draw do
+  resources :users
+  get "health", to: "health#index"
+  post "login", to: "authentications#create"
+  get "me", to: "application#user_from_token"
+end
+~
+EOF
 
 # echo -e "\n\n🦄  /me Route (Application Controller)\n\n"
 # cat <<'EOF' | puravida app/controllers/application_controller.rb ~

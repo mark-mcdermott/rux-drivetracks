@@ -482,6 +482,7 @@ RSpec.describe "/users", type: :request do
 end
 ~
 ```
+`rubocop -A`
 `rspec`
 
 #### /login Route (Authentications Controller)
