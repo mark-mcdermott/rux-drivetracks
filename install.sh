@@ -3348,6 +3348,9 @@ rm -rf spec/factories
 rm -rf spec/routing
 rubocop -A
 rspec
+rm -rf .git
+rm .gitignore
+rm .gitattributes
 
 # echo -e "\n\n🦄 FRONTEND\n\n"
 

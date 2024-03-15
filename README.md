@@ -3740,6 +3740,9 @@ document.attachment.attach(io: URI.open("#{Rails.root}/app/assets/images/documen
 - `rm -rf spec/routing`
 - `rubocop -A`
 - `rspec`
+- `rm -rf .git`
+- `rm .gitignore`
+- `rm .gitattributes`
 
 ## FRONTEND
 
