@@ -3352,335 +3352,335 @@ rm -rf .git
 rm .gitignore
 rm .gitattributes
 
-# echo -e "\n\n🦄 FRONTEND\n\n"
+echo -e "\n\n🦄 FRONTEND\n\n"
 
-# echo -e "\n\n🦄 Setup\n\n"
+echo -e "\n\n🦄 Setup\n\n"
 
-# cd ~/Desktop
-# npx create-nuxt-app front
-# cd front
-# npm install @picocss/pico @nuxtjs/auth@4.5.1 @fortawesome/fontawesome-svg-core @fortawesome/free-solid-svg-icons @fortawesome/free-brands-svg-icons @fortawesome/vue-fontawesome@latest-2
-# npm install --save-dev sass sass-loader@10
-# cat <<'EOF' | puravida assets/scss/main.scss ~
-# @import "node_modules/@picocss/pico/scss/pico.scss";
+cd ~/Desktop
+npx create-nuxt-app front
+cd front
+npm install @picocss/pico @nuxtjs/auth@4.5.1 @fortawesome/fontawesome-svg-core @fortawesome/free-solid-svg-icons @fortawesome/free-brands-svg-icons @fortawesome/vue-fontawesome@latest-2
+npm install --save-dev sass sass-loader@10
+cat <<'EOF' | puravida assets/scss/main.scss ~
+@import "node_modules/@picocss/pico/scss/pico.scss";
 
-# // Pico overrides 
-# // $primary-500: #e91e63;
+// Pico overrides 
+// $primary-500: #e91e63;
 
-# h1 {
-#   margin: 4rem 0
-# }
+h1 {
+  margin: 4rem 0
+}
 
-# .no-margin {
-#   margin: 0
-# }
+.no-margin {
+  margin: 0
+}
 
-# .small-bottom-margin {
-#   margin: 0 0 0.5rem
-# }
+.small-bottom-margin {
+  margin: 0 0 0.5rem
+}
 
-# .big-bottom-margin {
-#   margin: 0 0 8rem
-# }
+.big-bottom-margin {
+  margin: 0 0 8rem
+}
 
-# .half-width {
-#   margin: 0 0 4rem;
-#   width: 50%;
-# }
+.half-width {
+  margin: 0 0 4rem;
+  width: 50%;
+}
 
-# nav img {
-#   width: 40px;
-#   border-radius: 50%;
-#   border: 3px solid var(--pico-primary);
-# }
+nav img {
+  width: 40px;
+  border-radius: 50%;
+  border: 3px solid var(--pico-primary);
+}
 
-# article img {
-#   margin-bottom: var(--typography-spacing-vertical);
-#   width: 250px;
-# }
+article img {
+  margin-bottom: var(--typography-spacing-vertical);
+  width: 250px;
+}
 
-# ul.features { 
-#   margin: 0 0 2.5rem 1rem;
-#   li {
-#     margin: 0;
-#     padding: 0;
-#   }
-# }
+ul.features { 
+  margin: 0 0 2.5rem 1rem;
+  li {
+    margin: 0;
+    padding: 0;
+  }
+}
 
-# .aligned-columns {
-#   margin: 0 0 2rem;
-#   p {
-#     margin: 0;
-#     span {
-#       margin: 0 0.5rem 0 0;
-#       display: inline-block;
-#       width: 8rem;
-#       text-align: right;
-#       font-weight: bold;
-#     }
-#   }
-# }
+.aligned-columns {
+  margin: 0 0 2rem;
+  p {
+    margin: 0;
+    span {
+      margin: 0 0.5rem 0 0;
+      display: inline-block;
+      width: 8rem;
+      text-align: right;
+      font-weight: bold;
+    }
+  }
+}
 
-# main {
+main {
 
-#   > a {
-#     margin: 0 0 3rem;
-#   }
+  > a {
+    margin: 0 0 3rem;
+  }
 
-#   > section > div {
-#     margin: 0 0 4rem;
-#   }
+  > section > div {
+    margin: 0 0 4rem;
+  }
   
-# }
-# ~
-# EOF
-# cat <<'EOF' | puravida nuxt.config.js ~
-# let development = process.env.NODE_ENV !== 'production'
-# export default {
-#   ssr: false,
-#   head: { title: 'front', htmlAttrs: { lang: 'en' },
-#     meta: [ { charset: 'utf-8' },
-#       { name: 'viewport', content: 'width=device-width, initial-scale=1' },
-#       { hid: 'description', name: 'description', content: '' },
-#       { name: 'format-detection', content: 'telephone=no' }
-#     ], link: [{ rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }]
-#   },
-#   css: ['@fortawesome/fontawesome-svg-core/styles.css','@/assets/scss/main.scss'],
-#   plugins: [ '~/plugins/fontawesome.js' ],
-#   components: true,
-#   buildModules: [],
-#   router: { middleware: ['auth'] },
-#   modules: ['@nuxtjs/axios', '@nuxtjs/auth'],
-#   axios: { baseURL: development ? 'http://localhost:3000' : 'https://ruxtmin-back.fly.dev/' },
-#   server: { port: development ? 3001 : 3000 },
-#   auth: {
-#     redirect: { login: '/' },
-#     strategies: {
-#       local: {
-#         endpoints: {
-#           login: { url: 'login', method: 'post', propertyName: 'data' },
-#           logout: false,
-#           user: { url: 'me', method: 'get', propertyName: 'data' }
-#         }
-#       }
-#     }
-#   }
-# }
-# ~
-# EOF
-# cat <<'EOF' | puravida middleware/adminOnly.js ~
-# export default function ({ store, redirect }) {
-#   if (!store.state.auth.user.admin) {
-#     return redirect('/')
-#   }
-# }
-# ~
-# EOF
-# cat <<'EOF' | puravida middleware/currentOrAdmin-showEdit.js ~
-# import { mapGetters } from 'vuex'
-# export default function ({ route, store, redirect }) {
-#   const { isAdmin, loggedInUser } = store.getters
-#   const url = route.fullPath;
-#   const splitPath = url.split('/')
-#   let elemId = null
-#   let isElemUsers = false
-#   let isCar = false;
-#   let isMaintenance = false;
-#   let isDocument = false;
-#   let isUser = false;
-#   const userCars = loggedInUser.car_ids
-#   const userMaintenances = loggedInUser.maintenances_ids
-#   const userDocuments = loggedInUser.documents_ids
+}
+~
+EOF
+cat <<'EOF' | puravida nuxt.config.js ~
+let development = process.env.NODE_ENV !== 'production'
+export default {
+  ssr: false,
+  head: { title: 'front', htmlAttrs: { lang: 'en' },
+    meta: [ { charset: 'utf-8' },
+      { name: 'viewport', content: 'width=device-width, initial-scale=1' },
+      { hid: 'description', name: 'description', content: '' },
+      { name: 'format-detection', content: 'telephone=no' }
+    ], link: [{ rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }]
+  },
+  css: ['@fortawesome/fontawesome-svg-core/styles.css','@/assets/scss/main.scss'],
+  plugins: [ '~/plugins/fontawesome.js' ],
+  components: true,
+  buildModules: [],
+  router: { middleware: ['auth'] },
+  modules: ['@nuxtjs/axios', '@nuxtjs/auth'],
+  axios: { baseURL: development ? 'http://localhost:3000' : 'https://ruxtmin-back.fly.dev/' },
+  server: { port: development ? 3001 : 3000 },
+  auth: {
+    redirect: { login: '/' },
+    strategies: {
+      local: {
+        endpoints: {
+          login: { url: 'login', method: 'post', propertyName: 'data' },
+          logout: false,
+          user: { url: 'me', method: 'get', propertyName: 'data' }
+        }
+      }
+    }
+  }
+}
+~
+EOF
+cat <<'EOF' | puravida middleware/adminOnly.js ~
+export default function ({ store, redirect }) {
+  if (!store.state.auth.user.admin) {
+    return redirect('/')
+  }
+}
+~
+EOF
+cat <<'EOF' | puravida middleware/currentOrAdmin-showEdit.js ~
+import { mapGetters } from 'vuex'
+export default function ({ route, store, redirect }) {
+  const { isAdmin, loggedInUser } = store.getters
+  const url = route.fullPath;
+  const splitPath = url.split('/')
+  let elemId = null
+  let isElemUsers = false
+  let isCar = false;
+  let isMaintenance = false;
+  let isDocument = false;
+  let isUser = false;
+  const userCars = loggedInUser.car_ids
+  const userMaintenances = loggedInUser.maintenances_ids
+  const userDocuments = loggedInUser.documents_ids
 
-#   if (url.includes("document")) {
-#     isDocument = true
-#   } else if (url.includes("maintenance")) { 
-#     isMaintenance = true
-#   } else if (url.includes("car")) {
-#     isCar = true
-#   } else if (url.includes("users")) {
-#     isUser = true
-#   }
+  if (url.includes("document")) {
+    isDocument = true
+  } else if (url.includes("maintenance")) { 
+    isMaintenance = true
+  } else if (url.includes("car")) {
+    isCar = true
+  } else if (url.includes("users")) {
+    isUser = true
+  }
 
-#   if (isEditPage(url)) {
-#     elemId = parseInt(splitPath[splitPath.length-2])
-#   } else if (isShowPage(url)) {
-#     elemId = parseInt(splitPath[splitPath.length-1])
-#   }
+  if (isEditPage(url)) {
+    elemId = parseInt(splitPath[splitPath.length-2])
+  } else if (isShowPage(url)) {
+    elemId = parseInt(splitPath[splitPath.length-1])
+  }
   
-#   if (isCar) {
-#     isElemUsers = userCars.includes(elemId) ? true : false
-#   } else if (isMaintenance) {
-#     isElemUsers = userMaintenances.includes(elemId) ? true : false
-#   } else if (isDocument) {
-#     isElemUsers = userDocuments.includes(elemId) ? true : false
-#   } else if (isUser) {
-#     isElemUsers = loggedInUser.id === elemId ? true : false
-#   }
+  if (isCar) {
+    isElemUsers = userCars.includes(elemId) ? true : false
+  } else if (isMaintenance) {
+    isElemUsers = userMaintenances.includes(elemId) ? true : false
+  } else if (isDocument) {
+    isElemUsers = userDocuments.includes(elemId) ? true : false
+  } else if (isUser) {
+    isElemUsers = loggedInUser.id === elemId ? true : false
+  }
 
-#   if (!isAdmin && !isElemUsers) {
-#     return redirect('/')
-#   }
-# }
+  if (!isAdmin && !isElemUsers) {
+    return redirect('/')
+  }
+}
 
-# function isEditPage(url) {
-#   return url.includes("edit") ? true : false
-# }
+function isEditPage(url) {
+  return url.includes("edit") ? true : false
+}
 
-# function isShowPage(url) {
-#   const splitUrl = url.split('/')
-#   return (!isNaN(splitUrl[splitUrl.length-1]) && !isEditPage(url)) ? true : false
-# }
-# ~
-# EOF
-# cat <<'EOF' | puravida middleware/currentOrAdmin-index.js ~
-# export default function ({ route, store, redirect }) {
-#   const { isAdmin, loggedInUser } = store.getters
-#   const query = route.query
-#   const isAdminRequest = query['admin'] ? true : false
-#   const isUserIdRequest = query['user_id'] ? true : false
-#   const isQueryEmpty = Object.keys(query).length === 0 ? true : false
-#   const userIdRequestButNotAdmin = isUserIdRequest && !isAdmin
-#   const requested_user_id = parseInt(query['user_id'])
-#   const actual_user_id = loggedInUser.id
-#   const allowedAccess = requested_user_id === actual_user_id ? true : false
+function isShowPage(url) {
+  const splitUrl = url.split('/')
+  return (!isNaN(splitUrl[splitUrl.length-1]) && !isEditPage(url)) ? true : false
+}
+~
+EOF
+cat <<'EOF' | puravida middleware/currentOrAdmin-index.js ~
+export default function ({ route, store, redirect }) {
+  const { isAdmin, loggedInUser } = store.getters
+  const query = route.query
+  const isAdminRequest = query['admin'] ? true : false
+  const isUserIdRequest = query['user_id'] ? true : false
+  const isQueryEmpty = Object.keys(query).length === 0 ? true : false
+  const userIdRequestButNotAdmin = isUserIdRequest && !isAdmin
+  const requested_user_id = parseInt(query['user_id'])
+  const actual_user_id = loggedInUser.id
+  const allowedAccess = requested_user_id === actual_user_id ? true : false
 
-#   if ((isAdminRequest || isQueryEmpty) && !isAdmin) {
-#     return redirect('/')
-#   } else if (userIdRequestButNotAdmin && !allowedAccess) {
-#     return redirect('/cars?user_id=' + loggedInUser.id)
-#   }
-# }
-# ~
-# EOF
-# cat <<'EOF' | puravida plugins/fontawesome.js ~
-# import Vue from 'vue'
-# import { library, config } from '@fortawesome/fontawesome-svg-core'
-# import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-# import { fas } from '@fortawesome/free-solid-svg-icons'
+  if ((isAdminRequest || isQueryEmpty) && !isAdmin) {
+    return redirect('/')
+  } else if (userIdRequestButNotAdmin && !allowedAccess) {
+    return redirect('/cars?user_id=' + loggedInUser.id)
+  }
+}
+~
+EOF
+cat <<'EOF' | puravida plugins/fontawesome.js ~
+import Vue from 'vue'
+import { library, config } from '@fortawesome/fontawesome-svg-core'
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import { fas } from '@fortawesome/free-solid-svg-icons'
 
-# config.autoAddCss = false
-# library.add(fas)
-# Vue.component('font-awesome-icon', FontAwesomeIcon)
-# ~
-# EOF
-# rm -f components/*.vue
+config.autoAddCss = false
+library.add(fas)
+Vue.component('font-awesome-icon', FontAwesomeIcon)
+~
+EOF
+rm -f components/*.vue
 
-# echo -e "\n\n🦄 New User Page\n\n"
-# cat <<'EOF' | puravida components/user/Form.vue ~
-# <template>
-#   <section>
-#     <h1 v-if="editNewOrSignup === 'edit'">Edit User</h1>
-#     <h1 v-else-if="editNewOrSignup === 'new'">Add User</h1>
-#     <h1 v-else-if="editNewOrSignup === 'sign-up'">Sign Up</h1>
-#     <article>
-#       <form enctype="multipart/form-data">
-#         <p v-if="editNewOrSignup === 'edit'">id: {{ $route.params.id }}</p>
-#         <p>Name: </p><input v-model="name">
-#         <p>Email: </p><input v-model="email">
-#         <p class="no-margin">Avatar: </p>
-#         <img v-if="!hideAvatar && editNewOrSignup === 'edit'" :src="avatar" />    
-#         <input type="file" ref="inputFile" @change=uploadAvatar()>
-#         <p v-if="editNewOrSignup !== 'edit'">Password: </p>
-#         <input v-if="editNewOrSignup !== 'edit'" type="password" v-model="password">
-#         <button v-if="editNewOrSignup !== 'edit'" @click.prevent=createUser>Create User</button>
-#         <button v-else-if="editNewOrSignup == 'edit'" @click.prevent=editUser>Edit User</button>
-#       </form>
-#     </article>
-#   </section>
-# </template>
+echo -e "\n\n🦄 New User Page\n\n"
+cat <<'EOF' | puravida components/user/Form.vue ~
+<template>
+  <section>
+    <h1 v-if="editNewOrSignup === 'edit'">Edit User</h1>
+    <h1 v-else-if="editNewOrSignup === 'new'">Add User</h1>
+    <h1 v-else-if="editNewOrSignup === 'sign-up'">Sign Up</h1>
+    <article>
+      <form enctype="multipart/form-data">
+        <p v-if="editNewOrSignup === 'edit'">id: {{ $route.params.id }}</p>
+        <p>Name: </p><input v-model="name">
+        <p>Email: </p><input v-model="email">
+        <p class="no-margin">Avatar: </p>
+        <img v-if="!hideAvatar && editNewOrSignup === 'edit'" :src="avatar" />    
+        <input type="file" ref="inputFile" @change=uploadAvatar()>
+        <p v-if="editNewOrSignup !== 'edit'">Password: </p>
+        <input v-if="editNewOrSignup !== 'edit'" type="password" v-model="password">
+        <button v-if="editNewOrSignup !== 'edit'" @click.prevent=createUser>Create User</button>
+        <button v-else-if="editNewOrSignup == 'edit'" @click.prevent=editUser>Edit User</button>
+      </form>
+    </article>
+  </section>
+</template>
 
-# <script>
-# import { mapGetters } from 'vuex'
-# export default {
-#   data () {
-#     return {
-#       name: "",
-#       email: "",
-#       avatar: "",
-#       password: "",
-#       editNewOrSignup: "",
-#       hideAvatar: false
-#     }
-#   },
-#   mounted() {
-#     const splitPath = $nuxt.$route.path.split('/')
-#     this.editNewOrSignup = splitPath[splitPath.length-1]
-#   },
-#   computed: {
-#     ...mapGetters(['isAuthenticated', 'isAdmin', 'loggedInUser`']),
-#   },
-#   async fetch() {
-#     const splitPath = $nuxt.$route.path.split('/')
-#     this.editNewOrSignup = $nuxt.$route.path.split('/')[$nuxt.$route.path.split('/').length-1]
-#     if ($nuxt.$route.path.split('/')[$nuxt.$route.path.split('/').length-1]=='edit') {
-#       const user = await this.$axios.$get(`users/${this.$route.params.id}`)
-#       this.name = user.name
-#       this.email = user.email,
-#       this.avatar = user.avatar  
-#     }
-#   },
-#   methods: {
-#     uploadAvatar: function() {
-#       this.avatar = this.$refs.inputFile.files[0]
-#       this.hideAvatar = true
-#     },
-#     createUser: function() {
-#       const params = {
-#         'name': this.name,
-#         'email': this.email,
-#         'avatar': this.avatar,
-#         'password': this.password,
-#       }
-#       let payload = new FormData()
-#       Object.entries(params).forEach(
-#         ([key, value]) => payload.append(key, value)
-#       )
-#       this.$axios.$post('users', payload)
-#         .then(() => {
-#           this.$auth.loginWith('local', {
-#             data: {
-#             email: this.email,
-#             password: this.password
-#             },
-#           })
-#           .then(() => {
-#             const userId = this.$auth.$state.user.id
-#             this.$router.push(`/users/${userId}`)
-#           })
-#         })
-#     },
-#     editUser: function() {
-#       let params = {}
-#       const filePickerFile = this.$refs.inputFile.files[0]
-#       if (!filePickerFile) {
-#         params = { 'name': this.name, 'email': this.email }
-#       } else {
-#         params = { 'name': this.name, 'email': this.email, 'avatar': this.avatar }
-#       }
+<script>
+import { mapGetters } from 'vuex'
+export default {
+  data () {
+    return {
+      name: "",
+      email: "",
+      avatar: "",
+      password: "",
+      editNewOrSignup: "",
+      hideAvatar: false
+    }
+  },
+  mounted() {
+    const splitPath = $nuxt.$route.path.split('/')
+    this.editNewOrSignup = splitPath[splitPath.length-1]
+  },
+  computed: {
+    ...mapGetters(['isAuthenticated', 'isAdmin', 'loggedInUser`']),
+  },
+  async fetch() {
+    const splitPath = $nuxt.$route.path.split('/')
+    this.editNewOrSignup = $nuxt.$route.path.split('/')[$nuxt.$route.path.split('/').length-1]
+    if ($nuxt.$route.path.split('/')[$nuxt.$route.path.split('/').length-1]=='edit') {
+      const user = await this.$axios.$get(`users/${this.$route.params.id}`)
+      this.name = user.name
+      this.email = user.email,
+      this.avatar = user.avatar  
+    }
+  },
+  methods: {
+    uploadAvatar: function() {
+      this.avatar = this.$refs.inputFile.files[0]
+      this.hideAvatar = true
+    },
+    createUser: function() {
+      const params = {
+        'name': this.name,
+        'email': this.email,
+        'avatar': this.avatar,
+        'password': this.password,
+      }
+      let payload = new FormData()
+      Object.entries(params).forEach(
+        ([key, value]) => payload.append(key, value)
+      )
+      this.$axios.$post('users', payload)
+        .then(() => {
+          this.$auth.loginWith('local', {
+            data: {
+            email: this.email,
+            password: this.password
+            },
+          })
+          .then(() => {
+            const userId = this.$auth.$state.user.id
+            this.$router.push(`/users/${userId}`)
+          })
+        })
+    },
+    editUser: function() {
+      let params = {}
+      const filePickerFile = this.$refs.inputFile.files[0]
+      if (!filePickerFile) {
+        params = { 'name': this.name, 'email': this.email }
+      } else {
+        params = { 'name': this.name, 'email': this.email, 'avatar': this.avatar }
+      }
     
-#       let payload = new FormData()
-#       Object.entries(params).forEach(
-#         ([key, value]) => payload.append(key, value)
-#       )
-#       this.$axios.$patch(`/users/${this.$route.params.id}`, payload)
-#         .then(() => {
-#           this.$router.push(`/users/${this.$route.params.id}`)
-#         })
-#     },
-#   }
-# }
-# </script>
-# ~
-# EOF
-# cat <<'EOF' | puravida pages/users/new.vue ~
-# <template>
-#   <main class="container">
-#     <UserForm />
-#   </main>
-# </template>
-# ~
-# EOF
+      let payload = new FormData()
+      Object.entries(params).forEach(
+        ([key, value]) => payload.append(key, value)
+      )
+      this.$axios.$patch(`/users/${this.$route.params.id}`, payload)
+        .then(() => {
+          this.$router.push(`/users/${this.$route.params.id}`)
+        })
+    },
+  }
+}
+</script>
+~
+EOF
+cat <<'EOF' | puravida pages/users/new.vue ~
+<template>
+  <main class="container">
+    <UserForm />
+  </main>
+</template>
+~
+EOF
 
 # echo -e "\n\n🦄 Users Page\n\n"
 # cat <<'EOF' | puravida components/user/Card.vue ~

@@ -4097,7 +4097,6 @@ export default {
 </template>
 ~
 ```
-`rspec`
 
 ### Users Page
 - `puravida components/user/Card.vue ~`
