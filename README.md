@@ -1307,6 +1307,7 @@ def blob_for(name)
 end
 ~
 ```
+- `rubocop -A`
 
 ### Update Health Controller For Auth
 - `puravida app/controllers/health_controller.rb ~`
