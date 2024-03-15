@@ -580,6 +580,7 @@ Rails.application.routes.draw do
 end
 ~
 EOF
+rubocop -A
 
 # echo -e "\n\n🦄  /me Route (Application Controller)\n\n"
 # cat <<'EOF' | puravida app/controllers/application_controller.rb ~

@@ -619,6 +619,7 @@ Rails.application.routes.draw do
 end
 ~
 ```
+- `rubocop -A`
 
 #### /me Route (Application Controller Auth Helpers)
 
