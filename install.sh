@@ -969,6 +969,7 @@ class HealthController < ApplicationController
 end
 ~
 EOF
+rubocop -A
 rspec
 
 # echo -e "\n\n🦄  Cars (Backend)\n\n"

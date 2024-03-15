@@ -1320,6 +1320,7 @@ class HealthController < ApplicationController
 end
 ~
 ```
+- `rubocop -A`
 - `rspec`
 
 
