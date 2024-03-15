@@ -5543,7 +5543,6 @@ export const getters = {
 }
 ~
 ```
-~
 
 ### Admin page
 - `puravida pages/admin/index.vue ~`
