@@ -2308,6 +2308,7 @@ RSpec.describe "/users", type: :request do
 end
 ~
 ```
+- `rubocop -A`
 - `rspec`
 
 ### Maintenances (Backend)

@@ -972,969 +972,970 @@ EOF
 rubocop -A
 rspec
 
-# echo -e "\n\n🦄  Cars (Backend)\n\n"
-# rails g scaffold Car name image:attachment year:integer make model trim body color plate vin cost:decimal initial_mileage:integer purchase_date:date purchase_vendor user:references
-# MIGRATION_FILE=$(find /Users/mmcdermott/Desktop/back/db/migrate -name "*_create_cars.rb")
-# sed -i '' 3,20d $MIGRATION_FILE
-# awk 'NR==3 {print "\t\tcreate_table :cars do |t|\n\t\t\tt.string :name, null: false\n\t\t\tt.integer :year\n\t\t\tt.string :make\n\t\t\tt.string :model\n\t\t\tt.string :trim\n\t\t\tt.string :body\n\t\t\tt.string :color\n\t\t\tt.string :plate\n\t\t\tt.string :vin\n\t\t\tt.decimal :cost, precision: 10, scale: 2\n\t\t\tt.integer :initial_mileage\n\t\t\tt.date :purchase_date\n\t\t\tt.string :purchase_vendor\n\t\t\tt.references :user, null: false, foreign_key: {on_delete: :cascade}\n\t\t\tt.timestamps\n\t\tend"} 1' $MIGRATION_FILE > temp.txt
-# mv temp.txt $MIGRATION_FILE
-# rails db:migrate
-# cat <<'EOF' | puravida app/models/car.rb ~
-# class Car < ApplicationRecord
-#   belongs_to :user
-#   has_one_attached :image
-#   validates :name, presence: true, allow_blank: false, length: { minimum: 4, maximum: 254 }
-# end
-# ~
-# EOF
-# cat <<'EOF' | puravida app/models/user.rb ~
-# class User < ApplicationRecord
-#   has_many :cars, dependent: :destroy
-#   has_one_attached :avatar
-#   has_secure_password
-#   validates :email, format: { with: /\A(.+)@(.+)\z/, message: "Email invalid" }, uniqueness: { case_sensitive: false }, length: { minimum: 4, maximum: 254 }
-# end
-# ~
-# EOF
-# cat <<'EOF' | puravida app/controllers/application_controller.rb ~
-# class ApplicationController < ActionController::API
-#   SECRET_KEY_BASE = Rails.application.credentials.secret_key_base
-#   before_action :require_login
-#   rescue_from Exception, with: :response_internal_server_error
+echo -e "\n\n🦄  Cars (Backend)\n\n"
+rails g scaffold Car name image:attachment year:integer make model trim body color plate vin cost:decimal initial_mileage:integer purchase_date:date purchase_vendor user:references
+MIGRATION_FILE=$(find /Users/mmcdermott/Desktop/back/db/migrate -name "*_create_cars.rb")
+sed -i '' 3,20d $MIGRATION_FILE
+awk 'NR==3 {print "\t\tcreate_table :cars do |t|\n\t\t\tt.string :name, null: false\n\t\t\tt.integer :year\n\t\t\tt.string :make\n\t\t\tt.string :model\n\t\t\tt.string :trim\n\t\t\tt.string :body\n\t\t\tt.string :color\n\t\t\tt.string :plate\n\t\t\tt.string :vin\n\t\t\tt.decimal :cost, precision: 10, scale: 2\n\t\t\tt.integer :initial_mileage\n\t\t\tt.date :purchase_date\n\t\t\tt.string :purchase_vendor\n\t\t\tt.references :user, null: false, foreign_key: {on_delete: :cascade}\n\t\t\tt.timestamps\n\t\tend"} 1' $MIGRATION_FILE > temp.txt
+mv temp.txt $MIGRATION_FILE
+rails db:migrate
+cat <<'EOF' | puravida app/models/car.rb ~
+class Car < ApplicationRecord
+  belongs_to :user
+  has_one_attached :image
+  validates :name, presence: true, allow_blank: false, length: { minimum: 4, maximum: 254 }
+end
+~
+EOF
+cat <<'EOF' | puravida app/models/user.rb ~
+class User < ApplicationRecord
+  has_many :cars, dependent: :destroy
+  has_one_attached :avatar
+  has_secure_password
+  validates :email, format: { with: /\A(.+)@(.+)\z/, message: "Email invalid" }, uniqueness: { case_sensitive: false }, length: { minimum: 4, maximum: 254 }
+end
+~
+EOF
+cat <<'EOF' | puravida app/controllers/application_controller.rb ~
+class ApplicationController < ActionController::API
+  SECRET_KEY_BASE = Rails.application.credentials.secret_key_base
+  before_action :require_login
+  rescue_from Exception, with: :response_internal_server_error
 
-#   def require_login
-#     response_unauthorized if current_user_raw.blank?
-#   end
+  def require_login
+    response_unauthorized if current_user_raw.blank?
+  end
 
-#   # this is safe to send to the frontend, excludes password_digest, created_at, updated_at
-#   def user_from_token
-#     user = prep_raw_user(current_user_raw)
-#     render json: { data: user, status: 200 }
-#   end
+  # this is safe to send to the frontend, excludes password_digest, created_at, updated_at
+  def user_from_token
+    user = prep_raw_user(current_user_raw)
+    render json: { data: user, status: 200 }
+  end
 
-#   # unsafe/internal: includes password_digest, created_at, updated_at - we don't want those going to the frontend
-#   def current_user_raw
-#     if decoded_token.present?
-#       user_id = decoded_token[0]['user_id']
-#       @user = User.find_by(id: user_id)
-#     else
-#       nil
-#     end
-#   end
+  # unsafe/internal: includes password_digest, created_at, updated_at - we don't want those going to the frontend
+  def current_user_raw
+    if decoded_token.present?
+      user_id = decoded_token[0]['user_id']
+      @user = User.find_by(id: user_id)
+    else
+      nil
+    end
+  end
 
-#   def encode_token(payload)
-#     JWT.encode payload, SECRET_KEY_BASE, 'HS256'
-#   end
+  def encode_token(payload)
+    JWT.encode payload, SECRET_KEY_BASE, 'HS256'
+  end
 
-#   def decoded_token
-#     if auth_header and auth_header.split(' ')[0] == "Bearer"
-#       token = auth_header.split(' ')[1]
-#       begin
-#         JWT.decode token, SECRET_KEY_BASE, true, { algorithm: 'HS256' }
-#       rescue JWT::DecodeError
-#         []
-#       end
-#     end
-#   end
+  def decoded_token
+    if auth_header and auth_header.split(' ')[0] == "Bearer"
+      token = auth_header.split(' ')[1]
+      begin
+        JWT.decode token, SECRET_KEY_BASE, true, { algorithm: 'HS256' }
+      rescue JWT::DecodeError
+        []
+      end
+    end
+  end
 
-#   def response_unauthorized
-#     render status: 401, json: { status: 401, message: 'Unauthorized' }
-#   end
+  def response_unauthorized
+    render status: 401, json: { status: 401, message: 'Unauthorized' }
+  end
   
-#   def response_internal_server_error
-#     render status: 500, json: { status: 500, message: 'Internal Server Error' }
-#   end
+  def response_internal_server_error
+    render status: 500, json: { status: 500, message: 'Internal Server Error' }
+  end
 
-#   # We don't want to send the whole user record from the database to the frontend, so we only send what we need.
-#   # The db user row has password_digest (unsafe) and created_at and updated_at (extraneous).
-#   # We also change avatar from a weird active_storage object to just the avatar url before it gets to the frontend.
-#   def prep_raw_user(user)
-#     avatar = user.avatar.present? ? url_for(user.avatar) : nil
-#     car_ids = Car.where(user_id: user.id).map { |car| car.id }
-#     cars = Car.where(user_id: user.id).map { |car| prep_raw_car(car) }
-#     # maintenances = Maintenance.where(car_id: cars).map { |maintenance| maintenance.id }
-#     user = user.admin ? user.slice(:id,:email,:name,:admin) : user.slice(:id,:email,:name)
-#     user['avatar'] = avatar
-#     user['car_ids'] = car_ids
-#     user['cars'] = cars
-#     # user['maintenance_ids'] = maintenances
-#     user
-#   end
+  # We don't want to send the whole user record from the database to the frontend, so we only send what we need.
+  # The db user row has password_digest (unsafe) and created_at and updated_at (extraneous).
+  # We also change avatar from a weird active_storage object to just the avatar url before it gets to the frontend.
+  def prep_raw_user(user)
+    avatar = user.avatar.present? ? url_for(user.avatar) : nil
+    car_ids = Car.where(user_id: user.id).map { |car| car.id }
+    cars = Car.where(user_id: user.id).map { |car| prep_raw_car(car) }
+    # maintenances = Maintenance.where(car_id: cars).map { |maintenance| maintenance.id }
+    user = user.admin ? user.slice(:id,:email,:name,:admin) : user.slice(:id,:email,:name)
+    user['avatar'] = avatar
+    user['car_ids'] = car_ids
+    user['cars'] = cars
+    # user['maintenance_ids'] = maintenances
+    user
+  end
 
-#   def prep_raw_car(car)
-#     user_id = car.user_id
-#     user_name = User.find(car.user_id).name
-#     # maintenances = Maintenance.where(car_id: car.id)
-#     # maintenances = maintenances.map { |maintenance| maintenance.slice(:id,:name,:description,:car_id) }
-#     image = car.image.present? ? url_for(car.image) : nil
-#     car = car.slice(:id,:name,:year,:make,:model,:trim,:body,:color,:plate,:vin,:cost,:initial_mileage,:purchase_date,:purchase_vendor)
-#     car['userId'] = user_id
-#     car['userName'] = user_name
-#     car['image'] = image
-#     # car['maintenances'] = maintenances
-#     car
-#   end
+  def prep_raw_car(car)
+    user_id = car.user_id
+    user_name = User.find(car.user_id).name
+    # maintenances = Maintenance.where(car_id: car.id)
+    # maintenances = maintenances.map { |maintenance| maintenance.slice(:id,:name,:description,:car_id) }
+    image = car.image.present? ? url_for(car.image) : nil
+    car = car.slice(:id,:name,:year,:make,:model,:trim,:body,:color,:plate,:vin,:cost,:initial_mileage,:purchase_date,:purchase_vendor)
+    car['userId'] = user_id
+    car['userName'] = user_name
+    car['image'] = image
+    # car['maintenances'] = maintenances
+    car
+  end
 
-#   def prep_raw_maintenance(maintenance)
-#     car = Car.find(maintenance.car_id)
-#     user = User.find(car.user_id)
-#     # images = maintenance.images.present? ? maintenance.images.map { |image| url_for(image) } : nil
-#     # documents = Document.where(documentable_id: maintenance.id, documentable_type: "Maintenance").map { |document| prep_raw_document(document) }
-#     maintenance = maintenance.slice(:id,:date,:description,:vendor,:cost,:car_id)
-#     maintenance['carId'] = car.id
-#     maintenance['carName'] = car.name
-#     maintenance['userId'] = user.id
-#     maintenance['userName'] = user.name
-#     # maintenance['documents'] = documents
-#     # maintenance['images'] = images
-#     maintenance
-#   end
+  def prep_raw_maintenance(maintenance)
+    car = Car.find(maintenance.car_id)
+    user = User.find(car.user_id)
+    # images = maintenance.images.present? ? maintenance.images.map { |image| url_for(image) } : nil
+    # documents = Document.where(documentable_id: maintenance.id, documentable_type: "Maintenance").map { |document| prep_raw_document(document) }
+    maintenance = maintenance.slice(:id,:date,:description,:vendor,:cost,:car_id)
+    maintenance['carId'] = car.id
+    maintenance['carName'] = car.name
+    maintenance['userId'] = user.id
+    maintenance['userName'] = user.name
+    # maintenance['documents'] = documents
+    # maintenance['images'] = images
+    maintenance
+  end
   
-#   private 
+  private 
   
-#     def auth_header
-#       request.headers['Authorization']
-#     end
+    def auth_header
+      request.headers['Authorization']
+    end
 
-# end
-# ~
-# EOF
+end
+~
+EOF
 
-# cat <<'EOF' | puravida app/controllers/cars_controller.rb ~
-# class CarsController < ApplicationController
-#   before_action :set_car, only: %i[ show update destroy ]
+cat <<'EOF' | puravida app/controllers/cars_controller.rb ~
+class CarsController < ApplicationController
+  before_action :set_car, only: %i[ show update destroy ]
 
-#   # GET /cars
-#   def index
-#     if params['user_id'].present?
-#       @cars = Car.where(user_id: params['user_id']).map { |car| prep_raw_car(car) }
-#     else
-#       @cars = Car.all.map { |car| prep_raw_car(car) }
-#     end
-#     render json: @cars
-#   end
+  # GET /cars
+  def index
+    if params['user_id'].present?
+      @cars = Car.where(user_id: params['user_id']).map { |car| prep_raw_car(car) }
+    else
+      @cars = Car.all.map { |car| prep_raw_car(car) }
+    end
+    render json: @cars
+  end
 
-#   # GET /cars/1
-#   def show
-#     render json: prep_raw_car(@car)
-#   end
+  # GET /cars/1
+  def show
+    render json: prep_raw_car(@car)
+  end
 
-#   # POST /cars
-#   def create
-#     create_params = car_params
-#     create_params['image'] = params['image'].blank? ? nil : params['image'] # if no image is chosen on new car page, params['image'] comes in as a blank string, which throws a 500 error at User.new(user_params). This changes any params['avatar'] blank string to nil, which is fine in User.new(user_params).
-#     @car = Car.new(create_params)
-#     if @car.save
-#       render json: prep_raw_car(@car), status: :created, location: @car
-#     else
-#       render json: @car.errors, status: :unprocessable_entity
-#     end
-#   end
+  # POST /cars
+  def create
+    create_params = car_params
+    create_params['image'] = params['image'].blank? ? nil : params['image'] # if no image is chosen on new car page, params['image'] comes in as a blank string, which throws a 500 error at User.new(user_params). This changes any params['avatar'] blank string to nil, which is fine in User.new(user_params).
+    @car = Car.new(create_params)
+    if @car.save
+      render json: prep_raw_car(@car), status: :created, location: @car
+    else
+      render json: @car.errors, status: :unprocessable_entity
+    end
+  end
 
-#   # PATCH/PUT /cars/1
-#   def update
-#     if @car.update(car_params)
-#       render json: prep_raw_car(@car)
-#     else
-#       render json: @car.errors, status: :unprocessable_entity
-#     end
-#   end
+  # PATCH/PUT /cars/1
+  def update
+    if @car.update(car_params)
+      render json: prep_raw_car(@car)
+    else
+      render json: @car.errors, status: :unprocessable_entity
+    end
+  end
 
-#   # DELETE /cars/1
-#   def destroy
-#     @car.destroy
-#   end
+  # DELETE /cars/1
+  def destroy
+    @car.destroy
+  end
 
-#   private
-#     # Use callbacks to share common setup or constraints between actions.
-#     def set_car
-#       @car = Car.find(params[:id])
-#     end
+  private
+    # Use callbacks to share common setup or constraints between actions.
+    def set_car
+      @car = Car.find(params[:id])
+    end
 
-#     # Only allow a list of trusted parameters through.
-#     def car_params
-#       params.permit(:id, :name, :image, :year, :make, :model, :trim, :body, :color, :plate, :vin, :cost, :initial_mileage, :purchase_date, :purchase_vendor, :user_id)
-#     end
-# end
-# ~
-# EOF
-# cat <<'EOF' | puravida spec/fixtures/cars.yml ~
-# fiat:
-#   name: Michael's Fiat 500
-#   make: Fiat
-#   model: 500
-#   trim: Sport
-#   color: Yellow
-#   body: Hatchback
-#   plate: 6XYK922
-#   vin: 3C3CFFBR0CT382584
-#   year: 2012, 
-#   cost: 10235.00
-#   purchase_vendor: Ted Fleid
-#   initial_mileage: 47361
-#   purchase_date: Date.parse(20180606)
-#   user: michael
+    # Only allow a list of trusted parameters through.
+    def car_params
+      params.permit(:id, :name, :image, :year, :make, :model, :trim, :body, :color, :plate, :vin, :cost, :initial_mileage, :purchase_date, :purchase_vendor, :user_id)
+    end
+end
+~
+EOF
+cat <<'EOF' | puravida spec/fixtures/cars.yml ~
+fiat:
+  name: Michael's Fiat 500
+  make: Fiat
+  model: 500
+  trim: Sport
+  color: Yellow
+  body: Hatchback
+  plate: 6XYK922
+  vin: 3C3CFFBR0CT382584
+  year: 2012, 
+  cost: 10235.00
+  purchase_vendor: Ted Fleid
+  initial_mileage: 47361
+  purchase_date: Date.parse(20180606)
+  user: michael
 
-# civic:
-#   name: Michael's Honda Civic
-#   make: Honda
-#   model: Civic
-#   trim: Vp
-#   color: Blue
-#   body: Sedan
-#   plate: 4HGJ708
-#   vin: 2HGEJ6618XH589506
-#   year: 1999
-#   cost: 10352
-#   purchase_vendor: Howdy Honda
-#   initial_mileage: 78032
-#   purchase_date: Date.parse(20160713)
-#   user: michael
+civic:
+  name: Michael's Honda Civic
+  make: Honda
+  model: Civic
+  trim: Vp
+  color: Blue
+  body: Sedan
+  plate: 4HGJ708
+  vin: 2HGEJ6618XH589506
+  year: 1999
+  cost: 10352
+  purchase_vendor: Howdy Honda
+  initial_mileage: 78032
+  purchase_date: Date.parse(20160713)
+  user: michael
 
-# elantra:
-#   name: Jim's Hyundai Elantra
-#   make: Hyundai
-#   model: Elantra
-#   trim: GLS
-#   color: Black
-#   body: Sedan
-#   plate: 8CEU662
-#   vin: KMHDU46D17U090264
-#   year: 2007
-#   cost: 15000.00
-#   purchase_vendor: Feit Hyundai
-#   initial_mileage: 53032, 
-#   purchase_date: Date.parse(20200115)
-#   user: jim
+elantra:
+  name: Jim's Hyundai Elantra
+  make: Hyundai
+  model: Elantra
+  trim: GLS
+  color: Black
+  body: Sedan
+  plate: 8CEU662
+  vin: KMHDU46D17U090264
+  year: 2007
+  cost: 15000.00
+  purchase_vendor: Feit Hyundai
+  initial_mileage: 53032, 
+  purchase_date: Date.parse(20200115)
+  user: jim
 
-# leaf:
-#   name: Jim's Nissan Leaf
-#   make: Nissan
-#   model: Leaf
-#   trim: SV
-#   color: Silver
-#   body: Hatchback
-#   plate: ABC123
-#   vin: 1N4AZ1CP8LC310110
-#   year: 2020
-#   cost: 22590.00
-#   purchase_vendor: Carvana
-#   initial_mileage: 21440
-#   purchase_date: Date.parse(20230429)
-#   user: jim
+leaf:
+  name: Jim's Nissan Leaf
+  make: Nissan
+  model: Leaf
+  trim: SV
+  color: Silver
+  body: Hatchback
+  plate: ABC123
+  vin: 1N4AZ1CP8LC310110
+  year: 2020
+  cost: 22590.00
+  purchase_vendor: Carvana
+  initial_mileage: 21440
+  purchase_date: Date.parse(20230429)
+  user: jim
 
-# scion:
-#   name: Pam's Scion Xb
-#   make: Scion
-#   model: Xb
-#   trim: Base / Parklan Edition
-#   color: Gray
-#   body: Wagon
-#   plate: 7MBE060
-#   vin: JTLZE4FE0FJ074884
-#   year: 2015
-#   cost: 25867.00
-#   purchase_vendor: Craigslist
-#   initial_mileage: 35631
-#   purchase_date: Date.parse(20201109)
-#   user: pam
+scion:
+  name: Pam's Scion Xb
+  make: Scion
+  model: Xb
+  trim: Base / Parklan Edition
+  color: Gray
+  body: Wagon
+  plate: 7MBE060
+  vin: JTLZE4FE0FJ074884
+  year: 2015
+  cost: 25867.00
+  purchase_vendor: Craigslist
+  initial_mileage: 35631
+  purchase_date: Date.parse(20201109)
+  user: pam
 
-# camry:
-#   name: Pam's Toyota Camry
-#   make: Toyota
-#   model: Camry
-#   trim: LE
-#   color: Black
-#   body: Sedan
-#   plate: HDH1439
-#   vin: 4T1BE46K49U358097
-#   year: 2009
-#   cost: 7300
-#   purchase_vendor: Tanne Toyota
-#   initial_mileage: 134087
-#   purchase_date: Date.parse(20100513)
-#   user: pam
-# ~
-# EOF
-# cat <<'EOF' | puravida spec/models/car_spec.rb ~
-# require 'rails_helper'
+camry:
+  name: Pam's Toyota Camry
+  make: Toyota
+  model: Camry
+  trim: LE
+  color: Black
+  body: Sedan
+  plate: HDH1439
+  vin: 4T1BE46K49U358097
+  year: 2009
+  cost: 7300
+  purchase_vendor: Tanne Toyota
+  initial_mileage: 134087
+  purchase_date: Date.parse(20100513)
+  user: pam
+~
+EOF
+cat <<'EOF' | puravida spec/models/car_spec.rb ~
+require 'rails_helper'
 
-# RSpec.describe "/cars", type: :request do
-#   fixtures :users, :cars
-#   let(:valid_headers) {{ Authorization: "Bearer " + @michael_token }}
-#   let(:valid_attributes) {{ 
-#     name: "Jim's Fiat 500",
-#     make: "Fiat",
-#     model: "500",
-#     trim: "Sport",
-#     color: "Yellow",
-#     body: "Hatchback",
-#     plate: "6XYK922",
-#     vin: "3C3CFFBR0CT382584",
-#     year: 2012,
-#     cost: 10235.00,
-#     purchase_vendor: "Ted Fleid",
-#     initial_mileage: 47361,
-#     user_id: User.find_by(email: "michaelscott@dundermifflin.com").id
-#   }}
-#   let(:invalid_attributes) {{ 
-#     name: "",
-#     make: "Fiat",
-#     model: "500",
-#     trim: "Sport",
-#     color: "Yellow",
-#     body: "Hatchback",
-#     plate: "6XYK922",
-#     vin: "3C3CFFBR0CT382584",
-#     year: 2012,
-#     cost: 10235.00,
-#     purchase_vendor: "Ted Fleid",
-#     initial_mileage: 47361,
-#     user_id: User.find_by(email: "michaelscott@dundermifflin.com").id
-#   }}
+RSpec.describe "/cars", type: :request do
+  fixtures :users, :cars
+  let(:valid_headers) {{ Authorization: "Bearer " + @michael_token }}
+  let(:valid_attributes) {{ 
+    name: "Jim's Fiat 500",
+    make: "Fiat",
+    model: "500",
+    trim: "Sport",
+    color: "Yellow",
+    body: "Hatchback",
+    plate: "6XYK922",
+    vin: "3C3CFFBR0CT382584",
+    year: 2012,
+    cost: 10235.00,
+    purchase_vendor: "Ted Fleid",
+    initial_mileage: 47361,
+    user_id: User.find_by(email: "michaelscott@dundermifflin.com").id
+  }}
+  let(:invalid_attributes) {{ 
+    name: "",
+    make: "Fiat",
+    model: "500",
+    trim: "Sport",
+    color: "Yellow",
+    body: "Hatchback",
+    plate: "6XYK922",
+    vin: "3C3CFFBR0CT382584",
+    year: 2012,
+    cost: 10235.00,
+    purchase_vendor: "Ted Fleid",
+    initial_mileage: 47361,
+    user_id: User.find_by(email: "michaelscott@dundermifflin.com").id
+  }}
 
-#   before :all do
-#     @michael_token = token_from_email_password("michaelscott@dundermifflin.com", "password")
-#   end
+  before :all do
+    @michael_token = token_from_email_password("michaelscott@dundermifflin.com", "password")
+  end
 
-#   it "is valid with valid attributes" do
-#     expect(Car.new(valid_attributes)).to be_valid
-#   end
-#   it "is not valid width poorly formed email" do
-#     expect(Car.new(invalid_attributes)).to_not be_valid
-#   end
+  it "is valid with valid attributes" do
+    expect(Car.new(valid_attributes)).to be_valid
+  end
+  it "is not valid width poorly formed email" do
+    expect(Car.new(invalid_attributes)).to_not be_valid
+  end
 
-# end
-# ~
-# EOF
+end
+~
+EOF
 
-# cat <<'EOF' | puravida spec/requests/cars_spec.rb ~
-# require 'rails_helper'
+cat <<'EOF' | puravida spec/requests/cars_spec.rb ~
+require 'rails_helper'
 
-# RSpec.describe "/cars", type: :request do
-#   fixtures :users, :cars
-#   let(:valid_headers) {{ Authorization: "Bearer " + @michael_token }}
-#   let(:valid_attributes) {{ 
-#     name: "Jim's Fiat 500",
-#     make: "Fiat",
-#     model: "500",
-#     trim: "Sport",
-#     color: "Yellow",
-#     body: "Hatchback",
-#     plate: "6XYK922",
-#     vin: "3C3CFFBR0CT382584",
-#     year: 2012,
-#     cost: 10235.00,
-#     purchase_vendor: "Ted Fleid",
-#     initial_mileage: 47361,
-#     user_id: User.find_by(email: "michaelscott@dundermifflin.com").id
-#   }}
-#   let(:invalid_attributes) {{ 
-#     name: "",
-#     make: "Fiat",
-#     model: "500",
-#     trim: "Sport",
-#     color: "Yellow",
-#     body: "Hatchback",
-#     plate: "6XYK922",
-#     vin: "3C3CFFBR0CT382584",
-#     year: 2012,
-#     cost: 10235.00,
-#     purchase_vendor: "Ted Fleid",
-#     initial_mileage: 47361,
-#     user_id: User.find_by(email: "michaelscott@dundermifflin.com").id
-#   }}
+RSpec.describe "/cars", type: :request do
+  fixtures :users, :cars
+  let(:valid_headers) {{ Authorization: "Bearer " + @michael_token }}
+  let(:valid_attributes) {{ 
+    name: "Jim's Fiat 500",
+    make: "Fiat",
+    model: "500",
+    trim: "Sport",
+    color: "Yellow",
+    body: "Hatchback",
+    plate: "6XYK922",
+    vin: "3C3CFFBR0CT382584",
+    year: 2012,
+    cost: 10235.00,
+    purchase_vendor: "Ted Fleid",
+    initial_mileage: 47361,
+    user_id: User.find_by(email: "michaelscott@dundermifflin.com").id
+  }}
+  let(:invalid_attributes) {{ 
+    name: "",
+    make: "Fiat",
+    model: "500",
+    trim: "Sport",
+    color: "Yellow",
+    body: "Hatchback",
+    plate: "6XYK922",
+    vin: "3C3CFFBR0CT382584",
+    year: 2012,
+    cost: 10235.00,
+    purchase_vendor: "Ted Fleid",
+    initial_mileage: 47361,
+    user_id: User.find_by(email: "michaelscott@dundermifflin.com").id
+  }}
 
-#   before :all do
-#     @michael_token = token_from_email_password("michaelscott@dundermifflin.com", "password")
-#     @ryan_token = token_from_email_password("ryanhoward@dundermifflin.com", "password")
-#   end
+  before :all do
+    @michael_token = token_from_email_password("michaelscott@dundermifflin.com", "password")
+    @ryan_token = token_from_email_password("ryanhoward@dundermifflin.com", "password")
+  end
 
-#   before :each do
-#     @fiat = cars(:fiat)
-#     @fiat.image.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'fiat-500.jpg'),'image/jpeg'))
-#     @civic = cars(:civic)
-#     @civic.image.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'honda-civic.jpg'),'image/jpeg'))
-#     @elantra = cars(:elantra)
-#     @elantra.image.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'hyundai-elantra.jpg'),'image/jpeg'))
-#     @leaf = cars(:leaf)
-#     @leaf.image.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'nissan-leaf.jpg'),'image/jpeg'))
-#     @scion = cars(:scion)
-#     @scion.image.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'scion.jpg'),'image/jpeg'))
-#     @camry = cars(:camry)
-#     @camry.image.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'toyota-camry.jpg'),'image/jpeg'))
-#   end
+  before :each do
+    @fiat = cars(:fiat)
+    @fiat.image.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'fiat-500.jpg'),'image/jpeg'))
+    @civic = cars(:civic)
+    @civic.image.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'honda-civic.jpg'),'image/jpeg'))
+    @elantra = cars(:elantra)
+    @elantra.image.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'hyundai-elantra.jpg'),'image/jpeg'))
+    @leaf = cars(:leaf)
+    @leaf.image.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'nissan-leaf.jpg'),'image/jpeg'))
+    @scion = cars(:scion)
+    @scion.image.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'scion.jpg'),'image/jpeg'))
+    @camry = cars(:camry)
+    @camry.image.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'toyota-camry.jpg'),'image/jpeg'))
+  end
 
-#   describe "GET /index" do
-#     it "renders a successful response" do
-#       get cars_url, headers: valid_headers
-#       expect(response).to be_successful
-#     end
-#     it "gets two cars a successful response" do
-#       get cars_url, headers: valid_headers
-#       expect(JSON.parse(response.body).length).to eq 6
-#     end
-#     it "first car has correct properties" do
-#       get cars_url, headers: valid_headers
-#       cars = JSON.parse(response.body)
-#       fiat = cars.find { |car| car['name'] == "Michael's Fiat 500" }
-#       expect(fiat['name']).to eq "Michael's Fiat 500"
-#       expect(fiat['userName']).to eq "Michael Scott"
-#       expect(fiat['image']).to be_kind_of(String)
-#       expect(fiat['image']).to match(/http.*fiat-500\.jpg/)
-#       expect(fiat['make']).to eq "Fiat"
-#       expect(fiat['model']).to eq "500"
-#       expect(fiat['trim']).to eq "Sport"
-#       expect(fiat['color']).to eq "Yellow"
-#       expect(fiat['body']).to eq "Hatchback"
-#       expect(fiat['plate']).to eq "6XYK922"
-#       expect(fiat['vin']).to eq "3C3CFFBR0CT382584"
-#       expect(fiat['year']).to eq 2012
-#       expect(fiat['cost']).to eq "10235.0"
-#       expect(fiat['purchase_vendor']).to eq "Ted Fleid"
-#       expect(fiat['initial_mileage']).to eq 47361
-#       expect(fiat['userId']).to eq User.find_by(email: "michaelscott@dundermifflin.com").id
-#     end
-#     it "second car has correct properties" do
-#       get cars_url, headers: valid_headers
-#       cars = JSON.parse(response.body)
-#       elantra = cars.find { |car| car['name'] == "Jim's Hyundai Elantra" }
-#       expect(elantra['name']).to eq "Jim's Hyundai Elantra"
-#       expect(elantra['userName']).to eq "Jim Halpert"
-#       expect(elantra['image']).to be_kind_of(String)
-#       expect(elantra['image']).to match(/http.*hyundai-elantra\.jpg/)
-#       expect(elantra['make']).to eq "Hyundai"
-#       expect(elantra['model']).to eq "Elantra"
-#       expect(elantra['trim']).to eq "GLS"
-#       expect(elantra['color']).to eq "Black"
-#       expect(elantra['body']).to eq "Sedan"
-#       expect(elantra['plate']).to eq "8CEU662"
-#       expect(elantra['vin']).to eq "KMHDU46D17U090264"
-#       expect(elantra['year']).to eq 2007
-#       expect(elantra['cost']).to eq "15000.0"
-#       expect(elantra['purchase_vendor']).to eq "Feit Hyundai"
-#       expect(elantra['initial_mileage']).to eq 53032
-#       expect(elantra['userId']).to eq User.find_by(email: "jimhalpert@dundermifflin.com").id
-#     end
+  describe "GET /index" do
+    it "renders a successful response" do
+      get cars_url, headers: valid_headers
+      expect(response).to be_successful
+    end
+    it "gets two cars a successful response" do
+      get cars_url, headers: valid_headers
+      expect(JSON.parse(response.body).length).to eq 6
+    end
+    it "first car has correct properties" do
+      get cars_url, headers: valid_headers
+      cars = JSON.parse(response.body)
+      fiat = cars.find { |car| car['name'] == "Michael's Fiat 500" }
+      expect(fiat['name']).to eq "Michael's Fiat 500"
+      expect(fiat['userName']).to eq "Michael Scott"
+      expect(fiat['image']).to be_kind_of(String)
+      expect(fiat['image']).to match(/http.*fiat-500\.jpg/)
+      expect(fiat['make']).to eq "Fiat"
+      expect(fiat['model']).to eq "500"
+      expect(fiat['trim']).to eq "Sport"
+      expect(fiat['color']).to eq "Yellow"
+      expect(fiat['body']).to eq "Hatchback"
+      expect(fiat['plate']).to eq "6XYK922"
+      expect(fiat['vin']).to eq "3C3CFFBR0CT382584"
+      expect(fiat['year']).to eq 2012
+      expect(fiat['cost']).to eq "10235.0"
+      expect(fiat['purchase_vendor']).to eq "Ted Fleid"
+      expect(fiat['initial_mileage']).to eq 47361
+      expect(fiat['userId']).to eq User.find_by(email: "michaelscott@dundermifflin.com").id
+    end
+    it "second car has correct properties" do
+      get cars_url, headers: valid_headers
+      cars = JSON.parse(response.body)
+      elantra = cars.find { |car| car['name'] == "Jim's Hyundai Elantra" }
+      expect(elantra['name']).to eq "Jim's Hyundai Elantra"
+      expect(elantra['userName']).to eq "Jim Halpert"
+      expect(elantra['image']).to be_kind_of(String)
+      expect(elantra['image']).to match(/http.*hyundai-elantra\.jpg/)
+      expect(elantra['make']).to eq "Hyundai"
+      expect(elantra['model']).to eq "Elantra"
+      expect(elantra['trim']).to eq "GLS"
+      expect(elantra['color']).to eq "Black"
+      expect(elantra['body']).to eq "Sedan"
+      expect(elantra['plate']).to eq "8CEU662"
+      expect(elantra['vin']).to eq "KMHDU46D17U090264"
+      expect(elantra['year']).to eq 2007
+      expect(elantra['cost']).to eq "15000.0"
+      expect(elantra['purchase_vendor']).to eq "Feit Hyundai"
+      expect(elantra['initial_mileage']).to eq 53032
+      expect(elantra['userId']).to eq User.find_by(email: "jimhalpert@dundermifflin.com").id
+    end
 
-#   end
+  end
 
-#   describe "GET /show" do
-#     it "renders a successful response" do
-#       car = cars(:fiat)
-#       get car_url(car), headers: valid_headers
-#       expect(response).to be_successful
-#     end
-#     it "gets correct car properties" do
-#       car = cars(:fiat)
-#       get car_url(car), headers: valid_headers
-#       fiat = JSON.parse(response.body)
-#       expect(fiat['name']).to eq "Michael's Fiat 500"
-#       expect(fiat['userName']).to eq "Michael Scott"
-#       expect(fiat['image']).to be_kind_of(String)
-#       expect(fiat['image']).to match(/http.*fiat-500\.jpg/)
-#       expect(fiat['make']).to eq "Fiat"
-#       expect(fiat['model']).to eq "500"
-#       expect(fiat['trim']).to eq "Sport"
-#       expect(fiat['color']).to eq "Yellow"
-#       expect(fiat['body']).to eq "Hatchback"
-#       expect(fiat['plate']).to eq "6XYK922"
-#       expect(fiat['vin']).to eq "3C3CFFBR0CT382584"
-#       expect(fiat['year']).to eq 2012
-#       expect(fiat['cost']).to eq "10235.0"
-#       expect(fiat['purchase_vendor']).to eq "Ted Fleid"
-#       expect(fiat['initial_mileage']).to eq 47361
-#       expect(fiat['userId']).to eq User.find_by(email: "michaelscott@dundermifflin.com").id
-#     end
-#   end
+  describe "GET /show" do
+    it "renders a successful response" do
+      car = cars(:fiat)
+      get car_url(car), headers: valid_headers
+      expect(response).to be_successful
+    end
+    it "gets correct car properties" do
+      car = cars(:fiat)
+      get car_url(car), headers: valid_headers
+      fiat = JSON.parse(response.body)
+      expect(fiat['name']).to eq "Michael's Fiat 500"
+      expect(fiat['userName']).to eq "Michael Scott"
+      expect(fiat['image']).to be_kind_of(String)
+      expect(fiat['image']).to match(/http.*fiat-500\.jpg/)
+      expect(fiat['make']).to eq "Fiat"
+      expect(fiat['model']).to eq "500"
+      expect(fiat['trim']).to eq "Sport"
+      expect(fiat['color']).to eq "Yellow"
+      expect(fiat['body']).to eq "Hatchback"
+      expect(fiat['plate']).to eq "6XYK922"
+      expect(fiat['vin']).to eq "3C3CFFBR0CT382584"
+      expect(fiat['year']).to eq 2012
+      expect(fiat['cost']).to eq "10235.0"
+      expect(fiat['purchase_vendor']).to eq "Ted Fleid"
+      expect(fiat['initial_mileage']).to eq 47361
+      expect(fiat['userId']).to eq User.find_by(email: "michaelscott@dundermifflin.com").id
+    end
+  end
 
-#   describe "POST /create" do
-#     context "with valid parameters" do
-#       it "creates a new Car" do
-#         expect { post cars_url, params: valid_attributes, headers: valid_headers, as: :json
-#         }.to change(Car, :count).by(1)
-#       end
+  describe "POST /create" do
+    context "with valid parameters" do
+      it "creates a new Car" do
+        expect { post cars_url, params: valid_attributes, headers: valid_headers, as: :json
+        }.to change(Car, :count).by(1)
+      end
 
-#       it "renders a JSON response with the new car" do
-#         post cars_url, params: valid_attributes, headers: valid_headers, as: :json
-#         expect(response).to have_http_status(:created)
-#         expect(response.content_type).to match(a_string_including("application/json"))
-#       end
-#     end
+      it "renders a JSON response with the new car" do
+        post cars_url, params: valid_attributes, headers: valid_headers, as: :json
+        expect(response).to have_http_status(:created)
+        expect(response.content_type).to match(a_string_including("application/json"))
+      end
+    end
 
-#     context "with invalid parameters" do
-#       it "does not create a new Car" do
-#         expect {
-#           post cars_url, params: invalid_attributes, headers: valid_headers, as: :json
-#         }.to change(Car, :count).by(0)
-#       end
+    context "with invalid parameters" do
+      it "does not create a new Car" do
+        expect {
+          post cars_url, params: invalid_attributes, headers: valid_headers, as: :json
+        }.to change(Car, :count).by(0)
+      end
 
-#       it "renders a JSON response with errors for the new car" do
-#         post cars_url, params: invalid_attributes, headers: valid_headers, as: :json
-#         expect(response).to have_http_status(:unprocessable_entity)
-#         expect(response.content_type).to match(a_string_including("application/json"))
-#       end
-#     end
-#   end
+      it "renders a JSON response with errors for the new car" do
+        post cars_url, params: invalid_attributes, headers: valid_headers, as: :json
+        expect(response).to have_http_status(:unprocessable_entity)
+        expect(response.content_type).to match(a_string_including("application/json"))
+      end
+    end
+  end
 
-#   describe "PATCH /update" do
-#     context "with valid parameters" do
-#       let(:new_attributes) {{ name: "UpdatedName"}}
+  describe "PATCH /update" do
+    context "with valid parameters" do
+      let(:new_attributes) {{ name: "UpdatedName"}}
 
-#       it "updates car's name" do
-#         car = cars(:fiat)
-#         patch car_url(car), params: new_attributes, headers: valid_headers, as: :json
-#         car.reload
-#         expect(car.name).to eq("UpdatedName")
-#       end
+      it "updates car's name" do
+        car = cars(:fiat)
+        patch car_url(car), params: new_attributes, headers: valid_headers, as: :json
+        car.reload
+        expect(car.name).to eq("UpdatedName")
+      end
 
-#       it "renders a JSON response with the car" do
-#         car = cars(:fiat)
-#         patch car_url(car), params: new_attributes, headers: valid_headers, as: :json
-#         expect(response).to have_http_status(:ok)
-#         expect(response.content_type).to match(a_string_including("application/json"))
-#       end
+      it "renders a JSON response with the car" do
+        car = cars(:fiat)
+        patch car_url(car), params: new_attributes, headers: valid_headers, as: :json
+        expect(response).to have_http_status(:ok)
+        expect(response.content_type).to match(a_string_including("application/json"))
+      end
 
-#       it "car's other properties are still correct" do
-#         car = cars(:fiat)
-#         patch car_url(car), params: new_attributes, headers: valid_headers, as: :json
-#         fiat = JSON.parse(response.body)
-#         expect(fiat['userName']).to eq "Michael Scott"
-#         expect(fiat['image']).to be_kind_of(String)
-#         expect(fiat['image']).to match(/http.*fiat-500\.jpg/)
-#         expect(fiat['make']).to eq "Fiat"
-#         expect(fiat['model']).to eq "500"
-#         expect(fiat['trim']).to eq "Sport"
-#         expect(fiat['color']).to eq "Yellow"
-#         expect(fiat['body']).to eq "Hatchback"
-#         expect(fiat['plate']).to eq "6XYK922"
-#         expect(fiat['vin']).to eq "3C3CFFBR0CT382584"
-#         expect(fiat['year']).to eq 2012
-#         expect(fiat['cost']).to eq "10235.0"
-#         expect(fiat['purchase_vendor']).to eq "Ted Fleid"
-#         expect(fiat['initial_mileage']).to eq 47361
-#         expect(fiat['userId']).to eq User.find_by(email: "michaelscott@dundermifflin.com").id
-#       end
+      it "car's other properties are still correct" do
+        car = cars(:fiat)
+        patch car_url(car), params: new_attributes, headers: valid_headers, as: :json
+        fiat = JSON.parse(response.body)
+        expect(fiat['userName']).to eq "Michael Scott"
+        expect(fiat['image']).to be_kind_of(String)
+        expect(fiat['image']).to match(/http.*fiat-500\.jpg/)
+        expect(fiat['make']).to eq "Fiat"
+        expect(fiat['model']).to eq "500"
+        expect(fiat['trim']).to eq "Sport"
+        expect(fiat['color']).to eq "Yellow"
+        expect(fiat['body']).to eq "Hatchback"
+        expect(fiat['plate']).to eq "6XYK922"
+        expect(fiat['vin']).to eq "3C3CFFBR0CT382584"
+        expect(fiat['year']).to eq 2012
+        expect(fiat['cost']).to eq "10235.0"
+        expect(fiat['purchase_vendor']).to eq "Ted Fleid"
+        expect(fiat['initial_mileage']).to eq 47361
+        expect(fiat['userId']).to eq User.find_by(email: "michaelscott@dundermifflin.com").id
+      end
 
-#     end
+    end
 
-#     context "with invalid parameters" do
-#       it "renders a JSON response with errors for the car" do
-#         car = cars(:fiat)
-#         patch car_url(car), params: invalid_attributes, headers: valid_headers, as: :json
-#         expect(response).to have_http_status(:unprocessable_entity)
-#         expect(response.content_type).to match(a_string_including("application/json"))
-#       end
-#     end
-#   end
+    context "with invalid parameters" do
+      it "renders a JSON response with errors for the car" do
+        car = cars(:fiat)
+        patch car_url(car), params: invalid_attributes, headers: valid_headers, as: :json
+        expect(response).to have_http_status(:unprocessable_entity)
+        expect(response.content_type).to match(a_string_including("application/json"))
+      end
+    end
+  end
 
-#   describe "DELETE /destroy" do
-#     it "destroys the requested car" do
-#       car = Car.create! valid_attributes
-#       expect { delete car_url(car), headers: valid_headers, as: :json
-#       }.to change(Car, :count).by(-1)
-#     end
-#   end
-# end
-# ~
-# EOF
-# cat <<'EOF' | puravida spec/requests/users_spec.rb ~
-# # frozen_string_literal: true
-# require 'rails_helper'
-# require 'spec_helper'
+  describe "DELETE /destroy" do
+    it "destroys the requested car" do
+      car = Car.create! valid_attributes
+      expect { delete car_url(car), headers: valid_headers, as: :json
+      }.to change(Car, :count).by(-1)
+    end
+  end
+end
+~
+EOF
+cat <<'EOF' | puravida spec/requests/users_spec.rb ~
+# frozen_string_literal: true
+require 'rails_helper'
+require 'spec_helper'
 
-# RSpec.describe "/users", type: :request do
-#   fixtures :users, :cars
-#   let(:valid_headers) {{ Authorization: "Bearer " + @michael_token }}
-#   let(:admin_2_headers) {{ Authorization: "Bearer " + @ryan_token }}
-#   let(:invalid_token_header) {{ Authorization: "Bearer xyz" }}
-#   let(:poorly_formed_header) {{ Authorization: "Bear " + @michael_token }}
-#   let(:user_valid_create_params_mock_1) {{ name: "First1 Last1", email: "one@mail.com", admin: "false", password: "password", avatar: fixture_file_upload("spec/fixtures/files/michael-scott.png", "image/png") }}
-#   let(:user_invalid_create_params_email_poorly_formed_mock_1) {{ name: "", email: "not_an_email", admin: "false", password: "password", avatar: fixture_file_upload("spec/fixtures/files/michael-scott.png", "image/png") }}
-#   let(:valid_user_update_attributes) {{ name: "UpdatedName" }}
-#   let(:invalid_user_update_attributes) {{ email: "not_an_email" }}
+RSpec.describe "/users", type: :request do
+  fixtures :users, :cars
+  let(:valid_headers) {{ Authorization: "Bearer " + @michael_token }}
+  let(:admin_2_headers) {{ Authorization: "Bearer " + @ryan_token }}
+  let(:invalid_token_header) {{ Authorization: "Bearer xyz" }}
+  let(:poorly_formed_header) {{ Authorization: "Bear " + @michael_token }}
+  let(:user_valid_create_params_mock_1) {{ name: "First1 Last1", email: "one@mail.com", admin: "false", password: "password", avatar: fixture_file_upload("spec/fixtures/files/michael-scott.png", "image/png") }}
+  let(:user_invalid_create_params_email_poorly_formed_mock_1) {{ name: "", email: "not_an_email", admin: "false", password: "password", avatar: fixture_file_upload("spec/fixtures/files/michael-scott.png", "image/png") }}
+  let(:valid_user_update_attributes) {{ name: "UpdatedName" }}
+  let(:invalid_user_update_attributes) {{ email: "not_an_email" }}
   
-#   before :all do
-#     @michael_token = token_from_email_password("michaelscott@dundermifflin.com", "password")
-#     @ryan_token = token_from_email_password("ryanhoward@dundermifflin.com", "password")
-#   end
+  before :all do
+    @michael_token = token_from_email_password("michaelscott@dundermifflin.com", "password")
+    @ryan_token = token_from_email_password("ryanhoward@dundermifflin.com", "password")
+  end
 
-#   before :each do
-#     @user1 = users(:michael)
-#     avatar1 = fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'michael-scott.png'),'image/png')
-#     @user1.avatar.attach(avatar1)
-#     @user2 = users(:jim)
-#     avatar2 = fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'jim-halpert.png'),'image/png')
-#     @user2.avatar.attach(avatar2)
-#     cars(:fiat).image.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'fiat-500.jpg'),'image/jpeg'))
-#     cars(:civic).image.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'honda-civic.jpg'),'image/jpeg'))
-#     cars(:elantra).image.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'hyundai-elantra.jpg'),'image/jpeg'))
-#     cars(:leaf).image.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'nissan-leaf.jpg'),'image/jpeg'))
-#     cars(:scion).image.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'scion.jpg'),'image/jpeg'))
-#     cars(:camry).image.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'toyota-camry.jpg'),'image/jpeg'))
-#   end
+  before :each do
+    @user1 = users(:michael)
+    avatar1 = fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'michael-scott.png'),'image/png')
+    @user1.avatar.attach(avatar1)
+    @user2 = users(:jim)
+    avatar2 = fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'jim-halpert.png'),'image/png')
+    @user2.avatar.attach(avatar2)
+    cars(:fiat).image.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'fiat-500.jpg'),'image/jpeg'))
+    cars(:civic).image.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'honda-civic.jpg'),'image/jpeg'))
+    cars(:elantra).image.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'hyundai-elantra.jpg'),'image/jpeg'))
+    cars(:leaf).image.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'nissan-leaf.jpg'),'image/jpeg'))
+    cars(:scion).image.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'scion.jpg'),'image/jpeg'))
+    cars(:camry).image.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'toyota-camry.jpg'),'image/jpeg'))
+  end
 
-#   describe "GET /index" do
-#     context "with valid headers" do
-#       it "renders a successful response" do
-#         get users_url, headers: valid_headers
-#         expect(response).to be_successful
-#       end
+  describe "GET /index" do
+    context "with valid headers" do
+      it "renders a successful response" do
+        get users_url, headers: valid_headers
+        expect(response).to be_successful
+      end
 
-#       it "gets four users" do
-#         get users_url, headers: valid_headers
-#         expect(JSON.parse(response.body).length).to eq 4
-#       end
+      it "gets four users" do
+        get users_url, headers: valid_headers
+        expect(JSON.parse(response.body).length).to eq 4
+      end
 
-#       it "gets first users' correct details" do
-#         get users_url, headers: valid_headers
-#         users = JSON.parse(response.body)
-#         michael = users.find { |user| user['email'] == "michaelscott@dundermifflin.com" }
-#         car_ids = michael['car_ids']
-#         cars = michael['cars']
-#         fiat = cars.find { |car| car['name'] == "Michael's Fiat 500" }
-#         civic = cars.find { |car| car['name'] == "Michael's Honda Civic" }
-#         expect(michael['name']).to eq "Michael Scott"
-#         expect(michael['email']).to eq "michaelscott@dundermifflin.com"
-#         expect(michael['admin']).to eq true
-#         expect(michael['avatar']).to be_kind_of(String)
-#         expect(michael['avatar']).to match(/http.*\michael-scott\.png/)
-#         expect(michael['password']).to be_nil
-#         expect(michael['password_digest']).to be_nil
-#         expect(fiat['name']).to eq "Michael's Fiat 500"
-#         expect(fiat['userName']).to eq "Michael Scott"
-#         expect(fiat['image']).to be_kind_of(String)
-#         expect(fiat['image']).to match(/http.*fiat-500\.jpg/)
-#         expect(fiat['userName']).to eq "Michael Scott"
-#         expect(fiat['image']).to be_kind_of(String)
-#         expect(fiat['image']).to match(/http.*fiat-500\.jpg/)
-#         expect(fiat['make']).to eq "Fiat"
-#         expect(fiat['model']).to eq "500"
-#         expect(fiat['trim']).to eq "Sport"
-#         expect(fiat['color']).to eq "Yellow"
-#         expect(fiat['body']).to eq "Hatchback"
-#         expect(fiat['plate']).to eq "6XYK922"
-#         expect(fiat['vin']).to eq "3C3CFFBR0CT382584"
-#         expect(fiat['year']).to eq 2012
-#         expect(fiat['cost']).to eq "10235.0"
-#         expect(fiat['purchase_vendor']).to eq "Ted Fleid"
-#         expect(fiat['initial_mileage']).to eq 47361
-#         expect(fiat['userId']).to eq User.find_by(email: "michaelscott@dundermifflin.com").id
-#         expect(civic['name']).to eq "Michael's Honda Civic"
-#         expect(civic['userName']).to eq "Michael Scott"
-#         expect(civic['image']).to be_kind_of(String)
-#         expect(civic['image']).to match(/http.*honda-civic\.jpg/)
-#         expect(civic['make']).to eq "Honda"
-#         expect(civic['model']).to eq "Civic"
-#         expect(civic['trim']).to eq "Vp"
-#         expect(civic['color']).to eq "Blue"
-#         expect(civic['body']).to eq "Sedan"
-#         expect(civic['plate']).to eq "4HGJ708"
-#         expect(civic['vin']).to eq "2HGEJ6618XH589506"
-#         expect(civic['year']).to eq 1999
-#         expect(civic['cost']).to eq "10352.0"
-#         expect(civic['purchase_vendor']).to eq "Howdy Honda"
-#         expect(civic['initial_mileage']).to eq 78032
-#         expect(civic['userId']).to eq User.find_by(email: "michaelscott@dundermifflin.com").id
-#       end
+      it "gets first users' correct details" do
+        get users_url, headers: valid_headers
+        users = JSON.parse(response.body)
+        michael = users.find { |user| user['email'] == "michaelscott@dundermifflin.com" }
+        car_ids = michael['car_ids']
+        cars = michael['cars']
+        fiat = cars.find { |car| car['name'] == "Michael's Fiat 500" }
+        civic = cars.find { |car| car['name'] == "Michael's Honda Civic" }
+        expect(michael['name']).to eq "Michael Scott"
+        expect(michael['email']).to eq "michaelscott@dundermifflin.com"
+        expect(michael['admin']).to eq true
+        expect(michael['avatar']).to be_kind_of(String)
+        expect(michael['avatar']).to match(/http.*\michael-scott\.png/)
+        expect(michael['password']).to be_nil
+        expect(michael['password_digest']).to be_nil
+        expect(fiat['name']).to eq "Michael's Fiat 500"
+        expect(fiat['userName']).to eq "Michael Scott"
+        expect(fiat['image']).to be_kind_of(String)
+        expect(fiat['image']).to match(/http.*fiat-500\.jpg/)
+        expect(fiat['userName']).to eq "Michael Scott"
+        expect(fiat['image']).to be_kind_of(String)
+        expect(fiat['image']).to match(/http.*fiat-500\.jpg/)
+        expect(fiat['make']).to eq "Fiat"
+        expect(fiat['model']).to eq "500"
+        expect(fiat['trim']).to eq "Sport"
+        expect(fiat['color']).to eq "Yellow"
+        expect(fiat['body']).to eq "Hatchback"
+        expect(fiat['plate']).to eq "6XYK922"
+        expect(fiat['vin']).to eq "3C3CFFBR0CT382584"
+        expect(fiat['year']).to eq 2012
+        expect(fiat['cost']).to eq "10235.0"
+        expect(fiat['purchase_vendor']).to eq "Ted Fleid"
+        expect(fiat['initial_mileage']).to eq 47361
+        expect(fiat['userId']).to eq User.find_by(email: "michaelscott@dundermifflin.com").id
+        expect(civic['name']).to eq "Michael's Honda Civic"
+        expect(civic['userName']).to eq "Michael Scott"
+        expect(civic['image']).to be_kind_of(String)
+        expect(civic['image']).to match(/http.*honda-civic\.jpg/)
+        expect(civic['make']).to eq "Honda"
+        expect(civic['model']).to eq "Civic"
+        expect(civic['trim']).to eq "Vp"
+        expect(civic['color']).to eq "Blue"
+        expect(civic['body']).to eq "Sedan"
+        expect(civic['plate']).to eq "4HGJ708"
+        expect(civic['vin']).to eq "2HGEJ6618XH589506"
+        expect(civic['year']).to eq 1999
+        expect(civic['cost']).to eq "10352.0"
+        expect(civic['purchase_vendor']).to eq "Howdy Honda"
+        expect(civic['initial_mileage']).to eq 78032
+        expect(civic['userId']).to eq User.find_by(email: "michaelscott@dundermifflin.com").id
+      end
 
-#       it "gets second users' correct details" do
-#         get users_url, headers: valid_headers
-#         users = JSON.parse(response.body)
-#         jim = users.find { |user| user['email'] == "jimhalpert@dundermifflin.com" }
-#         car_ids = jim['car_ids']
-#         cars = jim['cars']
-#         elantra = cars.find { |car| car['name'] == "Jim's Hyundai Elantra" }
-#         leaf = cars.find { |car| car['name'] == "Jim's Nissan Leaf" }
-#         expect(jim['name']).to eq "Jim Halpert"
-#         expect(jim['email']).to eq "jimhalpert@dundermifflin.com"
-#         expect(jim['admin']).to be_nil or eq false
-#         expect(jim['avatar']).to be_kind_of(String)
-#         expect(jim['avatar']).to match(/http.*\jim-halpert\.png/)
-#         expect(jim['password']).to be_nil
-#         expect(jim['password_digest']).to be_nil
-#         expect(elantra['name']).to eq "Jim's Hyundai Elantra"
-#         expect(elantra['userName']).to eq "Jim Halpert"
-#         expect(elantra['image']).to be_kind_of(String)
-#         expect(elantra['image']).to match(/http.*hyundai-elantra\.jpg/)
-#         expect(elantra['make']).to eq "Hyundai"
-#         expect(elantra['model']).to eq "Elantra"
-#         expect(elantra['trim']).to eq "GLS"
-#         expect(elantra['color']).to eq "Black"
-#         expect(elantra['body']).to eq "Sedan"
-#         expect(elantra['plate']).to eq "8CEU662"
-#         expect(elantra['vin']).to eq "KMHDU46D17U090264"
-#         expect(elantra['year']).to eq 2007
-#         expect(elantra['cost']).to eq "15000.0"
-#         expect(elantra['purchase_vendor']).to eq "Feit Hyundai"
-#         expect(elantra['initial_mileage']).to eq 53032
-#         expect(elantra['userId']).to eq User.find_by(email: "jimhalpert@dundermifflin.com").id
-#         expect(leaf['name']).to eq "Jim's Nissan Leaf"
-#         expect(leaf['userName']).to eq "Jim Halpert"
-#         expect(leaf['image']).to be_kind_of(String)
-#         expect(leaf['image']).to match(/http.*nissan-leaf\.jpg/)
-#         expect(leaf['make']).to eq "Nissan"
-#         expect(leaf['model']).to eq "Leaf"
-#         expect(leaf['trim']).to eq "SV"
-#         expect(leaf['color']).to eq "Silver"
-#         expect(leaf['body']).to eq "Hatchback"
-#         expect(leaf['plate']).to eq "ABC123"
-#         expect(leaf['vin']).to eq "1N4AZ1CP8LC310110"
-#         expect(leaf['year']).to eq 2020
-#         expect(leaf['cost']).to eq "22590.0"
-#         expect(leaf['purchase_vendor']).to eq "Carvana"
-#         expect(leaf['initial_mileage']).to eq 21440
-#         expect(leaf['userId']).to eq User.find_by(email: "jimhalpert@dundermifflin.com").id
-#       end
-#     end
+      it "gets second users' correct details" do
+        get users_url, headers: valid_headers
+        users = JSON.parse(response.body)
+        jim = users.find { |user| user['email'] == "jimhalpert@dundermifflin.com" }
+        car_ids = jim['car_ids']
+        cars = jim['cars']
+        elantra = cars.find { |car| car['name'] == "Jim's Hyundai Elantra" }
+        leaf = cars.find { |car| car['name'] == "Jim's Nissan Leaf" }
+        expect(jim['name']).to eq "Jim Halpert"
+        expect(jim['email']).to eq "jimhalpert@dundermifflin.com"
+        expect(jim['admin']).to be_nil or eq false
+        expect(jim['avatar']).to be_kind_of(String)
+        expect(jim['avatar']).to match(/http.*\jim-halpert\.png/)
+        expect(jim['password']).to be_nil
+        expect(jim['password_digest']).to be_nil
+        expect(elantra['name']).to eq "Jim's Hyundai Elantra"
+        expect(elantra['userName']).to eq "Jim Halpert"
+        expect(elantra['image']).to be_kind_of(String)
+        expect(elantra['image']).to match(/http.*hyundai-elantra\.jpg/)
+        expect(elantra['make']).to eq "Hyundai"
+        expect(elantra['model']).to eq "Elantra"
+        expect(elantra['trim']).to eq "GLS"
+        expect(elantra['color']).to eq "Black"
+        expect(elantra['body']).to eq "Sedan"
+        expect(elantra['plate']).to eq "8CEU662"
+        expect(elantra['vin']).to eq "KMHDU46D17U090264"
+        expect(elantra['year']).to eq 2007
+        expect(elantra['cost']).to eq "15000.0"
+        expect(elantra['purchase_vendor']).to eq "Feit Hyundai"
+        expect(elantra['initial_mileage']).to eq 53032
+        expect(elantra['userId']).to eq User.find_by(email: "jimhalpert@dundermifflin.com").id
+        expect(leaf['name']).to eq "Jim's Nissan Leaf"
+        expect(leaf['userName']).to eq "Jim Halpert"
+        expect(leaf['image']).to be_kind_of(String)
+        expect(leaf['image']).to match(/http.*nissan-leaf\.jpg/)
+        expect(leaf['make']).to eq "Nissan"
+        expect(leaf['model']).to eq "Leaf"
+        expect(leaf['trim']).to eq "SV"
+        expect(leaf['color']).to eq "Silver"
+        expect(leaf['body']).to eq "Hatchback"
+        expect(leaf['plate']).to eq "ABC123"
+        expect(leaf['vin']).to eq "1N4AZ1CP8LC310110"
+        expect(leaf['year']).to eq 2020
+        expect(leaf['cost']).to eq "22590.0"
+        expect(leaf['purchase_vendor']).to eq "Carvana"
+        expect(leaf['initial_mileage']).to eq 21440
+        expect(leaf['userId']).to eq User.find_by(email: "jimhalpert@dundermifflin.com").id
+      end
+    end
 
-#     context "with invalid headers" do
-#       it "renders an unsuccessful response" do
-#         get users_url, headers: invalid_token_header
-#         expect(response).to_not be_successful
-#       end
-#     end
+    context "with invalid headers" do
+      it "renders an unsuccessful response" do
+        get users_url, headers: invalid_token_header
+        expect(response).to_not be_successful
+      end
+    end
 
-#   end
+  end
 
-#   describe "GET /show" do
-#     context "with valid headers" do
-#       it "renders a successful response" do
-#         get user_url(@user1), headers: valid_headers
-#         expect(response).to be_successful
-#       end
-#       it "gets users' correct details" do
-#         get user_url(@user1), headers: valid_headers
-#         michael = JSON.parse(response.body)
-#         car_ids = michael['car_ids']
-#         cars = michael['cars']
-#         fiat = cars.find { |car| car['name'] == "Michael's Fiat 500" }
-#         civic = cars.find { |car| car['name'] == "Michael's Honda Civic" }
-#         expect(michael['name']).to eq "Michael Scott"
-#         expect(michael['email']).to eq "michaelscott@dundermifflin.com"
-#         expect(michael['admin']).to eq true
-#         expect(michael['avatar']).to be_kind_of(String)
-#         expect(michael['avatar']).to match(/http.*\michael-scott\.png/)
-#         expect(michael['password']).to be_nil
-#         expect(michael['password_digest']).to be_nil
-#         expect(fiat['name']).to eq "Michael's Fiat 500"
-#         expect(fiat['userName']).to eq "Michael Scott"
-#         expect(fiat['image']).to be_kind_of(String)
-#         expect(fiat['image']).to match(/http.*fiat-500\.jpg/)
-#         expect(fiat['userName']).to eq "Michael Scott"
-#         expect(fiat['image']).to be_kind_of(String)
-#         expect(fiat['image']).to match(/http.*fiat-500\.jpg/)
-#         expect(fiat['make']).to eq "Fiat"
-#         expect(fiat['model']).to eq "500"
-#         expect(fiat['trim']).to eq "Sport"
-#         expect(fiat['color']).to eq "Yellow"
-#         expect(fiat['body']).to eq "Hatchback"
-#         expect(fiat['plate']).to eq "6XYK922"
-#         expect(fiat['vin']).to eq "3C3CFFBR0CT382584"
-#         expect(fiat['year']).to eq 2012
-#         expect(fiat['cost']).to eq "10235.0"
-#         expect(fiat['purchase_vendor']).to eq "Ted Fleid"
-#         expect(fiat['initial_mileage']).to eq 47361
-#         expect(fiat['userId']).to eq User.find_by(email: "michaelscott@dundermifflin.com").id
-#         expect(civic['name']).to eq "Michael's Honda Civic"
-#         expect(civic['userName']).to eq "Michael Scott"
-#         expect(civic['image']).to be_kind_of(String)
-#         expect(civic['image']).to match(/http.*honda-civic\.jpg/)
-#         expect(civic['make']).to eq "Honda"
-#         expect(civic['model']).to eq "Civic"
-#         expect(civic['trim']).to eq "Vp"
-#         expect(civic['color']).to eq "Blue"
-#         expect(civic['body']).to eq "Sedan"
-#         expect(civic['plate']).to eq "4HGJ708"
-#         expect(civic['vin']).to eq "2HGEJ6618XH589506"
-#         expect(civic['year']).to eq 1999
-#         expect(civic['cost']).to eq "10352.0"
-#         expect(civic['purchase_vendor']).to eq "Howdy Honda"
-#         expect(civic['initial_mileage']).to eq 78032
-#         expect(civic['userId']).to eq User.find_by(email: "michaelscott@dundermifflin.com").id
-#       end
-#     end
-#     context "with invalid headers" do
-#       it "renders an unsuccessful response" do
-#         get user_url(@user1), headers: invalid_token_header
-#         expect(response).to_not be_successful
-#       end
-#     end
-#   end
+  describe "GET /show" do
+    context "with valid headers" do
+      it "renders a successful response" do
+        get user_url(@user1), headers: valid_headers
+        expect(response).to be_successful
+      end
+      it "gets users' correct details" do
+        get user_url(@user1), headers: valid_headers
+        michael = JSON.parse(response.body)
+        car_ids = michael['car_ids']
+        cars = michael['cars']
+        fiat = cars.find { |car| car['name'] == "Michael's Fiat 500" }
+        civic = cars.find { |car| car['name'] == "Michael's Honda Civic" }
+        expect(michael['name']).to eq "Michael Scott"
+        expect(michael['email']).to eq "michaelscott@dundermifflin.com"
+        expect(michael['admin']).to eq true
+        expect(michael['avatar']).to be_kind_of(String)
+        expect(michael['avatar']).to match(/http.*\michael-scott\.png/)
+        expect(michael['password']).to be_nil
+        expect(michael['password_digest']).to be_nil
+        expect(fiat['name']).to eq "Michael's Fiat 500"
+        expect(fiat['userName']).to eq "Michael Scott"
+        expect(fiat['image']).to be_kind_of(String)
+        expect(fiat['image']).to match(/http.*fiat-500\.jpg/)
+        expect(fiat['userName']).to eq "Michael Scott"
+        expect(fiat['image']).to be_kind_of(String)
+        expect(fiat['image']).to match(/http.*fiat-500\.jpg/)
+        expect(fiat['make']).to eq "Fiat"
+        expect(fiat['model']).to eq "500"
+        expect(fiat['trim']).to eq "Sport"
+        expect(fiat['color']).to eq "Yellow"
+        expect(fiat['body']).to eq "Hatchback"
+        expect(fiat['plate']).to eq "6XYK922"
+        expect(fiat['vin']).to eq "3C3CFFBR0CT382584"
+        expect(fiat['year']).to eq 2012
+        expect(fiat['cost']).to eq "10235.0"
+        expect(fiat['purchase_vendor']).to eq "Ted Fleid"
+        expect(fiat['initial_mileage']).to eq 47361
+        expect(fiat['userId']).to eq User.find_by(email: "michaelscott@dundermifflin.com").id
+        expect(civic['name']).to eq "Michael's Honda Civic"
+        expect(civic['userName']).to eq "Michael Scott"
+        expect(civic['image']).to be_kind_of(String)
+        expect(civic['image']).to match(/http.*honda-civic\.jpg/)
+        expect(civic['make']).to eq "Honda"
+        expect(civic['model']).to eq "Civic"
+        expect(civic['trim']).to eq "Vp"
+        expect(civic['color']).to eq "Blue"
+        expect(civic['body']).to eq "Sedan"
+        expect(civic['plate']).to eq "4HGJ708"
+        expect(civic['vin']).to eq "2HGEJ6618XH589506"
+        expect(civic['year']).to eq 1999
+        expect(civic['cost']).to eq "10352.0"
+        expect(civic['purchase_vendor']).to eq "Howdy Honda"
+        expect(civic['initial_mileage']).to eq 78032
+        expect(civic['userId']).to eq User.find_by(email: "michaelscott@dundermifflin.com").id
+      end
+    end
+    context "with invalid headers" do
+      it "renders an unsuccessful response" do
+        get user_url(@user1), headers: invalid_token_header
+        expect(response).to_not be_successful
+      end
+    end
+  end
 
-#   describe "POST /users" do
-#     context "with valid parameters" do
-#       it "creates a new User" do
-#         expect {
-#           post users_url, params: user_valid_create_params_mock_1
-#         }.to change(User, :count).by(1)
-#       end
+  describe "POST /users" do
+    context "with valid parameters" do
+      it "creates a new User" do
+        expect {
+          post users_url, params: user_valid_create_params_mock_1
+        }.to change(User, :count).by(1)
+      end
 
-#       it "renders a successful response" do
-#         post users_url, params: user_valid_create_params_mock_1
-#         expect(response).to be_successful
-#       end
+      it "renders a successful response" do
+        post users_url, params: user_valid_create_params_mock_1
+        expect(response).to be_successful
+      end
 
-#       it "sets correct user details" do
-#         post users_url, params: user_valid_create_params_mock_1
-#         user = User.order(:created_at).last
-#         expect(user['name']).to eq "First1 Last1"
-#         expect(user['email']).to eq "one@mail.com"
-#         expect(user['admin']).to eq(false).or(be_nil)
-#         expect(user['avatar']).to be_nil
-#         expect(user['password']).to be_nil
-#         expect(user['password_digest']).to be_kind_of(String)
-#       end
+      it "sets correct user details" do
+        post users_url, params: user_valid_create_params_mock_1
+        user = User.order(:created_at).last
+        expect(user['name']).to eq "First1 Last1"
+        expect(user['email']).to eq "one@mail.com"
+        expect(user['admin']).to eq(false).or(be_nil)
+        expect(user['avatar']).to be_nil
+        expect(user['password']).to be_nil
+        expect(user['password_digest']).to be_kind_of(String)
+      end
 
-#       it "attaches user avatar" do
-#         post users_url, params: user_valid_create_params_mock_1
-#         user = User.order(:created_at).last
-#         expect(user.avatar.attached?).to eq(true)
-#         expect(url_for(user.avatar)).to be_kind_of(String)
-#         expect(url_for(user.avatar)).to match(/http.*michael-scott\.png/)
-#       end
-#     end
+      it "attaches user avatar" do
+        post users_url, params: user_valid_create_params_mock_1
+        user = User.order(:created_at).last
+        expect(user.avatar.attached?).to eq(true)
+        expect(url_for(user.avatar)).to be_kind_of(String)
+        expect(url_for(user.avatar)).to match(/http.*michael-scott\.png/)
+      end
+    end
 
-#     context "with invalid parameters (email poorly formed)" do
-#       it "does not create a new User" do
-#         expect {
-#           post users_url, params: user_invalid_create_params_email_poorly_formed_mock_1
-#         }.to change(User, :count).by(0)
-#       end
+    context "with invalid parameters (email poorly formed)" do
+      it "does not create a new User" do
+        expect {
+          post users_url, params: user_invalid_create_params_email_poorly_formed_mock_1
+        }.to change(User, :count).by(0)
+      end
     
-#       it "renders a 422 response" do
-#         post users_url, params: user_invalid_create_params_email_poorly_formed_mock_1
-#         expect(response).to have_http_status(:unprocessable_entity)
-#       end  
-#     end
-#   end
+      it "renders a 422 response" do
+        post users_url, params: user_invalid_create_params_email_poorly_formed_mock_1
+        expect(response).to have_http_status(:unprocessable_entity)
+      end  
+    end
+  end
 
-#   describe "PATCH /update" do
-#     context "with valid parameters and headers" do
+  describe "PATCH /update" do
+    context "with valid parameters and headers" do
 
-#       it "updates user's name" do
-#         patch user_url(@user1), params: valid_user_update_attributes, headers: valid_headers
-#         @user1.reload
-#         expect(@user1.name).to eq("UpdatedName")
-#       end
+      it "updates user's name" do
+        patch user_url(@user1), params: valid_user_update_attributes, headers: valid_headers
+        @user1.reload
+        expect(@user1.name).to eq("UpdatedName")
+      end
 
-#       it "updates user's name in their cars" do
-#         patch user_url(@user1), params: valid_user_update_attributes, headers: valid_headers
-#         @user1.reload
-#         get user_url(@user1), headers: valid_headers
-#         user = JSON.parse(response.body)
-#         car_ids = user['car_ids']
-#         cars = user['cars']
-#         fiat = cars.find { |car| car['name'] == "Michael's Fiat 500" }
-#         civic = cars.find { |car| car['name'] == "Michael's Honda Civic" }
-#         expect(fiat['userName']).to eq "UpdatedName"
-#         expect(civic['userName']).to eq "UpdatedName"
-#       end
+      it "updates user's name in their cars" do
+        patch user_url(@user1), params: valid_user_update_attributes, headers: valid_headers
+        @user1.reload
+        get user_url(@user1), headers: valid_headers
+        user = JSON.parse(response.body)
+        car_ids = user['car_ids']
+        cars = user['cars']
+        fiat = cars.find { |car| car['name'] == "Michael's Fiat 500" }
+        civic = cars.find { |car| car['name'] == "Michael's Honda Civic" }
+        expect(fiat['userName']).to eq "UpdatedName"
+        expect(civic['userName']).to eq "UpdatedName"
+      end
 
-#       it "doesn't change the other user attributes" do
-#         patch user_url(@user1), params: valid_user_update_attributes, headers: valid_headers
-#         @user1.reload
-#         get user_url(@user1), headers: valid_headers
-#         user = JSON.parse(response.body)
-#         car_ids = user['car_ids']
-#         cars = user['cars']
-#         fiat = cars.find { |car| car['name'] == "Michael's Fiat 500" }
-#         civic = cars.find { |car| car['name'] == "Michael's Honda Civic" }
-#         expect(@user1['email']).to eq "michaelscott@dundermifflin.com"
-#         expect(@user1['admin']).to eq true
-#         expect(@user1['avatar']).to be_nil
-#         expect(@user1['password']).to be_nil
-#         expect(@user1['password_digest']).to be_kind_of(String)
-#         expect(fiat['name']).to eq "Michael's Fiat 500"
-#         expect(url_for(fiat['image'])).to be_kind_of(String)
-#         expect(url_for(fiat['image'])).to match(/http.*fiat-500\.jpg/)
-#         expect(fiat['name']).to eq "Michael's Fiat 500"
-#         expect(fiat['image']).to be_kind_of(String)
-#         expect(fiat['image']).to match(/http.*fiat-500\.jpg/)
-#         expect(fiat['make']).to eq "Fiat"
-#         expect(fiat['model']).to eq "500"
-#         expect(fiat['trim']).to eq "Sport"
-#         expect(fiat['color']).to eq "Yellow"
-#         expect(fiat['body']).to eq "Hatchback"
-#         expect(fiat['plate']).to eq "6XYK922"
-#         expect(fiat['vin']).to eq "3C3CFFBR0CT382584"
-#         expect(fiat['year']).to eq 2012
-#         expect(fiat['cost']).to eq "10235.0"
-#         expect(fiat['purchase_vendor']).to eq "Ted Fleid"
-#         expect(fiat['initial_mileage']).to eq 47361
-#         expect(fiat['userId']).to eq User.find_by(email: "michaelscott@dundermifflin.com").id
-#         expect(civic['name']).to eq "Michael's Honda Civic"
-#         expect(url_for(civic['image'])).to be_kind_of(String)
-#         expect(url_for(civic['image'])).to match(/http.*honda-civic\.jpg/)
-#         expect(civic['make']).to eq "Honda"
-#         expect(civic['model']).to eq "Civic"
-#         expect(civic['trim']).to eq "Vp"
-#         expect(civic['color']).to eq "Blue"
-#         expect(civic['body']).to eq "Sedan"
-#         expect(civic['plate']).to eq "4HGJ708"
-#         expect(civic['vin']).to eq "2HGEJ6618XH589506"
-#         expect(civic['year']).to eq 1999
-#         expect(civic['cost']).to eq "10352.0"
-#         expect(civic['purchase_vendor']).to eq "Howdy Honda"
-#         expect(civic['initial_mileage']).to eq 78032
-#         expect(civic['userId']).to eq User.find_by(email: "michaelscott@dundermifflin.com").id
-#       end
+      it "doesn't change the other user attributes" do
+        patch user_url(@user1), params: valid_user_update_attributes, headers: valid_headers
+        @user1.reload
+        get user_url(@user1), headers: valid_headers
+        user = JSON.parse(response.body)
+        car_ids = user['car_ids']
+        cars = user['cars']
+        fiat = cars.find { |car| car['name'] == "Michael's Fiat 500" }
+        civic = cars.find { |car| car['name'] == "Michael's Honda Civic" }
+        expect(@user1['email']).to eq "michaelscott@dundermifflin.com"
+        expect(@user1['admin']).to eq true
+        expect(@user1['avatar']).to be_nil
+        expect(@user1['password']).to be_nil
+        expect(@user1['password_digest']).to be_kind_of(String)
+        expect(fiat['name']).to eq "Michael's Fiat 500"
+        expect(url_for(fiat['image'])).to be_kind_of(String)
+        expect(url_for(fiat['image'])).to match(/http.*fiat-500\.jpg/)
+        expect(fiat['name']).to eq "Michael's Fiat 500"
+        expect(fiat['image']).to be_kind_of(String)
+        expect(fiat['image']).to match(/http.*fiat-500\.jpg/)
+        expect(fiat['make']).to eq "Fiat"
+        expect(fiat['model']).to eq "500"
+        expect(fiat['trim']).to eq "Sport"
+        expect(fiat['color']).to eq "Yellow"
+        expect(fiat['body']).to eq "Hatchback"
+        expect(fiat['plate']).to eq "6XYK922"
+        expect(fiat['vin']).to eq "3C3CFFBR0CT382584"
+        expect(fiat['year']).to eq 2012
+        expect(fiat['cost']).to eq "10235.0"
+        expect(fiat['purchase_vendor']).to eq "Ted Fleid"
+        expect(fiat['initial_mileage']).to eq 47361
+        expect(fiat['userId']).to eq User.find_by(email: "michaelscott@dundermifflin.com").id
+        expect(civic['name']).to eq "Michael's Honda Civic"
+        expect(url_for(civic['image'])).to be_kind_of(String)
+        expect(url_for(civic['image'])).to match(/http.*honda-civic\.jpg/)
+        expect(civic['make']).to eq "Honda"
+        expect(civic['model']).to eq "Civic"
+        expect(civic['trim']).to eq "Vp"
+        expect(civic['color']).to eq "Blue"
+        expect(civic['body']).to eq "Sedan"
+        expect(civic['plate']).to eq "4HGJ708"
+        expect(civic['vin']).to eq "2HGEJ6618XH589506"
+        expect(civic['year']).to eq 1999
+        expect(civic['cost']).to eq "10352.0"
+        expect(civic['purchase_vendor']).to eq "Howdy Honda"
+        expect(civic['initial_mileage']).to eq 78032
+        expect(civic['userId']).to eq User.find_by(email: "michaelscott@dundermifflin.com").id
+      end
 
-#       it "is successful" do
-#         patch user_url(@user1), params: valid_user_update_attributes, headers: valid_headers
-#         @user1.reload
-#         expect(response).to be_successful
-#       end
-#     end
+      it "is successful" do
+        patch user_url(@user1), params: valid_user_update_attributes, headers: valid_headers
+        @user1.reload
+        expect(response).to be_successful
+      end
+    end
 
-#     context "with invalid parameters but valid headers" do
-#        it "renders a 422 response" do
-#          patch user_url(@user1), params: invalid_user_update_attributes, headers: valid_headers
-#          expect(response).to have_http_status(:unprocessable_entity)
-#        end
-#     end
+    context "with invalid parameters but valid headers" do
+       it "renders a 422 response" do
+         patch user_url(@user1), params: invalid_user_update_attributes, headers: valid_headers
+         expect(response).to have_http_status(:unprocessable_entity)
+       end
+    end
 
-#     context "with valid parameters but invalid headers" do
-#        it "renders a 401 response" do
-#          patch user_url(@user1), params: valid_user_update_attributes, headers: invalid_token_header
-#          expect(response).to have_http_status(:unauthorized)
-#        end
-#     end
+    context "with valid parameters but invalid headers" do
+       it "renders a 401 response" do
+         patch user_url(@user1), params: valid_user_update_attributes, headers: invalid_token_header
+         expect(response).to have_http_status(:unauthorized)
+       end
+    end
 
-#   end
+  end
 
-#   describe "DELETE /destroy" do
-#     context "with valid headers" do
-#       it "destroys the requested user" do
-#         expect {
-#           delete user_url(@user1), headers: valid_headers
-#         }.to change(User, :count).by(-1)
-#       end
+  describe "DELETE /destroy" do
+    context "with valid headers" do
+      it "destroys the requested user" do
+        expect {
+          delete user_url(@user1), headers: valid_headers
+        }.to change(User, :count).by(-1)
+      end
 
-#       it "renders a successful response" do
-#         delete user_url(@user1), headers: valid_headers
-#         expect(response).to be_successful
-#       end
-#     end
+      it "renders a successful response" do
+        delete user_url(@user1), headers: valid_headers
+        expect(response).to be_successful
+      end
+    end
 
-#     context "with invalid headers" do
-#       it "doesn't destroy user" do
-#         expect {
-#           delete user_url(@user1), headers: invalid_token_header
-#         }.to change(User, :count).by(0)
-#       end
+    context "with invalid headers" do
+      it "doesn't destroy user" do
+        expect {
+          delete user_url(@user1), headers: invalid_token_header
+        }.to change(User, :count).by(0)
+      end
 
-#       it "renders a unsuccessful response" do
-#         delete user_url(@user1), headers: invalid_token_header
-#         expect(response).to_not be_successful
-#       end
-#     end
-#   end
+      it "renders a unsuccessful response" do
+        delete user_url(@user1), headers: invalid_token_header
+        expect(response).to_not be_successful
+      end
+    end
+  end
 
-# end
-# ~
-# EOF
-# rspec
+end
+~
+EOF
+rubocop -A
+rspec
 
 
 # echo -e "\n\n🦄  Maintenances (Backend)\n\n"
