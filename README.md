@@ -17,7 +17,14 @@ This readme uses a small custom bash command called [puravida](#user-content-pur
 - `bundle add rack-cors bcrypt jwt pry`
 - `bundle add rspec-rails --group "development, test"`
 - `bundle add database_cleaner-active_record --group "test"`
+- to the end of `Gemfile` add:
+```
+gem 'rubocop', require: false
+gem 'rubocop-rails', require: false
+gem 'rubocop-rspec', require: false
+```
 - `bundle`
+- `rubocop -A`
 - `rails active_storage:install`
 - `rails generate rspec:install`
 - `rails db:migrate`

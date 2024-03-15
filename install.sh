@@ -9,7 +9,13 @@ rails db:drop db:create
 bundle add rack-cors bcrypt jwt pry
 bundle add rspec-rails --group "development, test"
 bundle add database_cleaner-active_record --group "test"
+cat <<EOT >> Gemfile
+gem 'rubocop', require: false
+gem 'rubocop-rails', require: false
+gem 'rubocop-rspec', require: false
+EOT
 bundle
+rubocop -A
 rails active_storage:install
 rails generate rspec:install
 rails db:migrate
