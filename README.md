@@ -55,6 +55,7 @@ Rails.application.config.middleware.insert_before 0, Rack::Cors do
 end
 ~
 ```
+- `rubocop -A`
 
 ### Health Controller
 - `rails g controller health index`
@@ -67,7 +68,6 @@ class HealthController < ApplicationController
 end
 ~
 ```
-
 - `puravida spec/requests/health_spec.rb ~`
 ```
 # frozen_string_literal: true

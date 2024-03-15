@@ -22,28 +22,29 @@ require:
 ~
 EOF
 rubocop -A
-# rails active_storage:install
-# rails generate rspec:install
-# rails db:migrate
-# cp -a ~/Desktop/rux-drivetracks/assets ~/Desktop/back/app/
-# puravida spec/fixtures/files
-# cp -a ~/Desktop/rux-drivetracks/assets/images/office-avatars/* ~/Desktop/back/spec/fixtures/files/
-# cp -a ~/Desktop/rux-drivetracks/assets/images/cars/* ~/Desktop/back/spec/fixtures/files/
-# cp -a ~/Desktop/rux-drivetracks/assets/maintenance-documents/* ~/Desktop/back/spec/fixtures/files/
-# cp -a ~/Desktop/rux-drivetracks/assets/car-documents/contracts/* ~/Desktop/back/spec/fixtures/files/
-# cp -a ~/Desktop/rux-drivetracks/assets/car-documents/titles/* ~/Desktop/back/spec/fixtures/files/
-# cp -a ~/Desktop/rux-drivetracks/assets/maintenance-documents/* ~/Desktop/back/spec/fixtures/files/
-# cat <<'EOF' | puravida config/initializers/cors.rb ~
-# Rails.application.config.middleware.insert_before 0, Rack::Cors do
-#   allow do
-#     origins "*"
-#     resource "*",
-#       headers: :any,
-#       methods: [:get, :post, :put, :patch, :delete, :options, :head]
-#   end
-# end
-# ~
-# EOF
+rails active_storage:install
+rails generate rspec:install
+rails db:migrate
+cp -a ~/Desktop/rux-drivetracks/assets ~/Desktop/back/app/
+puravida spec/fixtures/files
+cp -a ~/Desktop/rux-drivetracks/assets/images/office-avatars/* ~/Desktop/back/spec/fixtures/files/
+cp -a ~/Desktop/rux-drivetracks/assets/images/cars/* ~/Desktop/back/spec/fixtures/files/
+cp -a ~/Desktop/rux-drivetracks/assets/maintenance-documents/* ~/Desktop/back/spec/fixtures/files/
+cp -a ~/Desktop/rux-drivetracks/assets/car-documents/contracts/* ~/Desktop/back/spec/fixtures/files/
+cp -a ~/Desktop/rux-drivetracks/assets/car-documents/titles/* ~/Desktop/back/spec/fixtures/files/
+cp -a ~/Desktop/rux-drivetracks/assets/maintenance-documents/* ~/Desktop/back/spec/fixtures/files/
+cat <<'EOF' | puravida config/initializers/cors.rb ~
+Rails.application.config.middleware.insert_before 0, Rack::Cors do
+  allow do
+    origins "*"
+    resource "*",
+      headers: :any,
+      methods: [:get, :post, :put, :patch, :delete, :options, :head]
+  end
+end
+~
+EOF
+rubocop -A
 # echo -e "\n\n🦄 Health Controller\n\n"
 # rails g controller health index
 # cat <<'EOF' | puravida app/controllers/health_controller.rb ~
