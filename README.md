@@ -152,7 +152,7 @@ def token_from_email_password(email,password)
 end
 ~
 ```
-- `rails g rspec:scaffold users`
+- `rails g rspec:scaffold user`
 - `rails g rspec:model user`
 - `puravida spec/models/user_spec.rb ~`
 ```
