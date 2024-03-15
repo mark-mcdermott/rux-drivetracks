@@ -44,6 +44,7 @@ Rails.application.config.middleware.insert_before 0, Rack::Cors do
 end
 ~
 EOF
+rm -rf .git
 rubocop -A
 echo -e "\n\n🦄 Health Controller\n\n"
 rails g controller health index
