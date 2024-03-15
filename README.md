@@ -24,6 +24,13 @@ gem 'rubocop-rails', require: false
 gem 'rubocop-rspec', require: false
 ```
 - `bundle`
+- `puravida .rubocop.yml ~`
+```
+require:
+  - rubocop-rails
+  - rubocop-rspec
+~
+```
 - `rubocop -A`
 - `rails active_storage:install`
 - `rails generate rspec:install`
