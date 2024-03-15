@@ -580,158 +580,159 @@ Rails.application.routes.draw do
 end
 ~
 EOF
-rubocop -A
+rubocop
 
-# echo -e "\n\n🦄  /me Route (Application Controller)\n\n"
-# cat <<'EOF' | puravida app/controllers/application_controller.rb ~
-# class ApplicationController < ActionController::API
-#   SECRET_KEY_BASE = Rails.application.credentials.secret_key_base
-#   before_action :require_login
-#   rescue_from Exception, with: :response_internal_server_error
+echo -e "\n\n🦄  /me Route (Application Controller)\n\n"
+cat <<'EOF' | puravida app/controllers/application_controller.rb ~
+class ApplicationController < ActionController::API
+  SECRET_KEY_BASE = Rails.application.credentials.secret_key_base
+  before_action :require_login
+  rescue_from Exception, with: :response_internal_server_error
 
-#   def require_login
-#     response_unauthorized if current_user_raw.blank?
-#   end
+  def require_login
+    response_unauthorized if current_user_raw.blank?
+  end
 
-#   # this is safe to send to the frontend, excludes password_digest, created_at, updated_at
-#   def user_from_token
-#     user = prep_raw_user(current_user_raw)
-#     render json: { data: user, status: 200 }
-#   end
+  # this is safe to send to the frontend, excludes password_digest, created_at, updated_at
+  def user_from_token
+    user = prep_raw_user(current_user_raw)
+    render json: { data: user, status: 200 }
+  end
 
-#   # unsafe/internal: includes password_digest, created_at, updated_at - we don't want those going to the frontend
-#   def current_user_raw
-#     if decoded_token.present?
-#       user_id = decoded_token[0]['user_id']
-#       @user = User.find_by(id: user_id)
-#     else
-#       nil
-#     end
-#   end
+  # unsafe/internal: includes password_digest, created_at, updated_at - we don't want those going to the frontend
+  def current_user_raw
+    if decoded_token.present?
+      user_id = decoded_token[0]['user_id']
+      @user = User.find_by(id: user_id)
+    else
+      nil
+    end
+  end
 
-#   def encode_token(payload)
-#     JWT.encode payload, SECRET_KEY_BASE, 'HS256'
-#   end
+  def encode_token(payload)
+    JWT.encode payload, SECRET_KEY_BASE, 'HS256'
+  end
 
-#   def decoded_token
-#     if auth_header and auth_header.split(' ')[0] == "Bearer"
-#       token = auth_header.split(' ')[1]
-#       begin
-#         JWT.decode token, SECRET_KEY_BASE, true, { algorithm: 'HS256' }
-#       rescue JWT::DecodeError
-#         []
-#       end
-#     end
-#   end
+  def decoded_token
+    if auth_header and auth_header.split(' ')[0] == "Bearer"
+      token = auth_header.split(' ')[1]
+      begin
+        JWT.decode token, SECRET_KEY_BASE, true, { algorithm: 'HS256' }
+      rescue JWT::DecodeError
+        []
+      end
+    end
+  end
 
-#   def response_unauthorized
-#     render status: 401, json: { status: 401, message: 'Unauthorized' }
-#   end
+  def response_unauthorized
+    render status: 401, json: { status: 401, message: 'Unauthorized' }
+  end
   
-#   def response_internal_server_error
-#     render status: 500, json: { status: 500, message: 'Internal Server Error' }
-#   end
+  def response_internal_server_error
+    render status: 500, json: { status: 500, message: 'Internal Server Error' }
+  end
 
-#   # We don't want to send the whole user record from the database to the frontend, so we only send what we need.
-#   # The db user row has password_digest (unsafe) and created_at and updated_at (extraneous).
-#   # We also change avatar from a weird active_storage object to just the avatar url before it gets to the frontend.
-#   def prep_raw_user(user)
-#     avatar = user.avatar.present? ? url_for(user.avatar) : nil
-#     # cars = Car.where(user_id: user.id).map { |car| car.id }
-#     # maintenances = Maintenance.where(car_id: cars).map { |maintenance| maintenance.id }
-#     user = user.admin ? user.slice(:id,:email,:name,:admin) : user.slice(:id,:email,:name)
-#     user['avatar'] = avatar
-#     # user['car_ids'] = cars
-#     # user['maintenance_ids'] = maintenances
-#     user
-#   end
+  # We don't want to send the whole user record from the database to the frontend, so we only send what we need.
+  # The db user row has password_digest (unsafe) and created_at and updated_at (extraneous).
+  # We also change avatar from a weird active_storage object to just the avatar url before it gets to the frontend.
+  def prep_raw_user(user)
+    avatar = user.avatar.present? ? url_for(user.avatar) : nil
+    # cars = Car.where(user_id: user.id).map { |car| car.id }
+    # maintenances = Maintenance.where(car_id: cars).map { |maintenance| maintenance.id }
+    user = user.admin ? user.slice(:id,:email,:name,:admin) : user.slice(:id,:email,:name)
+    user['avatar'] = avatar
+    # user['car_ids'] = cars
+    # user['maintenance_ids'] = maintenances
+    user
+  end
 
-#   def prep_raw_car(car)
-#     user_id = car.user_id
-#     user_name = User.find(car.user_id).name
-#     # maintenances = Maintenance.where(car_id: car.id)
-#     # maintenances = maintenances.map { |maintenance| maintenance.slice(:id,:name,:description,:car_id) }
-#     image = car.image.present? ? url_for(car.image) : nil
-#     car = car.slice(:id,:name,:description)
-#     car['userId'] = user_id
-#     car['userName'] = user_name
-#     car['image'] = image
-#     # car['maintenances'] = maintenances
-#     car
-#   end
+  def prep_raw_car(car)
+    user_id = car.user_id
+    user_name = User.find(car.user_id).name
+    # maintenances = Maintenance.where(car_id: car.id)
+    # maintenances = maintenances.map { |maintenance| maintenance.slice(:id,:name,:description,:car_id) }
+    image = car.image.present? ? url_for(car.image) : nil
+    car = car.slice(:id,:name,:description)
+    car['userId'] = user_id
+    car['userName'] = user_name
+    car['image'] = image
+    # car['maintenances'] = maintenances
+    car
+  end
 
-#   def prep_raw_maintenance(maintenance)
-#     car = Car.find(maintenance.car_id)
-#     user = User.find(car.user_id)
-#     # images = maintenance.images.present? ? maintenance.images.map { |image| url_for(image) } : nil
-#     # documents = Document.where(documentable_id: maintenance.id, documentable_type: "Maintenance").map { |document| prep_raw_document(document) }
-#     maintenance = maintenance.slice(:id,:date,:description,:vendor,:cost,:car_id)
-#     maintenance['carId'] = car.id
-#     maintenance['carName'] = car.name
-#     maintenance['userId'] = user.id
-#     maintenance['userName'] = user.name
-#     # maintenance['documents'] = documents
-#     # maintenance['images'] = images
-#     maintenance
-#   end
+  def prep_raw_maintenance(maintenance)
+    car = Car.find(maintenance.car_id)
+    user = User.find(car.user_id)
+    # images = maintenance.images.present? ? maintenance.images.map { |image| url_for(image) } : nil
+    # documents = Document.where(documentable_id: maintenance.id, documentable_type: "Maintenance").map { |document| prep_raw_document(document) }
+    maintenance = maintenance.slice(:id,:date,:description,:vendor,:cost,:car_id)
+    maintenance['carId'] = car.id
+    maintenance['carName'] = car.name
+    maintenance['userId'] = user.id
+    maintenance['userName'] = user.name
+    # maintenance['documents'] = documents
+    # maintenance['images'] = images
+    maintenance
+  end
   
-#   private 
+  private 
   
-#     def auth_header
-#       request.headers['Authorization']
-#     end
+    def auth_header
+      request.headers['Authorization']
+    end
 
-# end
-# ~
-# EOF
-# cat <<'EOF' | puravida spec/requests/application_spec.rb ~
-# # frozen_string_literal: true
-# require 'rails_helper'
-# require 'spec_helper'
+end
+~
+EOF
+cat <<'EOF' | puravida spec/requests/application_spec.rb ~
+# frozen_string_literal: true
+require 'rails_helper'
+require 'spec_helper'
 
-# RSpec.describe "/me", type: :request do
-#   fixtures :users
-#   let(:valid_headers) {{ Authorization: "Bearer " + @token }}
-#   let(:invalid_token_header) {{ Authorization: "Bearer xyz" }}
-#   let(:poorly_formed_header) {{ Authorization: "Bear " + @token }}
+RSpec.describe "/me", type: :request do
+  fixtures :users
+  let(:valid_headers) {{ Authorization: "Bearer " + @token }}
+  let(:invalid_token_header) {{ Authorization: "Bearer xyz" }}
+  let(:poorly_formed_header) {{ Authorization: "Bear " + @token }}
   
-#   before :all do
-#     @token = token_from_email_password("michaelscott@dundermifflin.com", "password")
-#   end
+  before :all do
+    @token = token_from_email_password("michaelscott@dundermifflin.com", "password")
+  end
   
-#   describe "GET /me" do
+  describe "GET /me" do
 
-#     context "without auth header" do
-#       it "returns http success" do
-#         get "/me"
-#         expect(response).to have_http_status(:unauthorized)
-#       end
-#     end
+    context "without auth header" do
+      it "returns http success" do
+        get "/me"
+        expect(response).to have_http_status(:unauthorized)
+      end
+    end
     
-#     context "with invalid token header" do
-#       it "returns http success" do
-#         get "/me", headers: invalid_token_header
-#         expect(response).to have_http_status(:unauthorized)
-#       end
-#     end
+    context "with invalid token header" do
+      it "returns http success" do
+        get "/me", headers: invalid_token_header
+        expect(response).to have_http_status(:unauthorized)
+      end
+    end
 
-#     context "with valid token, but poorly formed auth header" do
-#       it "returns http success" do
-#         get "/me", headers: poorly_formed_header
-#         expect(response).to have_http_status(:unauthorized)
-#       end
-#     end
+    context "with valid token, but poorly formed auth header" do
+      it "returns http success" do
+        get "/me", headers: poorly_formed_header
+        expect(response).to have_http_status(:unauthorized)
+      end
+    end
 
-#     context "with valid auth header" do
-#       it "returns http success" do
-#         get "/me", headers: valid_headers
-#         expect(response).to have_http_status(:success)
-#       end
-#     end
-#   end
-# end
-# ~
-# EOF
+    context "with valid auth header" do
+      it "returns http success" do
+        get "/me", headers: valid_headers
+        expect(response).to have_http_status(:success)
+      end
+    end
+  end
+end
+~
+EOF
+rubocop -A
 
 # echo -e "\n\n🦄  Update users_spec.rb For Auth\n\n"
 # cat <<'EOF' | puravida spec/requests/users_spec.rb ~

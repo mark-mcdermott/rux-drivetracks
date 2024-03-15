@@ -782,6 +782,7 @@ RSpec.describe "/me", type: :request do
 end
 ~
 ```
+- `rubocop -A`
 
 ### Update users_spec.rb For Auth
 
