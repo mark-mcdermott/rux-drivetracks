@@ -3189,6 +3189,7 @@ RSpec.describe Document, type: :model do
 end
 ~
 EOF
+rubcop -A
 rspec
 
 # echo -e "\n\n🦄  Seeds\n\n"

@@ -3578,6 +3578,7 @@ RSpec.describe Document, type: :model do
 end
 ~
 ```
+- `rubcop -A`
 - `rspec`
 
 
