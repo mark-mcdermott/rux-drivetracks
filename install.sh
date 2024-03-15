@@ -45,42 +45,43 @@ end
 ~
 EOF
 rubocop -A
-# echo -e "\n\n🦄 Health Controller\n\n"
-# rails g controller health index
-# cat <<'EOF' | puravida app/controllers/health_controller.rb ~
-# class HealthController < ApplicationController
-#   def index
-#     render json: { status: 'online' }
-#   end
-# end
-# ~
-# EOF
-# cat <<'EOF' | puravida spec/requests/health_spec.rb ~
-# # frozen_string_literal: true
+echo -e "\n\n🦄 Health Controller\n\n"
+rails g controller health index
+cat <<'EOF' | puravida app/controllers/health_controller.rb ~
+class HealthController < ApplicationController
+  def index
+    render json: { status: 'online' }
+  end
+end
+~
+EOF
+cat <<'EOF' | puravida spec/requests/health_spec.rb ~
+# frozen_string_literal: true
 
-# require "rails_helper"
+require "rails_helper"
 
-# RSpec.describe "API Testing" do
-#   describe "GET /health" do
-#     it "returns success" do
-#       get("/health")
+RSpec.describe "API Testing" do
+  describe "GET /health" do
+    it "returns success" do
+      get("/health")
 
-#       expect(response).to have_http_status(:ok)
-#       expect(JSON.parse(response.body)['status']).to eq('online')
-#     end
+      expect(response).to have_http_status(:ok)
+      expect(JSON.parse(response.body)['status']).to eq('online')
+    end
 
-#   end
+  end
 
-# end
-# ~
-# EOF
-# cat <<'EOF' | puravida config/routes.rb ~
-# Rails.application.routes.draw do
-#   get "health", to: "health#index"
-# end
-# ~
-# EOF
-# rspec
+end
+~
+EOF
+cat <<'EOF' | puravida config/routes.rb ~
+Rails.application.routes.draw do
+  get "health", to: "health#index"
+end
+~
+EOF
+rubocop -A
+rspec
 
 # echo -e "\n\n🦄  Users\n\n"
 # rails g scaffold user name email avatar:attachment admin:boolean password_digest

@@ -95,6 +95,7 @@ Rails.application.routes.draw do
 end
 ~
 ```
+- `rubocop -A`
 - `rspec`
 
 ### Users
