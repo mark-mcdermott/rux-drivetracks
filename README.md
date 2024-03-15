@@ -3738,6 +3738,8 @@ document.attachment.attach(io: URI.open("#{Rails.root}/app/assets/images/documen
 - `rails db:drop db:create db:migrate db:seed RAILS_ENV=test`
 - `rm -rf spec/factories`
 - `rm -rf spec/routing`
+- `rubocop -A`
+- `rspec`
 
 ## FRONTEND
 
