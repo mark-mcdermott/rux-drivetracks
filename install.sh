@@ -1938,1255 +1938,1258 @@ rubocop -A
 rspec
 
 
-# echo -e "\n\n🦄  Maintenances (Backend)\n\n"
-# rails g scaffold maintenance date:date description vendor cost:decimal images:attachments car:references
-# MIGRATION_FILE=$(find /Users/mmcdermott/Desktop/back/db/migrate -name "*_create_maintenances.rb")
-# sed -i '' 3,11d $MIGRATION_FILE
-# awk 'NR==3 {print "\t\tcreate_table :maintenances do |t|\n\t\t\tt.date :date\n\t\t\tt.string :description\n\t\t\tt.string :vendor\n\t\t\tt.decimal :cost, precision: 10, scale: 2\n\t\t\tt.references :car, null: false, foreign_key: {on_delete: :cascade}\n\t\t\tt.timestamps\n\t\tend"} 1' $MIGRATION_FILE > temp.txt
-# mv temp.txt $MIGRATION_FILE
-# rails db:migrate
+echo -e "\n\n🦄  Maintenances (Backend)\n\n"
+rails g scaffold maintenance date:date description vendor cost:decimal images:attachments car:references
+MIGRATION_FILE=$(find /Users/mmcdermott/Desktop/back/db/migrate -name "*_create_maintenances.rb")
+sed -i '' 3,11d $MIGRATION_FILE
+awk 'NR==3 {print "\t\tcreate_table :maintenances do |t|\n\t\t\tt.date :date\n\t\t\tt.string :description\n\t\t\tt.string :vendor\n\t\t\tt.decimal :cost, precision: 10, scale: 2\n\t\t\tt.references :car, null: false, foreign_key: {on_delete: :cascade}\n\t\t\tt.timestamps\n\t\tend"} 1' $MIGRATION_FILE > temp.txt
+mv temp.txt $MIGRATION_FILE
+rails db:migrate
 
-# cat <<'EOF' | puravida app/models/maintenance.rb ~
-# class Maintenance < ApplicationRecord
-#   belongs_to :car
-#   # has_many_attached :images
-#   validates :date, presence: true
-#   validates :description, presence: true
-# end
-# ~
-# EOF
-# cat <<'EOF' | puravida app/models/car.rb ~
-# class Car < ApplicationRecord
-#   belongs_to :user
-#   has_many :maintenances, dependent: :destroy
-#   has_one_attached :image
-#   validates :name, presence: true, allow_blank: false, length: { minimum: 4, maximum: 254 }
-# end
-# ~
-# EOF
-# cat <<'EOF' | puravida spec/models/maintenance_spec.rb ~
-# require 'rails_helper'
+cat <<'EOF' | puravida app/models/maintenance.rb ~
+class Maintenance < ApplicationRecord
+  belongs_to :car
+  # has_many_attached :images
+  validates :date, presence: true
+  validates :description, presence: true
+end
+~
+EOF
+cat <<'EOF' | puravida app/models/car.rb ~
+class Car < ApplicationRecord
+  belongs_to :user
+  has_many :maintenances, dependent: :destroy
+  has_one_attached :image
+  validates :name, presence: true, allow_blank: false, length: { minimum: 4, maximum: 254 }
+end
+~
+EOF
+cat <<'EOF' | puravida spec/models/maintenance_spec.rb ~
+require 'rails_helper'
 
-# RSpec.describe Maintenance, type: :model do
-#   fixtures :users, :cars, :maintenances
-#   let(:valid_attributes) {{ 
-#     date: Date.parse("20200713"),
-#     description: "Alignment",
-#     vendor: "Pep Boys",
-#     cost: 350.00,
-#     car_id: cars(:fiat).id
-#   }}
-#   let(:invalid_attributes) {{ 
-#     date: Date.parse("20200713"),
-#     description: nil,
-#     vendor: "Pep Boys",
-#     cost: 350.00,
-#     car_id: cars(:fiat).id
-#   }}
+RSpec.describe Maintenance, type: :model do
+  fixtures :users, :cars, :maintenances
+  let(:valid_attributes) {{ 
+    date: Date.parse("20200713"),
+    description: "Alignment",
+    vendor: "Pep Boys",
+    cost: 350.00,
+    car_id: cars(:fiat).id
+  }}
+  let(:invalid_attributes) {{ 
+    date: Date.parse("20200713"),
+    description: nil,
+    vendor: "Pep Boys",
+    cost: 350.00,
+    car_id: cars(:fiat).id
+  }}
 
-#   it "is valid with valid attributes" do
-#     expect(Maintenance.new(valid_attributes)).to be_valid
-#   end
-#   it "is not valid width poorly formed email" do
-#     expect(Maintenance.new(invalid_attributes)).to_not be_valid
-#   end
+  it "is valid with valid attributes" do
+    expect(Maintenance.new(valid_attributes)).to be_valid
+  end
+  it "is not valid width poorly formed email" do
+    expect(Maintenance.new(invalid_attributes)).to_not be_valid
+  end
 
-# end
-# ~
-# EOF
-# cat <<'EOF' | puravida app/controllers/maintenances_controller.rb ~
-# class MaintenancesController < ApplicationController
-#   before_action :set_maintenance, only: %i[ show update destroy ]
+end
+~
+EOF
+cat <<'EOF' | puravida app/controllers/maintenances_controller.rb ~
+class MaintenancesController < ApplicationController
+  before_action :set_maintenance, only: %i[ show update destroy ]
 
-#   # GET /maintenances
-#   def index
-#     if params['user_id'].present?
-#       @maintenances = Maintenance.joins(car: [:user]).where(users: {id: params['user_id']}).map { |maintenance| prep_raw_maintenance(maintenance) }
-#     else
-#       @maintenances = Maintenance.all.map { |maintenance| prep_raw_maintenance(maintenance) }
-#     end
-#     render json: @maintenances
-#   end
+  # GET /maintenances
+  def index
+    if params['user_id'].present?
+      @maintenances = Maintenance.joins(car: [:user]).where(users: {id: params['user_id']}).map { |maintenance| prep_raw_maintenance(maintenance) }
+    else
+      @maintenances = Maintenance.all.map { |maintenance| prep_raw_maintenance(maintenance) }
+    end
+    render json: @maintenances
+  end
 
-#   # GET /maintenances/1
-#   def show
-#     render json: prep_raw_maintenance(@maintenance)
-#   end
+  # GET /maintenances/1
+  def show
+    render json: prep_raw_maintenance(@maintenance)
+  end
 
-#   # POST /maintenances
-#   def create
-#     create_params = maintenance_params
-#     # create_params['images'] = params['images'].blank? ? nil : params['images'] # if no image is chosen on new maintenance page, params['image'] comes in as a blank string, which throws a 500 error at Maintenance.new(create_params). This changes any params['image'] blank string to nil, which is fine in Maintenance.new(create_params).
-#     create_params['car_id'] = create_params['car_id'].to_i
-#     @maintenance = Maintenance.new(create_params)
-#     if @maintenance.save
-#       prepped_maintenance = prep_raw_maintenance(@maintenance)
-#       render json: prepped_maintenance, status: :created, location: @maintenance
-#     else
-#       render json: @maintenance.errors, status: :unprocessable_entity
-#     end
-#   end
+  # POST /maintenances
+  def create
+    create_params = maintenance_params
+    # create_params['images'] = params['images'].blank? ? nil : params['images'] # if no image is chosen on new maintenance page, params['image'] comes in as a blank string, which throws a 500 error at Maintenance.new(create_params). This changes any params['image'] blank string to nil, which is fine in Maintenance.new(create_params).
+    create_params['car_id'] = create_params['car_id'].to_i
+    @maintenance = Maintenance.new(create_params)
+    if @maintenance.save
+      prepped_maintenance = prep_raw_maintenance(@maintenance)
+      render json: prepped_maintenance, status: :created, location: @maintenance
+    else
+      render json: @maintenance.errors, status: :unprocessable_entity
+    end
+  end
 
-#   # PATCH/PUT /maintenances/1
-#   def update
-#     if @maintenance.update(maintenance_params)
-#       render json: prep_raw_maintenance(@maintenance)
-#     else
-#       render json: @maintenance.errors, status: :unprocessable_entity
-#     end
-#   end
+  # PATCH/PUT /maintenances/1
+  def update
+    if @maintenance.update(maintenance_params)
+      render json: prep_raw_maintenance(@maintenance)
+    else
+      render json: @maintenance.errors, status: :unprocessable_entity
+    end
+  end
 
-#   # DELETE /maintenances/1
-#   def destroy
-#     @maintenance.destroy
-#   end
+  # DELETE /maintenances/1
+  def destroy
+    @maintenance.destroy
+  end
 
-#   private
-#     # Use callbacks to share common setup or constraints between actions.
-#     def set_maintenance
-#       @maintenance = Maintenance.find(params[:id])
-#     end
+  private
+    # Use callbacks to share common setup or constraints between actions.
+    def set_maintenance
+      @maintenance = Maintenance.find(params[:id])
+    end
 
-#     # Only allow a list of trusted parameters through.
-#     def maintenance_params
-#       # params.permit(:id, :date, :description, :vendor, :cost, :images, :car_id)
-#       params.permit(:id, :date, :description, :vendor, :cost, :car_id)
-#     end
-# end
-# ~
-# EOF
+    # Only allow a list of trusted parameters through.
+    def maintenance_params
+      # params.permit(:id, :date, :description, :vendor, :cost, :images, :car_id)
+      params.permit(:id, :date, :description, :vendor, :cost, :car_id)
+    end
+end
+~
+EOF
 
-# cat <<'EOF' | puravida app/controllers/application_controller.rb ~
-# class ApplicationController < ActionController::API
-#   SECRET_KEY_BASE = Rails.application.credentials.secret_key_base
-#   before_action :require_login
-#   rescue_from Exception, with: :response_internal_server_error
+cat <<'EOF' | puravida app/controllers/application_controller.rb ~
+class ApplicationController < ActionController::API
+  SECRET_KEY_BASE = Rails.application.credentials.secret_key_base
+  before_action :require_login
+  rescue_from Exception, with: :response_internal_server_error
 
-#   def require_login
-#     response_unauthorized if current_user_raw.blank?
-#   end
+  def require_login
+    response_unauthorized if current_user_raw.blank?
+  end
 
-#   # this is safe to send to the frontend, excludes password_digest, created_at, updated_at
-#   def user_from_token
-#     user = prep_raw_user(current_user_raw)
-#     render json: { data: user, status: 200 }
-#   end
+  # this is safe to send to the frontend, excludes password_digest, created_at, updated_at
+  def user_from_token
+    user = prep_raw_user(current_user_raw)
+    render json: { data: user, status: 200 }
+  end
 
-#   # unsafe/internal: includes password_digest, created_at, updated_at - we don't want those going to the frontend
-#   def current_user_raw
-#     if decoded_token.present?
-#       user_id = decoded_token[0]['user_id']
-#       @user = User.find_by(id: user_id)
-#     else
-#       nil
-#     end
-#   end
+  # unsafe/internal: includes password_digest, created_at, updated_at - we don't want those going to the frontend
+  def current_user_raw
+    if decoded_token.present?
+      user_id = decoded_token[0]['user_id']
+      @user = User.find_by(id: user_id)
+    else
+      nil
+    end
+  end
 
-#   def encode_token(payload)
-#     JWT.encode payload, SECRET_KEY_BASE, 'HS256'
-#   end
+  def encode_token(payload)
+    JWT.encode payload, SECRET_KEY_BASE, 'HS256'
+  end
 
-#   def decoded_token
-#     if auth_header and auth_header.split(' ')[0] == "Bearer"
-#       token = auth_header.split(' ')[1]
-#       begin
-#         JWT.decode token, SECRET_KEY_BASE, true, { algorithm: 'HS256' }
-#       rescue JWT::DecodeError
-#         []
-#       end
-#     end
-#   end
+  def decoded_token
+    if auth_header and auth_header.split(' ')[0] == "Bearer"
+      token = auth_header.split(' ')[1]
+      begin
+        JWT.decode token, SECRET_KEY_BASE, true, { algorithm: 'HS256' }
+      rescue JWT::DecodeError
+        []
+      end
+    end
+  end
 
-#   def response_unauthorized
-#     render status: 401, json: { status: 401, message: 'Unauthorized' }
-#   end
+  def response_unauthorized
+    render status: 401, json: { status: 401, message: 'Unauthorized' }
+  end
   
-#   def response_internal_server_error
-#     render status: 500, json: { status: 500, message: 'Internal Server Error' }
-#   end
+  def response_internal_server_error
+    render status: 500, json: { status: 500, message: 'Internal Server Error' }
+  end
 
-#   # We don't want to send the whole user record from the database to the frontend, so we only send what we need.
-#   # The db user row has password_digest (unsafe) and created_at and updated_at (extraneous).
-#   # We also change avatar from a weird active_storage object to just the avatar url before it gets to the frontend.
-#   def prep_raw_user(user)
-#     avatar = user.avatar.present? ? url_for(user.avatar) : nil
-#     car_ids = Car.where(user_id: user.id).map { |car| car.id }
-#     cars = Car.where(user_id: user.id).map { |car| prep_raw_car(car) }
-#     maintenances_ids = Maintenance.where(car_id: car_ids).map { |maintenance| maintenance.id }
-#     maintenances = Maintenance.where(car_id: car_ids).map { |maintenance| prep_raw_maintenance(maintenance) }
-#     # documents = Document.where(car_id: cars).map { |document| document.id }
-#     user = user.admin ? user.slice(:id,:email,:name,:admin) : user.slice(:id,:email,:name)
-#     user['avatar'] = avatar
-#     user['car_ids'] = car_ids
-#     user['cars'] = cars
-#     user['maintenances_ids'] = maintenances_ids
-#     user['maintenances'] = maintenances
-#     # user['document_ids'] = documents
-#     user
-#   end
+  # We don't want to send the whole user record from the database to the frontend, so we only send what we need.
+  # The db user row has password_digest (unsafe) and created_at and updated_at (extraneous).
+  # We also change avatar from a weird active_storage object to just the avatar url before it gets to the frontend.
+  def prep_raw_user(user)
+    avatar = user.avatar.present? ? url_for(user.avatar) : nil
+    car_ids = Car.where(user_id: user.id).map { |car| car.id }
+    cars = Car.where(user_id: user.id).map { |car| prep_raw_car(car) }
+    maintenances_ids = Maintenance.where(car_id: car_ids).map { |maintenance| maintenance.id }
+    maintenances = Maintenance.where(car_id: car_ids).map { |maintenance| prep_raw_maintenance(maintenance) }
+    # documents = Document.where(car_id: cars).map { |document| document.id }
+    user = user.admin ? user.slice(:id,:email,:name,:admin) : user.slice(:id,:email,:name)
+    user['avatar'] = avatar
+    user['car_ids'] = car_ids
+    user['cars'] = cars
+    user['maintenances_ids'] = maintenances_ids
+    user['maintenances'] = maintenances
+    # user['document_ids'] = documents
+    user
+  end
 
-#   def prep_raw_car(car)
-#     user_id = car.user_id
-#     user_name = User.find(car.user_id).name
-#     maintenances = Maintenance.where(car_id: car.id).map { |maintenance| prep_raw_maintenance(maintenance) }
-#     # documents = Document.where(car_id: car.id)
-#     # documents = documents.map { |document| document.slice(:id,:name,:description,:car_id) }
-#     image = car.image.present? ? url_for(car.image) : nil
-#     car = car.slice(:id,:name,:year,:make,:model,:trim,:body,:color,:plate,:vin,:cost,:initial_mileage,:purchase_date,:purchase_vendor)
-#     car['userId'] = user_id
-#     car['userName'] = user_name
-#     car['image'] = image
-#     car['maintenances'] = maintenances
-#     # car['documents'] = documents
-#     car
-#   end
+  def prep_raw_car(car)
+    user_id = car.user_id
+    user_name = User.find(car.user_id).name
+    maintenances = Maintenance.where(car_id: car.id).map { |maintenance| prep_raw_maintenance(maintenance) }
+    # documents = Document.where(car_id: car.id)
+    # documents = documents.map { |document| document.slice(:id,:name,:description,:car_id) }
+    image = car.image.present? ? url_for(car.image) : nil
+    car = car.slice(:id,:name,:year,:make,:model,:trim,:body,:color,:plate,:vin,:cost,:initial_mileage,:purchase_date,:purchase_vendor)
+    car['userId'] = user_id
+    car['userName'] = user_name
+    car['image'] = image
+    car['maintenances'] = maintenances
+    # car['documents'] = documents
+    car
+  end
 
-#   def prep_raw_maintenance(maintenance)
-#     car = Car.find(maintenance.car_id)
-#     user = User.find(car.user_id)
-#     # images = maintenance.images.present? ? maintenance.images.map { |image| url_for(image) } : nil
-#     # documents = Document.where(documentable_id: maintenance.id, documentable_type: "Maintenance").map { |document| prep_raw_document(document) }
-#     maintenance = maintenance.slice(:id,:date,:description,:vendor,:cost,:car_id)
-#     maintenance['carId'] = car.id
-#     maintenance['carName'] = car.name
-#     maintenance['userId'] = user.id
-#     maintenance['userName'] = user.name
-#     # maintenance['documents'] = documents
-#     # maintenance['images'] = images
-#     maintenance
-#   end
+  def prep_raw_maintenance(maintenance)
+    car = Car.find(maintenance.car_id)
+    user = User.find(car.user_id)
+    # images = maintenance.images.present? ? maintenance.images.map { |image| url_for(image) } : nil
+    # documents = Document.where(documentable_id: maintenance.id, documentable_type: "Maintenance").map { |document| prep_raw_document(document) }
+    maintenance = maintenance.slice(:id,:date,:description,:vendor,:cost,:car_id)
+    maintenance['carId'] = car.id
+    maintenance['carName'] = car.name
+    maintenance['userId'] = user.id
+    maintenance['userName'] = user.name
+    # maintenance['documents'] = documents
+    # maintenance['images'] = images
+    maintenance
+  end
 
-#   def prep_raw_document(document)
-#     car_id = document.car_id
-#     car = Car.find(car_id)
-#     user = User.find(car.user_id)
-#     image = document.image.present? ? url_for(document.image) : nil
-#     document = document.slice(:id,:name,:description)
-#     document['carId'] = car_id
-#     document['carName'] = car.name
-#     document['carDescription'] = car.description
-#     document['userId'] = user.id
-#     document['userName'] = user.name
-#     document['image'] = image
-#     document
-#   end
+  def prep_raw_document(document)
+    car_id = document.car_id
+    car = Car.find(car_id)
+    user = User.find(car.user_id)
+    image = document.image.present? ? url_for(document.image) : nil
+    document = document.slice(:id,:name,:description)
+    document['carId'] = car_id
+    document['carName'] = car.name
+    document['carDescription'] = car.description
+    document['userId'] = user.id
+    document['userName'] = user.name
+    document['image'] = image
+    document
+  end
   
-#   private 
+  private 
   
-#     def auth_header
-#       request.headers['Authorization']
-#     end
-
-# end
-# ~
-# EOF
-
-# cat <<'EOF' | puravida spec/fixtures/maintenances.yml ~
-# fiat_alignment:
-#   date: Date.parse("20200713")
-#   description: "Alignment"
-#   vendor: "Pep Boys"
-#   cost: 350.00
-#   car: fiat
-
-# fiat_oil_change:
-#   date: Date.parse("20210812")
-#   description: "Oil Change"
-#   vendor: "Jiffy Lube"
-#   cost: 78.00
-#   car: fiat
-
-# civic_brake_repair:
-#   date: Date.parse("20170123")
-#   description: "Brake Repair"
-#   vendor: "WalMart"
-#   cost: 400.00
-#   car: civic
-
-# civic_tire_rotation:
-#   date: Date.parse("20200311")
-#   description: "Tire Rotation"
-#   vendor: "Goodyear"
-#   cost: 105.00
-#   car: civic
-
-# elantra_new_tires:
-#   date: Date.parse("20200111")
-#   description: "New Tires"
-#   vendor: "Scott's"
-#   cost: 812.00
-#   car: elantra
-
-# elantra_repaired_body:
-#   date: Date.parse("20230627")
-#   description: "Repaired Body Dents"
-#   vendor: "Tenede Auto"
-#   cost: 1343.00
-#   car: elantra
-
-# leaf_windshield_replacement:
-#   date: Date.parse("20150614")
-#   description: "Windshield Replacement"
-#   vendor: "45th St. Car Repair"
-#   cost: 800.00
-#   car: leaf
-
-# leaf_new_spark_plugs:
-#   date: Date.parse("20170811")
-#   description: "New Spark Plugs"
-#   vendor: "Jim & Tony's Automotive Service"
-#   cost: 5.00
-#   car: leaf
-
-# scion_engine_overhaul:
-#   date: Date.parse("20200909")
-#   description: "Engine Overhaul"
-#   vendor: "Auto Stoppe"
-#   cost: 5932.00
-#   car: scion
-
-# scion_5k_mile_maintenance:
-#   date: Date.parse("20201030")
-#   description: "50,000 Mile Maintenance"
-#   vendor: "Dealership"
-#   cost: 0
-#   car: scion
-
-# camry_fuel_line:
-#   date: Date.parse("20220903")
-#   description: "Fuel Line Replacement"
-#   vendor: "Foreign Auto Austin"
-#   cost: 37.00
-#   car: camry
-
-# camry_replaced_radiator:
-#   date: Date.parse("20230601")
-#   description: "Replaced Radiator"
-#   vendor: "Blan's Auto Repair"
-#   cost: 400.00
-#   car: camry
-# ~
-# EOF
-# cat <<'EOF' | puravida spec/requests/maintenances_spec.rb ~
-# # frozen_string_literal: true
-
-# require 'rails_helper'
-# RSpec.describe "/maintenances", type: :request do
-#   fixtures :users
-#   fixtures :cars
-#   fixtures :maintenances
-#   let(:valid_headers) {{ Authorization: "Bearer " + @michael_token }}
-#   let(:valid_attributes) {{ 
-#     date: Date.parse("20200713"),
-#     description: "Alignment",
-#     vendor: "Pep Boys",
-#     cost: 350.00,
-#     car_id: cars(:fiat).id
-#   }}
-#   let(:invalid_attributes) {{ 
-#     date: Date.parse("20200713"),
-#     description: nil,
-#     vendor: "Pep Boys",
-#     cost: 350.00,
-#     car_id: cars(:fiat).id
-#   }}
-
-#   before :all do
-#     @michael_token = token_from_email_password("michaelscott@dundermifflin.com", "password")
-#     @ryan_token = token_from_email_password("ryanhoward@dundermifflin.com", "password")
-#   end
-
-#   before :each do
-#     @fiat_alignment = maintenances(:fiat_alignment)
-#     # @fiat_alignment.images.attach([fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'fiat-alignment-1.jpg'),'image/jpeg'), fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'fiat-alignment-2.jpg'),'image/jpeg')])
-#     @fiat_oil_change = maintenances(:fiat_oil_change)
-#     # @fiat_oil_change.images.attach([fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'fiat-oil-change-1.jpg'),'image/jpeg'), fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'fiat-oil-change-2.jpg'),'image/jpeg')])
-#     @civic_brake_repair = maintenances(:civic_brake_repair)
-#     # @civic_brake_repair.images.attach([fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'civic-brake-repair-1.jpg'),'image/jpeg'), fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'civic-brake-repair-2.jpg'),'image/jpeg')])
-#     @civic_tire_rotation = maintenances(:civic_tire_rotation)
-#     # @civic_tire_rotation.images.attach([fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'civic-tire-rotation-1.jpg'),'image/jpeg'), fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'civic-tire-rotation-2.jpg'),'image/jpeg')])
-#     @elantra_new_tires = maintenances(:elantra_new_tires)
-#     # @elantra_new_tires.images.attach([fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'elantra-new-tires-1.jpg'),'image/jpeg'), fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'elantra-new-tires-2.jpg'),'image/jpeg')])
-#     @elantra_repaired_body = maintenances(:elantra_repaired_body)
-#     # @elantra_repaired_body.images.attach([fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'elantra-repaired-body-1.jpg'),'image/jpeg'), fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'elantra-repaired-body-2.jpg'),'image/jpeg')])
-#     @leaf_windshield_replacement = maintenances(:leaf_windshield_replacement)
-#     # @leaf_windshield_replacement.images.attach([fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'leaf-windshield-replacement-1.jpg'),'image/jpeg'), fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'leaf-windshield-replacement-2.jpg'),'image/jpeg')])
-#     @leaf_new_spark_plugs = maintenances(:leaf_new_spark_plugs)
-#     # @leaf_new_spark_plugs.images.attach([fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'leaf-new-spark-plugs-1.jpg'),'image/jpeg'), fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'leaf-new-spark-plugs-2.jpg'),'image/jpeg')])
-#     @scion_engine_overhaul = maintenances(:scion_engine_overhaul)
-#     # @scion_engine_overhaul.images.attach([fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'scion-engine-overhaul-1.jpg'),'image/jpeg'), fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'scion-engine-overhaul-2.jpg'),'image/jpeg')])
-#     @scion_5k_mile_maintenance = maintenances(:scion_5k_mile_maintenance)
-#     # @scion_5k_mile_maintenance.images.attach([fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'scion-5k-mile-maintenance-1.jpg'),'image/jpeg'), fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'scion-5k-mile-maintenance-2.jpg'),'image/jpeg')])
-#     @camry_fuel_line = maintenances(:camry_fuel_line)
-#     # @camry_fuel_line.images.attach([fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'camry-fuel-line-1.jpg'),'image/jpeg'), fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'camry-fuel-line-2.jpg'),'image/jpeg')])
-#     @camry_replaced_radiator = maintenances(:camry_replaced_radiator)
-#     # @camry_replaced_radiator.images.attach([fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'camry-replaced-radiator-1.jpg'),'image/jpeg'), fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'camry-replaced-radiator-2.jpg'),'image/jpeg')])
-#   end
-
-#   describe "GET /index" do
-#     it "renders a successful response" do
-#       get maintenances_url, headers: valid_headers
-#       expect(response).to be_successful
-#     end
-#     it "gets twenty maintenances" do
-#       get maintenances_url, headers: valid_headers
-#       expect(JSON.parse(response.body).length).to eq 12
-#     end
-#     it "first maintenance has correct properties" do
-#       get maintenances_url, headers: valid_headers
-#       maintenances = JSON.parse(response.body)
-#       fiat = Car.find_by(name: "Michael's Fiat 500")
-#       michael = User.find_by(name: "Michael Scott")
-#       alignment = maintenances.find { |maintenance| maintenance['car_id'] == fiat.id and maintenance['cost'] == "350.0"}
-#       expect(alignment['date']).to eq "2020-07-13"
-#       expect(alignment['description']).to eq "Alignment"
-#       expect(alignment['vendor']).to eq "Pep Boys"
-#       expect(alignment['cost']).to eq "350.0"
-#       expect(alignment['carId']).to eq fiat.id
-#       expect(alignment['carName']).to eq fiat.name
-#       expect(alignment['userId']).to eq michael.id
-#       expect(alignment['userName']).to eq michael.name
-#     end
-#     it "second maintenance has correct properties" do
-#       get maintenances_url, headers: valid_headers
-#       maintenances = JSON.parse(response.body)
-#       elantra = Car.find_by(name: "Jim's Hyundai Elantra")
-#       jim = User.find_by(name: "Jim Halpert")
-#       tires = maintenances.find { |maintenance| maintenance['car_id'] == elantra.id and maintenance['cost'] == "812.0"}
-#       expect(tires['date']).to eq "2020-01-11"
-#       expect(tires['description']).to eq "New Tires"
-#       expect(tires['vendor']).to eq "Scott's"
-#       expect(tires['cost']).to eq "812.0"
-#       expect(tires['carId']).to eq elantra.id
-#       expect(tires['carName']).to eq elantra.name
-#       expect(tires['userId']).to eq jim.id
-#       expect(tires['userName']).to eq jim.name
-#     end
-#   end
-
-#   describe "GET /show" do
-#     it "renders a successful response" do
-#       maintenance = maintenances(:fiat_alignment)
-#       get maintenance_url(maintenance), headers: valid_headers
-#       expect(response).to be_successful
-#     end
-#     it "gets correct maintenance properties" do
-#       maintenance = maintenances(:fiat_alignment)
-#       fiat = cars(:fiat)
-#       michael = users(:michael)
-#       get maintenance_url(maintenance.id), headers: valid_headers
-#       fiat_alignment = JSON.parse(response.body)
-#       expect(fiat_alignment['date']).to eq "2020-07-13"
-#       expect(fiat_alignment['description']).to eq "Alignment"
-#       expect(fiat_alignment['vendor']).to eq "Pep Boys"
-#       expect(fiat_alignment['cost']).to eq "350.0"
-#       expect(fiat_alignment['carId']).to eq fiat.id
-#       expect(fiat_alignment['carName']).to eq "Michael's Fiat 500"
-#       expect(fiat_alignment['userId']).to eq michael.id
-#       expect(fiat_alignment['userName']).to eq michael.name
-#     end
-#   end
-
-#   describe "POST /create" do
-#     context "with valid parameters" do
-#       it "creates a new maintenance" do
-#         expect { post maintenances_url, params: valid_attributes, headers: valid_headers, as: :json
-#         }.to change(Maintenance, :count).by(1)
-#       end
-#       it "renders a JSON response with the new maintenance" do
-#         post maintenances_url, params: valid_attributes, headers: valid_headers, as: :json
-#         expect(response).to have_http_status(:created)
-#         expect(response.content_type).to match(a_string_including("application/json"))
-#       end
-#     end
-
-#     context "with invalid parameters" do
-#       it "does not create new maintenance" do
-#         expect {
-#           post maintenances_url, params: invalid_attributes, headers: valid_headers, as: :json
-#         }.to change(Maintenance, :count).by(0)
-#       end
-#       it "renders a JSON response with errors for the new car" do
-#         post maintenances_url, params: invalid_attributes, headers: valid_headers, as: :json
-#         expect(response).to have_http_status(:unprocessable_entity)
-#         expect(response.content_type).to match(a_string_including("application/json"))
-#       end
-#     end
-#   end
-
-#   describe "PATCH /update" do
-#     context "with valid parameters" do
-#       let(:new_attributes) {{ description: "UpdatedDescription"}}
-
-#       it "updates maintenance's description" do
-#         maintenance = maintenances(:fiat_alignment)
-#         patch maintenance_url(maintenance), params: new_attributes, headers: valid_headers, as: :json
-#         maintenance.reload
-#         expect(maintenance.description).to eq("UpdatedDescription")
-#       end
-
-#       it "renders a JSON response with the maintenance" do
-#         maintenance = maintenances(:fiat_alignment)
-#         patch maintenance_url(maintenance), params: new_attributes, headers: valid_headers, as: :json
-#         expect(response).to have_http_status(:ok)
-#         expect(response.content_type).to match(a_string_including("application/json"))
-#       end
-
-#       it "maintenance's other properties are still correct" do
-#         fiat = cars(:fiat)
-#         michael = users(:michael)
-#         maintenance = maintenances(:fiat_alignment)
-#         patch maintenance_url(maintenance), params: new_attributes, headers: valid_headers, as: :json
-#         fiat_alignment = JSON.parse(response.body)
-#         expect(fiat_alignment['date']).to eq "2020-07-13"
-#         expect(fiat_alignment['vendor']).to eq "Pep Boys"
-#         expect(fiat_alignment['cost']).to eq "350.0"
-#         expect(fiat_alignment['carId']).to eq fiat.id
-#         expect(fiat_alignment['carName']).to eq "Michael's Fiat 500"
-#         expect(fiat_alignment['userId']).to eq michael.id
-#         expect(fiat_alignment['userName']).to eq michael.name
-#       end
-
-#     end
-
-#     context "with invalid parameters" do
-#       it "renders a JSON response with errors for the maintenance" do
-#         maintenance = maintenances(:fiat_alignment)
-#         patch maintenance_url(maintenance), params: invalid_attributes, headers: valid_headers, as: :json
-#         expect(response).to have_http_status(:unprocessable_entity)
-#         expect(response.content_type).to match(a_string_including("application/json"))
-#       end
-#     end
-#   end
-
-#   describe "DELETE /destroy" do
-#     it "destroys the requested maintenance" do
-#       maintenance = Maintenance.create! valid_attributes
-#       expect { delete maintenance_url(maintenance), headers: valid_headers, as: :json
-#       }.to change(Maintenance, :count).by(-1)
-#     end
-#   end
-
-# end
-# ~
-# EOF
-# echo -e "\n\n🦄  Routes\n\n"
-# cat <<'EOF' | puravida config/routes.rb ~
-# Rails.application.routes.draw do
-#   resources :users
-#   resources :cars
-#   resources :maintenances
-#   get "health", to: "health#index"
-#   post "login", to: "authentications#create"
-#   get "me", to: "application#user_from_token"
-# end
-# ~
-# EOF
-# rspec
-
-# echo -e "\n\n🦄 Documents (Backend)\n\n"
-# rails g scaffold document date:date name notes:text attachment:attachment documentable:references{polymorphic}
-# rails db:migrate
-
-# cat <<'EOF' | puravida app/models/document.rb ~
-# class Document < ApplicationRecord
-#   belongs_to :documentable, polymorphic: true
-#   has_one_attached :attachment
-# end
-# ~
-# EOF
-
-# cat <<'EOF' | puravida spec/fixtures/documents.yml ~
-# fiat_title:
-#   name: Fiat title
-#   documentable_type: Car
-#   documentable: fiat
-
-# fiat_contract:
-#   name: Fiat contract
-#   documentable_type: Car
-#   documentable: fiat
-
-# civic_title:
-#   name: civic title
-#   documentable_type: Car
-#   documentable: civic
-
-# civic_contract:
-#   name: civic contract
-#   documentable_type: Car
-#   documentable: civic
-
-# elantra_title:
-#   name: elantra title
-#   documentable_type: Car
-#   documentable: elantra
-
-# elantra_contract:
-#   name: elantra contract
-#   documentable_type: Car
-#   documentable: elantra
-
-# leaf_title:
-#   name: leaf title
-#   documentable_type: Car
-#   documentable: leaf
-
-# leaf_contract:
-#   name: leaf contract
-#   documentable_type: Car
-#   documentable: leaf
-
-# scion_title:
-#   name: scion title
-#   documentable_type: Car
-#   documentable: scion
-
-# scion_contract:
-#   name: scion contract
-#   documentable_type: Car
-#   documentable: scion
-
-# camry_title:
-#   name: camry title
-#   documentable_type: Car
-#   documentable: camry
-
-# camry_contract:
-#   name: camry contract
-#   documentable_type: Car
-#   documentable: camry
-
-# fiat_alignment_document_1:
-#   name: fiat_alignment_document_1
-#   documentable_type: Maintenance
-#   documentable: fiat_alignment
-
-# fiat_alignment_document_2:
-#   name: fiat_alignment_document_2
-#   documentable_type: Maintenance
-#   documentable: fiat_alignment
-
-# fiat_oil_change_document_1:
-#   name: fiat_oil_change_document_1
-#   documentable_type: Maintenance
-#   documentable: fiat_oil_change
-
-# fiat_oil_change_document_2:
-#   name: fiat_oil_change_document_2
-#   documentable_type: Maintenance
-#   documentable: fiat_oil_change
-
-# civic_brake_repair_document_1:
-#   name: civic_brake_repair_document_1
-#   documentable_type: Maintenance
-#   documentable: civic_brake_repair
-
-# civic_brake_repair_document_2:
-#   name: civic_brake_repair_document_2
-#   documentable_type: Maintenance
-#   documentable: civic_brake_repair
-
-# civic_tire_rotation_document_1:
-#   name: civic_tire_rotation_document_1
-#   documentable_type: Maintenance
-#   documentable: civic_tire_rotation
-
-# civic_tire_rotation_document_2:
-#   name: civic_tire_rotation_document_2
-#   documentable_type: Maintenance
-#   documentable: civic_tire_rotation
-
-# elantra_new_tires_document_1:
-#   name: elantra_new_tires_document_1
-#   documentable_type: Maintenance
-#   documentable: elantra_new_tires
-
-# elantra_new_tires_document_2:
-#   name: elantra_new_tires_document_2
-#   documentable_type: Maintenance
-#   documentable: elantra_new_tires
-
-# elantra_repaired_body_document_1:
-#   name: elantra_repaired_body_document_1
-#   documentable_type: Maintenance
-#   documentable: elantra_repaired_body
-
-# elantra_repaired_body_document_2:
-#   name: elantra_repaired_body_document_2
-#   documentable_type: Maintenance
-#   documentable: elantra_repaired_body
-
-# leaf_windshield_replacement_document_1:
-#   name: leaf_windshield_replacement_document_1
-#   documentable_type: Maintenance
-#   documentable: leaf_windshield_replacement
-
-# leaf_windshield_replacement_document_2:
-#   name: leaf_windshield_replacement_document_2
-#   documentable_type: Maintenance
-#   documentable: leaf_windshield_replacement
-
-# leaf_new_spark_plugs_document_1:
-#   name: leaf_new_spark_plugs_document_1
-#   documentable_type: Maintenance
-#   documentable: leaf_new_spark_plugs
-
-# leaf_new_spark_plugs_document_2:
-#   name: leaf_new_spark_plugs_document_2
-#   documentable_type: Maintenance
-#   documentable: leaf_new_spark_plugs
-
-# scion_engine_overhaul_document_1:
-#   name: scion_engine_overhaul_document_1
-#   documentable_type: Maintenance
-#   documentable: scion_engine_overhaul
-
-# scion_engine_overhaul_document_2:
-#   name: scion_engine_overhaul_document_2
-#   documentable_type: Maintenance
-#   documentable: scion_engine_overhaul
-
-# scion_5k_mile_maintenance_document_1:
-#   name: scion_5k_mile_maintenance_document_1
-#   documentable_type: Maintenance
-#   documentable: scion_5k_mile_maintenance
-
-# scion_5k_mile_maintenance_document_2:
-#   name: scion_5k_mile_maintenance_document_2
-#   documentable_type: Maintenance
-#   documentable: scion_5k_mile_maintenance
-
-# camry_fuel_line_document_1:
-#   name: camry_fuel_line_document_1
-#   documentable_type: Maintenance
-#   documentable: camry_fuel_line
-
-# camry_fuel_line_document_2:
-#   name: camry_fuel_line_document_2
-#   documentable_type: Maintenance
-#   documentable: camry_fuel_line
-
-# camry_replaced_radiator_document_1:
-#   name: camry_replaced_radiator_document_1
-#   documentable_type: Maintenance
-#   documentable: camry_replaced_radiator
-
-# camry_replaced_radiator_document_2:
-#   name: camry_replaced_radiator_document_2
-#   documentable_type: Maintenance
-#   documentable: camry_replaced_radiator
-# ~
-# EOF
-
-# cat <<'EOF' | puravida app/models/car.rb ~
-# class Car < ApplicationRecord
-#   belongs_to :user
-#   has_many :maintenances, dependent: :destroy
-#   has_many :documents, :as => :documentable
-#   has_one_attached :image
-#   validates :name, presence: true, allow_blank: false, length: { minimum: 4, maximum: 254 }
-# end
-# ~
-# EOF
-
-# cat <<'EOF' | puravida app/models/maintenance.rb ~
-# class Maintenance < ApplicationRecord
-#   belongs_to :car
-#   # has_many_attached :images
-#   has_many :documents, :as => :documentable
-#   validates :date, presence: true
-#   validates :description, presence: true
-# end
-# ~
-# EOF
-
-# cat <<'EOF' | puravida app/controllers/application_controller.rb ~
-# class ApplicationController < ActionController::API
-#   SECRET_KEY_BASE = Rails.application.credentials.secret_key_base
-#   before_action :require_login
-#   rescue_from Exception, with: :response_internal_server_error
-
-#   def require_login
-#     response_unauthorized if current_user_raw.blank?
-#   end
-
-#   # this is safe to send to the frontend, excludes password_digest, created_at, updated_at
-#   def user_from_token
-#     user = prep_raw_user(current_user_raw)
-#     render json: { data: user, status: 200 }
-#   end
-
-#   # unsafe/internal: includes password_digest, created_at, updated_at - we don't want those going to the frontend
-#   def current_user_raw
-#     if decoded_token.present?
-#       user_id = decoded_token[0]['user_id']
-#       @user = User.find_by(id: user_id)
-#     else
-#       nil
-#     end
-#   end
-
-#   def encode_token(payload)
-#     JWT.encode payload, SECRET_KEY_BASE, 'HS256'
-#   end
-
-#   def decoded_token
-#     if auth_header and auth_header.split(' ')[0] == "Bearer"
-#       token = auth_header.split(' ')[1]
-#       begin
-#         JWT.decode token, SECRET_KEY_BASE, true, { algorithm: 'HS256' }
-#       rescue JWT::DecodeError
-#         []
-#       end
-#     end
-#   end
-
-#   def response_unauthorized
-#     render status: 401, json: { status: 401, message: 'Unauthorized' }
-#   end
+    def auth_header
+      request.headers['Authorization']
+    end
+
+end
+~
+EOF
+
+cat <<'EOF' | puravida spec/fixtures/maintenances.yml ~
+fiat_alignment:
+  date: Date.parse("20200713")
+  description: "Alignment"
+  vendor: "Pep Boys"
+  cost: 350.00
+  car: fiat
+
+fiat_oil_change:
+  date: Date.parse("20210812")
+  description: "Oil Change"
+  vendor: "Jiffy Lube"
+  cost: 78.00
+  car: fiat
+
+civic_brake_repair:
+  date: Date.parse("20170123")
+  description: "Brake Repair"
+  vendor: "WalMart"
+  cost: 400.00
+  car: civic
+
+civic_tire_rotation:
+  date: Date.parse("20200311")
+  description: "Tire Rotation"
+  vendor: "Goodyear"
+  cost: 105.00
+  car: civic
+
+elantra_new_tires:
+  date: Date.parse("20200111")
+  description: "New Tires"
+  vendor: "Scott's"
+  cost: 812.00
+  car: elantra
+
+elantra_repaired_body:
+  date: Date.parse("20230627")
+  description: "Repaired Body Dents"
+  vendor: "Tenede Auto"
+  cost: 1343.00
+  car: elantra
+
+leaf_windshield_replacement:
+  date: Date.parse("20150614")
+  description: "Windshield Replacement"
+  vendor: "45th St. Car Repair"
+  cost: 800.00
+  car: leaf
+
+leaf_new_spark_plugs:
+  date: Date.parse("20170811")
+  description: "New Spark Plugs"
+  vendor: "Jim & Tony's Automotive Service"
+  cost: 5.00
+  car: leaf
+
+scion_engine_overhaul:
+  date: Date.parse("20200909")
+  description: "Engine Overhaul"
+  vendor: "Auto Stoppe"
+  cost: 5932.00
+  car: scion
+
+scion_5k_mile_maintenance:
+  date: Date.parse("20201030")
+  description: "50,000 Mile Maintenance"
+  vendor: "Dealership"
+  cost: 0
+  car: scion
+
+camry_fuel_line:
+  date: Date.parse("20220903")
+  description: "Fuel Line Replacement"
+  vendor: "Foreign Auto Austin"
+  cost: 37.00
+  car: camry
+
+camry_replaced_radiator:
+  date: Date.parse("20230601")
+  description: "Replaced Radiator"
+  vendor: "Blan's Auto Repair"
+  cost: 400.00
+  car: camry
+~
+EOF
+cat <<'EOF' | puravida spec/requests/maintenances_spec.rb ~
+# frozen_string_literal: true
+
+require 'rails_helper'
+RSpec.describe "/maintenances", type: :request do
+  fixtures :users
+  fixtures :cars
+  fixtures :maintenances
+  let(:valid_headers) {{ Authorization: "Bearer " + @michael_token }}
+  let(:valid_attributes) {{ 
+    date: Date.parse("20200713"),
+    description: "Alignment",
+    vendor: "Pep Boys",
+    cost: 350.00,
+    car_id: cars(:fiat).id
+  }}
+  let(:invalid_attributes) {{ 
+    date: Date.parse("20200713"),
+    description: nil,
+    vendor: "Pep Boys",
+    cost: 350.00,
+    car_id: cars(:fiat).id
+  }}
+
+  before :all do
+    @michael_token = token_from_email_password("michaelscott@dundermifflin.com", "password")
+    @ryan_token = token_from_email_password("ryanhoward@dundermifflin.com", "password")
+  end
+
+  before :each do
+    @fiat_alignment = maintenances(:fiat_alignment)
+    # @fiat_alignment.images.attach([fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'fiat-alignment-1.jpg'),'image/jpeg'), fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'fiat-alignment-2.jpg'),'image/jpeg')])
+    @fiat_oil_change = maintenances(:fiat_oil_change)
+    # @fiat_oil_change.images.attach([fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'fiat-oil-change-1.jpg'),'image/jpeg'), fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'fiat-oil-change-2.jpg'),'image/jpeg')])
+    @civic_brake_repair = maintenances(:civic_brake_repair)
+    # @civic_brake_repair.images.attach([fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'civic-brake-repair-1.jpg'),'image/jpeg'), fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'civic-brake-repair-2.jpg'),'image/jpeg')])
+    @civic_tire_rotation = maintenances(:civic_tire_rotation)
+    # @civic_tire_rotation.images.attach([fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'civic-tire-rotation-1.jpg'),'image/jpeg'), fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'civic-tire-rotation-2.jpg'),'image/jpeg')])
+    @elantra_new_tires = maintenances(:elantra_new_tires)
+    # @elantra_new_tires.images.attach([fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'elantra-new-tires-1.jpg'),'image/jpeg'), fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'elantra-new-tires-2.jpg'),'image/jpeg')])
+    @elantra_repaired_body = maintenances(:elantra_repaired_body)
+    # @elantra_repaired_body.images.attach([fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'elantra-repaired-body-1.jpg'),'image/jpeg'), fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'elantra-repaired-body-2.jpg'),'image/jpeg')])
+    @leaf_windshield_replacement = maintenances(:leaf_windshield_replacement)
+    # @leaf_windshield_replacement.images.attach([fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'leaf-windshield-replacement-1.jpg'),'image/jpeg'), fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'leaf-windshield-replacement-2.jpg'),'image/jpeg')])
+    @leaf_new_spark_plugs = maintenances(:leaf_new_spark_plugs)
+    # @leaf_new_spark_plugs.images.attach([fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'leaf-new-spark-plugs-1.jpg'),'image/jpeg'), fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'leaf-new-spark-plugs-2.jpg'),'image/jpeg')])
+    @scion_engine_overhaul = maintenances(:scion_engine_overhaul)
+    # @scion_engine_overhaul.images.attach([fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'scion-engine-overhaul-1.jpg'),'image/jpeg'), fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'scion-engine-overhaul-2.jpg'),'image/jpeg')])
+    @scion_5k_mile_maintenance = maintenances(:scion_5k_mile_maintenance)
+    # @scion_5k_mile_maintenance.images.attach([fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'scion-5k-mile-maintenance-1.jpg'),'image/jpeg'), fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'scion-5k-mile-maintenance-2.jpg'),'image/jpeg')])
+    @camry_fuel_line = maintenances(:camry_fuel_line)
+    # @camry_fuel_line.images.attach([fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'camry-fuel-line-1.jpg'),'image/jpeg'), fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'camry-fuel-line-2.jpg'),'image/jpeg')])
+    @camry_replaced_radiator = maintenances(:camry_replaced_radiator)
+    # @camry_replaced_radiator.images.attach([fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'camry-replaced-radiator-1.jpg'),'image/jpeg'), fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'camry-replaced-radiator-2.jpg'),'image/jpeg')])
+  end
+
+  describe "GET /index" do
+    it "renders a successful response" do
+      get maintenances_url, headers: valid_headers
+      expect(response).to be_successful
+    end
+    it "gets twenty maintenances" do
+      get maintenances_url, headers: valid_headers
+      expect(JSON.parse(response.body).length).to eq 12
+    end
+    it "first maintenance has correct properties" do
+      get maintenances_url, headers: valid_headers
+      maintenances = JSON.parse(response.body)
+      fiat = Car.find_by(name: "Michael's Fiat 500")
+      michael = User.find_by(name: "Michael Scott")
+      alignment = maintenances.find { |maintenance| maintenance['car_id'] == fiat.id and maintenance['cost'] == "350.0"}
+      expect(alignment['date']).to eq "2020-07-13"
+      expect(alignment['description']).to eq "Alignment"
+      expect(alignment['vendor']).to eq "Pep Boys"
+      expect(alignment['cost']).to eq "350.0"
+      expect(alignment['carId']).to eq fiat.id
+      expect(alignment['carName']).to eq fiat.name
+      expect(alignment['userId']).to eq michael.id
+      expect(alignment['userName']).to eq michael.name
+    end
+    it "second maintenance has correct properties" do
+      get maintenances_url, headers: valid_headers
+      maintenances = JSON.parse(response.body)
+      elantra = Car.find_by(name: "Jim's Hyundai Elantra")
+      jim = User.find_by(name: "Jim Halpert")
+      tires = maintenances.find { |maintenance| maintenance['car_id'] == elantra.id and maintenance['cost'] == "812.0"}
+      expect(tires['date']).to eq "2020-01-11"
+      expect(tires['description']).to eq "New Tires"
+      expect(tires['vendor']).to eq "Scott's"
+      expect(tires['cost']).to eq "812.0"
+      expect(tires['carId']).to eq elantra.id
+      expect(tires['carName']).to eq elantra.name
+      expect(tires['userId']).to eq jim.id
+      expect(tires['userName']).to eq jim.name
+    end
+  end
+
+  describe "GET /show" do
+    it "renders a successful response" do
+      maintenance = maintenances(:fiat_alignment)
+      get maintenance_url(maintenance), headers: valid_headers
+      expect(response).to be_successful
+    end
+    it "gets correct maintenance properties" do
+      maintenance = maintenances(:fiat_alignment)
+      fiat = cars(:fiat)
+      michael = users(:michael)
+      get maintenance_url(maintenance.id), headers: valid_headers
+      fiat_alignment = JSON.parse(response.body)
+      expect(fiat_alignment['date']).to eq "2020-07-13"
+      expect(fiat_alignment['description']).to eq "Alignment"
+      expect(fiat_alignment['vendor']).to eq "Pep Boys"
+      expect(fiat_alignment['cost']).to eq "350.0"
+      expect(fiat_alignment['carId']).to eq fiat.id
+      expect(fiat_alignment['carName']).to eq "Michael's Fiat 500"
+      expect(fiat_alignment['userId']).to eq michael.id
+      expect(fiat_alignment['userName']).to eq michael.name
+    end
+  end
+
+  describe "POST /create" do
+    context "with valid parameters" do
+      it "creates a new maintenance" do
+        expect { post maintenances_url, params: valid_attributes, headers: valid_headers, as: :json
+        }.to change(Maintenance, :count).by(1)
+      end
+      it "renders a JSON response with the new maintenance" do
+        post maintenances_url, params: valid_attributes, headers: valid_headers, as: :json
+        expect(response).to have_http_status(:created)
+        expect(response.content_type).to match(a_string_including("application/json"))
+      end
+    end
+
+    context "with invalid parameters" do
+      it "does not create new maintenance" do
+        expect {
+          post maintenances_url, params: invalid_attributes, headers: valid_headers, as: :json
+        }.to change(Maintenance, :count).by(0)
+      end
+      it "renders a JSON response with errors for the new car" do
+        post maintenances_url, params: invalid_attributes, headers: valid_headers, as: :json
+        expect(response).to have_http_status(:unprocessable_entity)
+        expect(response.content_type).to match(a_string_including("application/json"))
+      end
+    end
+  end
+
+  describe "PATCH /update" do
+    context "with valid parameters" do
+      let(:new_attributes) {{ description: "UpdatedDescription"}}
+
+      it "updates maintenance's description" do
+        maintenance = maintenances(:fiat_alignment)
+        patch maintenance_url(maintenance), params: new_attributes, headers: valid_headers, as: :json
+        maintenance.reload
+        expect(maintenance.description).to eq("UpdatedDescription")
+      end
+
+      it "renders a JSON response with the maintenance" do
+        maintenance = maintenances(:fiat_alignment)
+        patch maintenance_url(maintenance), params: new_attributes, headers: valid_headers, as: :json
+        expect(response).to have_http_status(:ok)
+        expect(response.content_type).to match(a_string_including("application/json"))
+      end
+
+      it "maintenance's other properties are still correct" do
+        fiat = cars(:fiat)
+        michael = users(:michael)
+        maintenance = maintenances(:fiat_alignment)
+        patch maintenance_url(maintenance), params: new_attributes, headers: valid_headers, as: :json
+        fiat_alignment = JSON.parse(response.body)
+        expect(fiat_alignment['date']).to eq "2020-07-13"
+        expect(fiat_alignment['vendor']).to eq "Pep Boys"
+        expect(fiat_alignment['cost']).to eq "350.0"
+        expect(fiat_alignment['carId']).to eq fiat.id
+        expect(fiat_alignment['carName']).to eq "Michael's Fiat 500"
+        expect(fiat_alignment['userId']).to eq michael.id
+        expect(fiat_alignment['userName']).to eq michael.name
+      end
+
+    end
+
+    context "with invalid parameters" do
+      it "renders a JSON response with errors for the maintenance" do
+        maintenance = maintenances(:fiat_alignment)
+        patch maintenance_url(maintenance), params: invalid_attributes, headers: valid_headers, as: :json
+        expect(response).to have_http_status(:unprocessable_entity)
+        expect(response.content_type).to match(a_string_including("application/json"))
+      end
+    end
+  end
+
+  describe "DELETE /destroy" do
+    it "destroys the requested maintenance" do
+      maintenance = Maintenance.create! valid_attributes
+      expect { delete maintenance_url(maintenance), headers: valid_headers, as: :json
+      }.to change(Maintenance, :count).by(-1)
+    end
+  end
+
+end
+~
+EOF
+rubocop -A
+
+echo -e "\n\n🦄  Routes\n\n"
+cat <<'EOF' | puravida config/routes.rb ~
+Rails.application.routes.draw do
+  resources :users
+  resources :cars
+  resources :maintenances
+  get "health", to: "health#index"
+  post "login", to: "authentications#create"
+  get "me", to: "application#user_from_token"
+end
+~
+EOF
+rubocop -A
+rspec
+
+echo -e "\n\n🦄 Documents (Backend)\n\n"
+rails g scaffold document date:date name notes:text attachment:attachment documentable:references{polymorphic}
+rails db:migrate
+
+cat <<'EOF' | puravida app/models/document.rb ~
+class Document < ApplicationRecord
+  belongs_to :documentable, polymorphic: true
+  has_one_attached :attachment
+end
+~
+EOF
+
+cat <<'EOF' | puravida spec/fixtures/documents.yml ~
+fiat_title:
+  name: Fiat title
+  documentable_type: Car
+  documentable: fiat
+
+fiat_contract:
+  name: Fiat contract
+  documentable_type: Car
+  documentable: fiat
+
+civic_title:
+  name: civic title
+  documentable_type: Car
+  documentable: civic
+
+civic_contract:
+  name: civic contract
+  documentable_type: Car
+  documentable: civic
+
+elantra_title:
+  name: elantra title
+  documentable_type: Car
+  documentable: elantra
+
+elantra_contract:
+  name: elantra contract
+  documentable_type: Car
+  documentable: elantra
+
+leaf_title:
+  name: leaf title
+  documentable_type: Car
+  documentable: leaf
+
+leaf_contract:
+  name: leaf contract
+  documentable_type: Car
+  documentable: leaf
+
+scion_title:
+  name: scion title
+  documentable_type: Car
+  documentable: scion
+
+scion_contract:
+  name: scion contract
+  documentable_type: Car
+  documentable: scion
+
+camry_title:
+  name: camry title
+  documentable_type: Car
+  documentable: camry
+
+camry_contract:
+  name: camry contract
+  documentable_type: Car
+  documentable: camry
+
+fiat_alignment_document_1:
+  name: fiat_alignment_document_1
+  documentable_type: Maintenance
+  documentable: fiat_alignment
+
+fiat_alignment_document_2:
+  name: fiat_alignment_document_2
+  documentable_type: Maintenance
+  documentable: fiat_alignment
+
+fiat_oil_change_document_1:
+  name: fiat_oil_change_document_1
+  documentable_type: Maintenance
+  documentable: fiat_oil_change
+
+fiat_oil_change_document_2:
+  name: fiat_oil_change_document_2
+  documentable_type: Maintenance
+  documentable: fiat_oil_change
+
+civic_brake_repair_document_1:
+  name: civic_brake_repair_document_1
+  documentable_type: Maintenance
+  documentable: civic_brake_repair
+
+civic_brake_repair_document_2:
+  name: civic_brake_repair_document_2
+  documentable_type: Maintenance
+  documentable: civic_brake_repair
+
+civic_tire_rotation_document_1:
+  name: civic_tire_rotation_document_1
+  documentable_type: Maintenance
+  documentable: civic_tire_rotation
+
+civic_tire_rotation_document_2:
+  name: civic_tire_rotation_document_2
+  documentable_type: Maintenance
+  documentable: civic_tire_rotation
+
+elantra_new_tires_document_1:
+  name: elantra_new_tires_document_1
+  documentable_type: Maintenance
+  documentable: elantra_new_tires
+
+elantra_new_tires_document_2:
+  name: elantra_new_tires_document_2
+  documentable_type: Maintenance
+  documentable: elantra_new_tires
+
+elantra_repaired_body_document_1:
+  name: elantra_repaired_body_document_1
+  documentable_type: Maintenance
+  documentable: elantra_repaired_body
+
+elantra_repaired_body_document_2:
+  name: elantra_repaired_body_document_2
+  documentable_type: Maintenance
+  documentable: elantra_repaired_body
+
+leaf_windshield_replacement_document_1:
+  name: leaf_windshield_replacement_document_1
+  documentable_type: Maintenance
+  documentable: leaf_windshield_replacement
+
+leaf_windshield_replacement_document_2:
+  name: leaf_windshield_replacement_document_2
+  documentable_type: Maintenance
+  documentable: leaf_windshield_replacement
+
+leaf_new_spark_plugs_document_1:
+  name: leaf_new_spark_plugs_document_1
+  documentable_type: Maintenance
+  documentable: leaf_new_spark_plugs
+
+leaf_new_spark_plugs_document_2:
+  name: leaf_new_spark_plugs_document_2
+  documentable_type: Maintenance
+  documentable: leaf_new_spark_plugs
+
+scion_engine_overhaul_document_1:
+  name: scion_engine_overhaul_document_1
+  documentable_type: Maintenance
+  documentable: scion_engine_overhaul
+
+scion_engine_overhaul_document_2:
+  name: scion_engine_overhaul_document_2
+  documentable_type: Maintenance
+  documentable: scion_engine_overhaul
+
+scion_5k_mile_maintenance_document_1:
+  name: scion_5k_mile_maintenance_document_1
+  documentable_type: Maintenance
+  documentable: scion_5k_mile_maintenance
+
+scion_5k_mile_maintenance_document_2:
+  name: scion_5k_mile_maintenance_document_2
+  documentable_type: Maintenance
+  documentable: scion_5k_mile_maintenance
+
+camry_fuel_line_document_1:
+  name: camry_fuel_line_document_1
+  documentable_type: Maintenance
+  documentable: camry_fuel_line
+
+camry_fuel_line_document_2:
+  name: camry_fuel_line_document_2
+  documentable_type: Maintenance
+  documentable: camry_fuel_line
+
+camry_replaced_radiator_document_1:
+  name: camry_replaced_radiator_document_1
+  documentable_type: Maintenance
+  documentable: camry_replaced_radiator
+
+camry_replaced_radiator_document_2:
+  name: camry_replaced_radiator_document_2
+  documentable_type: Maintenance
+  documentable: camry_replaced_radiator
+~
+EOF
+
+cat <<'EOF' | puravida app/models/car.rb ~
+class Car < ApplicationRecord
+  belongs_to :user
+  has_many :maintenances, dependent: :destroy
+  has_many :documents, :as => :documentable
+  has_one_attached :image
+  validates :name, presence: true, allow_blank: false, length: { minimum: 4, maximum: 254 }
+end
+~
+EOF
+
+cat <<'EOF' | puravida app/models/maintenance.rb ~
+class Maintenance < ApplicationRecord
+  belongs_to :car
+  # has_many_attached :images
+  has_many :documents, :as => :documentable
+  validates :date, presence: true
+  validates :description, presence: true
+end
+~
+EOF
+
+cat <<'EOF' | puravida app/controllers/application_controller.rb ~
+class ApplicationController < ActionController::API
+  SECRET_KEY_BASE = Rails.application.credentials.secret_key_base
+  before_action :require_login
+  rescue_from Exception, with: :response_internal_server_error
+
+  def require_login
+    response_unauthorized if current_user_raw.blank?
+  end
+
+  # this is safe to send to the frontend, excludes password_digest, created_at, updated_at
+  def user_from_token
+    user = prep_raw_user(current_user_raw)
+    render json: { data: user, status: 200 }
+  end
+
+  # unsafe/internal: includes password_digest, created_at, updated_at - we don't want those going to the frontend
+  def current_user_raw
+    if decoded_token.present?
+      user_id = decoded_token[0]['user_id']
+      @user = User.find_by(id: user_id)
+    else
+      nil
+    end
+  end
+
+  def encode_token(payload)
+    JWT.encode payload, SECRET_KEY_BASE, 'HS256'
+  end
+
+  def decoded_token
+    if auth_header and auth_header.split(' ')[0] == "Bearer"
+      token = auth_header.split(' ')[1]
+      begin
+        JWT.decode token, SECRET_KEY_BASE, true, { algorithm: 'HS256' }
+      rescue JWT::DecodeError
+        []
+      end
+    end
+  end
+
+  def response_unauthorized
+    render status: 401, json: { status: 401, message: 'Unauthorized' }
+  end
   
-#   def response_internal_server_error
-#     render status: 500, json: { status: 500, message: 'Internal Server Error' }
-#   end
+  def response_internal_server_error
+    render status: 500, json: { status: 500, message: 'Internal Server Error' }
+  end
 
-#   # We don't want to send the whole user record from the database to the frontend, so we only send what we need.
-#   # The db user row has password_digest (unsafe) and created_at and updated_at (extraneous).
-#   # We also change avatar from a weird active_storage object to just the avatar url before it gets to the frontend.
-#   def prep_raw_user(user)
-#     avatar = user.avatar.present? ? url_for(user.avatar) : nil
-#     car_ids = Car.where(user_id: user.id).map { |car| car.id }
-#     cars = Car.where(user_id: user.id).map { |car| prep_raw_car(car) }
-#     maintenances_ids = Maintenance.where(car_id: car_ids).map { |maintenance| maintenance.id }
-#     maintenances = Maintenance.where(car_id: car_ids).map { |maintenance| prep_raw_maintenance(maintenance) }
-#     documents_ids = Document.where(documentable_id: car_ids, documentable_type: "Car").map { |document| document.id }
-#     documents = Document.where(documentable_id: car_ids, documentable_type: "Car").map { |document| prep_raw_document(document) }
-#     user = user.admin ? user.slice(:id,:email,:name,:admin) : user.slice(:id,:email,:name)
-#     user['avatar'] = avatar
-#     user['car_ids'] = car_ids
-#     user['cars'] = cars
-#     user['maintenances_ids'] = maintenances_ids
-#     user['maintenances'] = maintenances
-#     user['documents_ids'] = documents_ids
-#     user['documents'] = documents
-#     user
-#   end
+  # We don't want to send the whole user record from the database to the frontend, so we only send what we need.
+  # The db user row has password_digest (unsafe) and created_at and updated_at (extraneous).
+  # We also change avatar from a weird active_storage object to just the avatar url before it gets to the frontend.
+  def prep_raw_user(user)
+    avatar = user.avatar.present? ? url_for(user.avatar) : nil
+    car_ids = Car.where(user_id: user.id).map { |car| car.id }
+    cars = Car.where(user_id: user.id).map { |car| prep_raw_car(car) }
+    maintenances_ids = Maintenance.where(car_id: car_ids).map { |maintenance| maintenance.id }
+    maintenances = Maintenance.where(car_id: car_ids).map { |maintenance| prep_raw_maintenance(maintenance) }
+    documents_ids = Document.where(documentable_id: car_ids, documentable_type: "Car").map { |document| document.id }
+    documents = Document.where(documentable_id: car_ids, documentable_type: "Car").map { |document| prep_raw_document(document) }
+    user = user.admin ? user.slice(:id,:email,:name,:admin) : user.slice(:id,:email,:name)
+    user['avatar'] = avatar
+    user['car_ids'] = car_ids
+    user['cars'] = cars
+    user['maintenances_ids'] = maintenances_ids
+    user['maintenances'] = maintenances
+    user['documents_ids'] = documents_ids
+    user['documents'] = documents
+    user
+  end
 
-#   def prep_raw_car(car)
-#     user_id = car.user_id
-#     user_name = User.find(car.user_id).name
-#     maintenances = Maintenance.where(car_id: car.id).map { |maintenance| prep_raw_maintenance(maintenance) }
-#     # documents_ids = Document.where(documentable_id: car_ids, documentable_type: "Car").map { |document| document.id }
-#     documents = Document.where(documentable_id: car.id, documentable_type: "Car").map { |document| prep_raw_document(document) }
-#     image = car.image.present? ? url_for(car.image) : nil
-#     car = car.slice(:id,:name,:year,:make,:model,:trim,:body,:color,:plate,:vin,:cost,:initial_mileage,:purchase_date,:purchase_vendor)
-#     car['userId'] = user_id
-#     car['userName'] = user_name
-#     car['image'] = image
-#     car['maintenances'] = maintenances
-#     car['documents'] = documents
-#     car
-#   end
+  def prep_raw_car(car)
+    user_id = car.user_id
+    user_name = User.find(car.user_id).name
+    maintenances = Maintenance.where(car_id: car.id).map { |maintenance| prep_raw_maintenance(maintenance) }
+    # documents_ids = Document.where(documentable_id: car_ids, documentable_type: "Car").map { |document| document.id }
+    documents = Document.where(documentable_id: car.id, documentable_type: "Car").map { |document| prep_raw_document(document) }
+    image = car.image.present? ? url_for(car.image) : nil
+    car = car.slice(:id,:name,:year,:make,:model,:trim,:body,:color,:plate,:vin,:cost,:initial_mileage,:purchase_date,:purchase_vendor)
+    car['userId'] = user_id
+    car['userName'] = user_name
+    car['image'] = image
+    car['maintenances'] = maintenances
+    car['documents'] = documents
+    car
+  end
 
-#   def prep_raw_maintenance(maintenance)
-#     car = Car.find(maintenance.car_id)
-#     user = User.find(car.user_id)
-#     # images = maintenance.images.present? ? maintenance.images.map { |image| url_for(image) } : nil
-#     documents = Document.where(documentable_id: maintenance.id, documentable_type: "Maintenance").map { |document| prep_raw_document(document) }
-#     maintenance = maintenance.slice(:id,:date,:description,:vendor,:cost,:car_id)
-#     maintenance['carId'] = car.id
-#     maintenance['carName'] = car.name
-#     maintenance['userId'] = user.id
-#     maintenance['userName'] = user.name
-#     maintenance['documents'] = documents
-#     # maintenance['images'] = images
-#     maintenance
-#   end
+  def prep_raw_maintenance(maintenance)
+    car = Car.find(maintenance.car_id)
+    user = User.find(car.user_id)
+    # images = maintenance.images.present? ? maintenance.images.map { |image| url_for(image) } : nil
+    documents = Document.where(documentable_id: maintenance.id, documentable_type: "Maintenance").map { |document| prep_raw_document(document) }
+    maintenance = maintenance.slice(:id,:date,:description,:vendor,:cost,:car_id)
+    maintenance['carId'] = car.id
+    maintenance['carName'] = car.name
+    maintenance['userId'] = user.id
+    maintenance['userName'] = user.name
+    maintenance['documents'] = documents
+    # maintenance['images'] = images
+    maintenance
+  end
 
-#   def prep_raw_document(document)
-#     attachment_path = document.attachment.present? ? url_for(document.attachment) : nil
-#     attachment_file = attachment_path.present? ? File.basename(attachment_path) : nil
-#     documentable_type = document.documentable_type
-#     documentable_id = document.documentable_id
-#     document = document.slice(:id,:date,:name,:notes)
-#     document['attachment'] = attachment_path
-#     document['attachmentFile'] = attachment_file
-#     car_id = nil
-#     if documentable_type == "Car"
-#       car_id = documentable_id
-#     elsif documentable_type == "Maintenance"
-#       maintenance_id = documentable_id
-#       maintenance = Maintenance.find(maintenance_id)
-#       car_id = maintenance.car_id
-#       document['maintenanceId'] = maintenance_id
-#       document['maintenanceDate'] = maintenance.date
-#       document['maintenanceDescription'] = maintenance.description
-#     end
-#     car = Car.find(car_id)
-#     user = User.find(car.user_id)
-#     document['carId'] = car_id
-#     document['carName'] = car.name
-#     document['userId'] = user.id
-#     document['userName'] = user.name
-#     document
-#   end
+  def prep_raw_document(document)
+    attachment_path = document.attachment.present? ? url_for(document.attachment) : nil
+    attachment_file = attachment_path.present? ? File.basename(attachment_path) : nil
+    documentable_type = document.documentable_type
+    documentable_id = document.documentable_id
+    document = document.slice(:id,:date,:name,:notes)
+    document['attachment'] = attachment_path
+    document['attachmentFile'] = attachment_file
+    car_id = nil
+    if documentable_type == "Car"
+      car_id = documentable_id
+    elsif documentable_type == "Maintenance"
+      maintenance_id = documentable_id
+      maintenance = Maintenance.find(maintenance_id)
+      car_id = maintenance.car_id
+      document['maintenanceId'] = maintenance_id
+      document['maintenanceDate'] = maintenance.date
+      document['maintenanceDescription'] = maintenance.description
+    end
+    car = Car.find(car_id)
+    user = User.find(car.user_id)
+    document['carId'] = car_id
+    document['carName'] = car.name
+    document['userId'] = user.id
+    document['userName'] = user.name
+    document
+  end
   
-#   private 
+  private 
   
-#     def auth_header
-#       request.headers['Authorization']
-#     end
+    def auth_header
+      request.headers['Authorization']
+    end
 
-# end
-# ~
-# EOF
+end
+~
+EOF
 
-# cat <<'EOF' | puravida app/controllers/documents_controller.rb ~
-# class DocumentsController < ApplicationController
-#   before_action :set_document, only: %i[ show update destroy ]
+cat <<'EOF' | puravida app/controllers/documents_controller.rb ~
+class DocumentsController < ApplicationController
+  before_action :set_document, only: %i[ show update destroy ]
 
-#   # GET /documents
-#   def index
-#     if params['user_id'].present?
-#       car_ids = Car.where(user_id: params['user_id']).map { |car| car.id }
-#       maintenance_ids = Maintenance.where(car_id: car_ids).map { |maintenance| maintenance.id }
-#       car_documents = Document.where(documentable_type: "Car", documentable_id: car_ids)
-#       maintenance_documents = Document.where(documentable_type: "Maintenance", documentable_id: maintenance_ids)
-#       all_documents = car_documents + maintenance_documents
-#       @documents = all_documents.map { |document| prep_raw_document(document) }
-#     else
-#       @documents = Document.all.map { |document| prep_raw_document(document) }
-#     end
-#     render json: @documents
-#   end
+  # GET /documents
+  def index
+    if params['user_id'].present?
+      car_ids = Car.where(user_id: params['user_id']).map { |car| car.id }
+      maintenance_ids = Maintenance.where(car_id: car_ids).map { |maintenance| maintenance.id }
+      car_documents = Document.where(documentable_type: "Car", documentable_id: car_ids)
+      maintenance_documents = Document.where(documentable_type: "Maintenance", documentable_id: maintenance_ids)
+      all_documents = car_documents + maintenance_documents
+      @documents = all_documents.map { |document| prep_raw_document(document) }
+    else
+      @documents = Document.all.map { |document| prep_raw_document(document) }
+    end
+    render json: @documents
+  end
 
-#   # GET /documents/1
-#   def show
-#     render json: prep_raw_document(@document)
-#   end
+  # GET /documents/1
+  def show
+    render json: prep_raw_document(@document)
+  end
 
-#   # POST /documents
-#   def create
-#     create_params = document_params
-#     create_params['attachment'] = params['attachment'].blank? ? nil : params['attachment'] # if no image is chosen on new maintenance page, params['image'] comes in as a blank string, which throws a 500 error at Maintenance.new(create_params). This changes any params['image'] blank string to nil, which is fine in Maintenance.new(create_params).
-#     @document = Document.new(create_params)
-#     if @document.save
-#       render json: prep_raw_document(@document), status: :created, location: @document
-#     else
-#       render json: @document.errors, status: :unprocessable_entity
-#     end
-#   end
+  # POST /documents
+  def create
+    create_params = document_params
+    create_params['attachment'] = params['attachment'].blank? ? nil : params['attachment'] # if no image is chosen on new maintenance page, params['image'] comes in as a blank string, which throws a 500 error at Maintenance.new(create_params). This changes any params['image'] blank string to nil, which is fine in Maintenance.new(create_params).
+    @document = Document.new(create_params)
+    if @document.save
+      render json: prep_raw_document(@document), status: :created, location: @document
+    else
+      render json: @document.errors, status: :unprocessable_entity
+    end
+  end
 
-#   # PATCH/PUT /documents/1
-#   def update
-#     if @document.update(document_params)
-#       render json: prep_raw_document(@document)
-#     else
-#       render json: @document.errors, status: :unprocessable_entity
-#     end
-#   end
+  # PATCH/PUT /documents/1
+  def update
+    if @document.update(document_params)
+      render json: prep_raw_document(@document)
+    else
+      render json: @document.errors, status: :unprocessable_entity
+    end
+  end
 
-#   # DELETE /documents/1
-#   def destroy
-#     @document.destroy
-#   end
+  # DELETE /documents/1
+  def destroy
+    @document.destroy
+  end
 
-#   private
-#     # Use callbacks to share common setup or constraints between actions.
-#     def set_document
-#       @document = Document.find(params[:id])
-#     end
+  private
+    # Use callbacks to share common setup or constraints between actions.
+    def set_document
+      @document = Document.find(params[:id])
+    end
 
-#     # Only allow a list of trusted parameters through.
-#     def document_params
-#       params.permit(:date, :name, :notes, :attachment, :documentable_id, :documentable_type)
-#     end
-# end
-# ~
-# EOF
-
-
-# cat <<'EOF' | puravida spec/requests/documents_spec.rb ~
-# require 'rails_helper'
-
-# RSpec.describe "/documents", type: :request do
-#   fixtures :users, :cars, :maintenances, :documents
-#   let(:valid_headers) {{ Authorization: "Bearer " + @michael_token }}
-#   let(:valid_attributes) {{ 
-#     date: Date.parse("20200713"),
-#     name: "name",
-#     notes: "notes",
-#     documentable_type: "Maintenance",
-#     documentable_id: maintenances(:fiat_alignment).id
-#   }}
-#   let(:invalid_attributes) {{ 
-#     date: Date.parse("20200713"),
-#     name: "name",
-#     notes: "notes",
-#     documentable_type: "Maintenance",
-#     documentable_id: -1
-#   }}
-
-#   before :all do
-#     @michael_token = token_from_email_password("michaelscott@dundermifflin.com", "password")
-#   end
-
-#   before :each do
-#     @fiat_title = documents(:fiat_title)
-#     @fiat_title.attachment.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'title-fiat-500.gif'),'image/gif'))
-#     @fiat_contract = documents(:fiat_contract)
-#     @fiat_contract.attachment.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'contract-fiat-500.webp'),'image/webp'))
-#     @civic_title = documents(:civic_title)
-#     @civic_title.attachment.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'title-honda-civic.png'),'image/png'))
-#     @civic_contract = documents(:civic_contract)
-#     @civic_contract.attachment.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'contract-honda-civic.png'),'image/png'))
-#     @elantra_title = documents(:elantra_title)
-#     @elantra_title.attachment.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'title-hyundai-elantra.pdf'),'application/pdf'))
-#     @elantra_contract = documents(:elantra_contract)
-#     @elantra_contract.attachment.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'contract-hyundai-elantra.jpg'),'image/jpeg'))
-#     @leaf_title = documents(:leaf_title)
-#     @leaf_title.attachment.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'title-nissan-leaf.png'),'image/png'))
-#     @leaf_contract = documents(:leaf_contract)
-#     @leaf_contract.attachment.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'contract-nissan-leaf.png'),'image/png'))
-#     @scion_title = documents(:scion_title)
-#     @scion_title.attachment.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'title-scion.jpg'),'image/jpeg'))
-#     @scion_contract = documents(:scion_contract)
-#     @scion_contract.attachment.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'contract-scion.pdf'),'application/pdf'))
-#     @camry_title = documents(:camry_title)
-#     @camry_title.attachment.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'title-toyota-camry.jpg'),'image/jpeg'))
-#     @camry_contract = documents(:camry_contract)
-#     @camry_contract.attachment.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'contract-toyota-camry.jpg'),'image/jpeg'))
-#     @fiat_alignment_document_1 = documents(:fiat_alignment_document_1)
-#     @fiat_alignment_document_1.attachment.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'fiat-alignment-1.png'),'image/png'))
-#     @fiat_alignment_document_2 = documents(:fiat_alignment_document_2)
-#     @fiat_alignment_document_2.attachment.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'fiat-alignment-2.txt'),'text/plain'))
-#     @fiat_oil_change_document_1 = documents(:fiat_oil_change_document_1)
-#     @fiat_oil_change_document_1.attachment.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'fiat-oil-change-1.txt'),'text/plain'))
-#     @fiat_oil_change_document_2 = documents(:fiat_oil_change_document_2)
-#     @fiat_oil_change_document_2.attachment.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'fiat-oil-change-2.txt'),'text/plain'))
-#     @civic_brake_repair_document_1 = documents(:civic_brake_repair_document_1)
-#     @civic_brake_repair_document_1.attachment.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'civic-brake-repair-1.jpg'),'image/jpeg'))
-#     @civic_brake_repair_document_2 = documents(:civic_brake_repair_document_2)
-#     @civic_brake_repair_document_2.attachment.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'civic-brake-repair-2.pdf'),'application/pdf'))
-#     @civic_tire_rotation_document_1 = documents(:civic_tire_rotation_document_1)
-#     @civic_tire_rotation_document_1.attachment.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'civic-tire-rotation-1.pdf'),'application/pdf'))
-#     @civic_tire_rotation_document_2 = documents(:civic_tire_rotation_document_2)
-#     @civic_tire_rotation_document_2.attachment.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'civic-tire-rotation-2.png'),'image/png'))
-#     @elantra_new_tires_document_1 = documents(:elantra_new_tires_document_1)
-#     @elantra_new_tires_document_1.attachment.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'elantra-new-tires-1.pdf'),'application/pdf'))
-#     @elantra_new_tires_document_2 = documents(:elantra_new_tires_document_2)
-#     @elantra_new_tires_document_2.attachment.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'elantra-new-tires-2.pdf'),'application/pdf'))
-#     @elantra_repaired_body_document_1 = documents(:elantra_repaired_body_document_1)
-#     @elantra_repaired_body_document_1.attachment.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'elantra-repaired-body-1.png'),'image/png'))
-#     @elantra_repaired_body_document_2 = documents(:elantra_repaired_body_document_2)
-#     @elantra_repaired_body_document_2.attachment.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'elantra-repaired-body-2.pdf'),'application/pdf'))
-#     @leaf_windshield_replacement_document_1 = documents(:leaf_windshield_replacement_document_1)
-#     @leaf_windshield_replacement_document_1.attachment.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'leaf-windshield-replacement-1.webp'),'image/webp'))
-#     @leaf_windshield_replacement_document_2 = documents(:leaf_windshield_replacement_document_2)
-#     @leaf_windshield_replacement_document_2.attachment.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'leaf-windshield-replacement-2.webp'),'image/webp'))
-#     @leaf_new_spark_plugs_document_1 = documents(:leaf_new_spark_plugs_document_1)
-#     @leaf_new_spark_plugs_document_1.attachment.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'leaf-new-spark-plugs-1.txt'),'text/plain'))
-#     @leaf_new_spark_plugs_document_2 = documents(:leaf_new_spark_plugs_document_2)
-#     @leaf_new_spark_plugs_document_2.attachment.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'leaf-new-spark-plugs-2.png'),'image/png'))
-#     @scion_engine_overhaul_document_1 = documents(:scion_engine_overhaul_document_1)
-#     @scion_engine_overhaul_document_1.attachment.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'scion-engine-overhaul-1.png'),'image/png'))
-#     @scion_engine_overhaul_document_2 = documents(:scion_engine_overhaul_document_2)
-#     @scion_engine_overhaul_document_2.attachment.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'scion-engine-overhaul-2.jpg'),'image/jpeg'))
-#     @scion_5k_mile_maintenance_document_1 = documents(:scion_5k_mile_maintenance_document_1)
-#     @scion_5k_mile_maintenance_document_1.attachment.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'scion-5k-mile-maintenance-1.jpg'),'image/jpeg'))
-#     @scion_5k_mile_maintenance_document_2 = documents(:scion_5k_mile_maintenance_document_2)
-#     @scion_5k_mile_maintenance_document_2.attachment.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'scion-5k-mile-maintenance-2.png'),'image/png'))
-#     @camry_fuel_line_document_1 = documents(:camry_fuel_line_document_1)
-#     @camry_fuel_line_document_1.attachment.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'camry-fuel-line-1.txt'),'text/plain'))
-#     @camry_fuel_line_document_2 = documents(:camry_fuel_line_document_2)
-#     @camry_fuel_line_document_2.attachment.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'camry-fuel-line-2.webp'),'image/webp'))
-#     @camry_replaced_radiator_document_1 = documents(:camry_replaced_radiator_document_1)
-#     @camry_replaced_radiator_document_1.attachment.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'camry-replaced-radiator-1.png'),'image/png'))
-#     @camry_replaced_radiator_document_2 = documents(:camry_replaced_radiator_document_2)
-#     @camry_replaced_radiator_document_2.attachment.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'camry-replaced-radiator-2.webp'),'image/webp'))
-#   end
-
-#   describe "GET /index" do
-#     it "renders a successful response" do
-#       get documents_url, headers: valid_headers
-#       expect(response).to be_successful
-#     end
-#     it "gets 36 documents" do
-#       get documents_url, headers: valid_headers
-#       expect(JSON.parse(response.body).length).to eq 36
-#     end
-#     it "first document has correct properties" do
-#       get documents_url, headers: valid_headers
-#       documents = JSON.parse(response.body)
-#       fiat_title = documents.select{|document| document['name'] == "Fiat title"}[0]
-#       michael = User.find_by(name: "Michael Scott")
-#       fiat = Car.find_by(name: "Michael's Fiat 500")
-#       expect(fiat_title['date']).to be_nil
-#       expect(fiat_title['name']).to eq "Fiat title"
-#       expect(fiat_title['notes']).to be_nil
-#       expect(fiat_title['attachment']).to match(/http.*title-fiat-500\.gif/)
-#       expect(fiat_title['carId']).to eq fiat.id
-#       expect(fiat_title['carName']).to eq fiat.name
-#       expect(fiat_title['userId']).to eq michael.id
-#       expect(fiat_title['userName']).to eq michael.name
-#     end
-#     it "second document has correct properties" do
-#       get documents_url, headers: valid_headers
-#       documents = JSON.parse(response.body)
-#       elantra_tires = documents.select{|document| document['name'] == "elantra_new_tires_document_1"}[0]
-#       jim = User.find_by(name: "Jim Halpert")
-#       elantra = Car.find_by(name: "Jim's Hyundai Elantra")
-#       expect(elantra_tires['date']).to be_nil
-#       expect(elantra_tires['name']).to eq "elantra_new_tires_document_1"
-#       expect(elantra_tires['notes']).to be_nil
-#       expect(elantra_tires['attachment']).to match(/http.*elantra-new-tires-1\.pdf/)
-#       expect(elantra_tires['carId']).to eq elantra.id
-#       expect(elantra_tires['carName']).to eq elantra.name
-#       expect(elantra_tires['userId']).to eq jim.id
-#       expect(elantra_tires['userName']).to eq jim.name
-#     end
-#   end
-
-#   describe "GET /show" do
-#     it "renders a successful response" do
-#       document = documents(:fiat_title)
-#       get document_url(document), headers: valid_headers
-#       expect(response).to be_successful
-#     end
-#     it "document has correct properties" do
-#       document = documents(:fiat_title)
-#       fiat = cars(:fiat)
-#       michael = users(:michael)
-#       get document_url(document), headers: valid_headers
-#       fiat_title = JSON.parse(response.body)
-#       expect(fiat_title['date']).to be_nil
-#       expect(fiat_title['name']).to eq "Fiat title"
-#       expect(fiat_title['notes']).to be_nil
-#       expect(fiat_title['attachment']).to match(/http.*title-fiat-500\.gif/)
-#       expect(fiat_title['carId']).to eq fiat.id
-#       expect(fiat_title['carName']).to eq fiat.name
-#       expect(fiat_title['userId']).to eq michael.id
-#       expect(fiat_title['userName']).to eq michael.name
-#     end
-#   end
-
-#   describe "POST /create" do
-#     context "with valid parameters" do
-#       it "creates a new document" do
-#         expect { post documents_url, params: valid_attributes, headers: valid_headers, as: :json
-#         }.to change(Document, :count).by(1)
-#       end
-#       it "renders a JSON response with the new document" do
-#         post documents_url, params: valid_attributes, headers: valid_headers, as: :json
-#         expect(response).to have_http_status(:created)
-#         expect(response.content_type).to match(a_string_including("application/json"))
-#       end
-#     end
-
-#     context "with invalid parameters" do
-#       it "does not create new document" do
-#         expect {
-#           post documents_url, params: invalid_attributes, headers: valid_headers, as: :json
-#         }.to change(Document, :count).by(0)
-#       end
-#       it "renders a JSON response with errors for the new document" do
-#         post documents_url, params: invalid_attributes, headers: valid_headers, as: :json
-#         expect(response).to have_http_status(:unprocessable_entity)
-#         expect(response.content_type).to match(a_string_including("application/json"))
-#       end
-#     end
-#   end
-
-#   describe "PATCH /update" do
-#     context "with valid parameters" do
-#       let(:new_attributes) {{ name: "UpdatedName"}}
-
-#       it "updates document's description" do
-#         document = documents(:fiat_title)
-#         patch document_url(document), params: new_attributes, headers: valid_headers, as: :json
-#         document.reload
-#         expect(document.name).to eq("UpdatedName")
-#       end
-
-#       it "renders a JSON response with the document" do
-#         document = documents(:fiat_title)
-#         patch document_url(document), params: new_attributes, headers: valid_headers, as: :json
-#         expect(response).to have_http_status(:ok)
-#         expect(response.content_type).to match(a_string_including("application/json"))
-#       end
-
-#       it "document's other properties are still correct" do
-#         fiat = cars(:fiat)
-#         michael = users(:michael)
-#         document = documents(:fiat_title)
-#         patch document_url(document), params: new_attributes, headers: valid_headers, as: :json
-#         fiat_title = JSON.parse(response.body)
-#         fiat_title = JSON.parse(response.body)
-#         expect(fiat_title['date']).to be_nil
-#         expect(fiat_title['notes']).to be_nil
-#         expect(fiat_title['attachment']).to match(/http.*title-fiat-500\.gif/)
-#         expect(fiat_title['carId']).to eq fiat.id
-#         expect(fiat_title['carName']).to eq fiat.name
-#         expect(fiat_title['userId']).to eq michael.id
-#         expect(fiat_title['userName']).to eq michael.name
-#       end
-
-#       context "with invalid parameters" do
-#         it "renders a JSON response with errors for the document" do
-#           document = documents(:fiat_title)
-#           patch document_url(document), params: invalid_attributes, headers: valid_headers, as: :json
-#           expect(response).to have_http_status(:unprocessable_entity)
-#           expect(response.content_type).to match(a_string_including("application/json"))
-#         end
-#       end
-
-#     end
-
-#     describe "DELETE /destroy" do
-#       it "destroys the requested document" do
-#         document = Document.create! valid_attributes
-#         expect { delete document_url(document), headers: valid_headers, as: :json
-#         }.to change(Document, :count).by(-1)
-#       end
-#     end
-
-#   end
+    # Only allow a list of trusted parameters through.
+    def document_params
+      params.permit(:date, :name, :notes, :attachment, :documentable_id, :documentable_type)
+    end
+end
+~
+EOF
 
 
-# end
-# ~
-# EOF
+cat <<'EOF' | puravida spec/requests/documents_spec.rb ~
+require 'rails_helper'
 
-# cat <<'EOF' | puravida spec/models/document_spec.rb ~
-# require 'rails_helper'
+RSpec.describe "/documents", type: :request do
+  fixtures :users, :cars, :maintenances, :documents
+  let(:valid_headers) {{ Authorization: "Bearer " + @michael_token }}
+  let(:valid_attributes) {{ 
+    date: Date.parse("20200713"),
+    name: "name",
+    notes: "notes",
+    documentable_type: "Maintenance",
+    documentable_id: maintenances(:fiat_alignment).id
+  }}
+  let(:invalid_attributes) {{ 
+    date: Date.parse("20200713"),
+    name: "name",
+    notes: "notes",
+    documentable_type: "Maintenance",
+    documentable_id: -1
+  }}
 
-# RSpec.describe Document, type: :model do
-#   fixtures :users, :cars, :maintenances, :documents
-#   let(:valid_attributes) {{ 
-#     date: Date.parse("20200713"),
-#     name: "name",
-#     notes: "notes",
-#     documentable_type: "Maintenance",
-#     documentable_id: maintenances(:fiat_alignment).id
-#   }}
-#   let(:invalid_attributes) {{ 
-#     date: Date.parse("20200713"),
-#     name: "name",
-#     notes: "notes",
-#     documentable_type: "Maintenance",
-#     documentable_id: -1
-#   }}
+  before :all do
+    @michael_token = token_from_email_password("michaelscott@dundermifflin.com", "password")
+  end
 
-#   it "is valid with valid attributes" do
-#     expect(Document.new(valid_attributes)).to be_valid
-#   end
-#   it "is not valid width poorly formed email" do
-#     expect(Document.new(invalid_attributes)).to_not be_valid
-#   end
-# end
-# ~
-# EOF
-# rspec
+  before :each do
+    @fiat_title = documents(:fiat_title)
+    @fiat_title.attachment.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'title-fiat-500.gif'),'image/gif'))
+    @fiat_contract = documents(:fiat_contract)
+    @fiat_contract.attachment.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'contract-fiat-500.webp'),'image/webp'))
+    @civic_title = documents(:civic_title)
+    @civic_title.attachment.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'title-honda-civic.png'),'image/png'))
+    @civic_contract = documents(:civic_contract)
+    @civic_contract.attachment.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'contract-honda-civic.png'),'image/png'))
+    @elantra_title = documents(:elantra_title)
+    @elantra_title.attachment.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'title-hyundai-elantra.pdf'),'application/pdf'))
+    @elantra_contract = documents(:elantra_contract)
+    @elantra_contract.attachment.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'contract-hyundai-elantra.jpg'),'image/jpeg'))
+    @leaf_title = documents(:leaf_title)
+    @leaf_title.attachment.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'title-nissan-leaf.png'),'image/png'))
+    @leaf_contract = documents(:leaf_contract)
+    @leaf_contract.attachment.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'contract-nissan-leaf.png'),'image/png'))
+    @scion_title = documents(:scion_title)
+    @scion_title.attachment.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'title-scion.jpg'),'image/jpeg'))
+    @scion_contract = documents(:scion_contract)
+    @scion_contract.attachment.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'contract-scion.pdf'),'application/pdf'))
+    @camry_title = documents(:camry_title)
+    @camry_title.attachment.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'title-toyota-camry.jpg'),'image/jpeg'))
+    @camry_contract = documents(:camry_contract)
+    @camry_contract.attachment.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'contract-toyota-camry.jpg'),'image/jpeg'))
+    @fiat_alignment_document_1 = documents(:fiat_alignment_document_1)
+    @fiat_alignment_document_1.attachment.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'fiat-alignment-1.png'),'image/png'))
+    @fiat_alignment_document_2 = documents(:fiat_alignment_document_2)
+    @fiat_alignment_document_2.attachment.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'fiat-alignment-2.txt'),'text/plain'))
+    @fiat_oil_change_document_1 = documents(:fiat_oil_change_document_1)
+    @fiat_oil_change_document_1.attachment.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'fiat-oil-change-1.txt'),'text/plain'))
+    @fiat_oil_change_document_2 = documents(:fiat_oil_change_document_2)
+    @fiat_oil_change_document_2.attachment.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'fiat-oil-change-2.txt'),'text/plain'))
+    @civic_brake_repair_document_1 = documents(:civic_brake_repair_document_1)
+    @civic_brake_repair_document_1.attachment.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'civic-brake-repair-1.jpg'),'image/jpeg'))
+    @civic_brake_repair_document_2 = documents(:civic_brake_repair_document_2)
+    @civic_brake_repair_document_2.attachment.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'civic-brake-repair-2.pdf'),'application/pdf'))
+    @civic_tire_rotation_document_1 = documents(:civic_tire_rotation_document_1)
+    @civic_tire_rotation_document_1.attachment.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'civic-tire-rotation-1.pdf'),'application/pdf'))
+    @civic_tire_rotation_document_2 = documents(:civic_tire_rotation_document_2)
+    @civic_tire_rotation_document_2.attachment.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'civic-tire-rotation-2.png'),'image/png'))
+    @elantra_new_tires_document_1 = documents(:elantra_new_tires_document_1)
+    @elantra_new_tires_document_1.attachment.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'elantra-new-tires-1.pdf'),'application/pdf'))
+    @elantra_new_tires_document_2 = documents(:elantra_new_tires_document_2)
+    @elantra_new_tires_document_2.attachment.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'elantra-new-tires-2.pdf'),'application/pdf'))
+    @elantra_repaired_body_document_1 = documents(:elantra_repaired_body_document_1)
+    @elantra_repaired_body_document_1.attachment.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'elantra-repaired-body-1.png'),'image/png'))
+    @elantra_repaired_body_document_2 = documents(:elantra_repaired_body_document_2)
+    @elantra_repaired_body_document_2.attachment.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'elantra-repaired-body-2.pdf'),'application/pdf'))
+    @leaf_windshield_replacement_document_1 = documents(:leaf_windshield_replacement_document_1)
+    @leaf_windshield_replacement_document_1.attachment.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'leaf-windshield-replacement-1.webp'),'image/webp'))
+    @leaf_windshield_replacement_document_2 = documents(:leaf_windshield_replacement_document_2)
+    @leaf_windshield_replacement_document_2.attachment.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'leaf-windshield-replacement-2.webp'),'image/webp'))
+    @leaf_new_spark_plugs_document_1 = documents(:leaf_new_spark_plugs_document_1)
+    @leaf_new_spark_plugs_document_1.attachment.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'leaf-new-spark-plugs-1.txt'),'text/plain'))
+    @leaf_new_spark_plugs_document_2 = documents(:leaf_new_spark_plugs_document_2)
+    @leaf_new_spark_plugs_document_2.attachment.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'leaf-new-spark-plugs-2.png'),'image/png'))
+    @scion_engine_overhaul_document_1 = documents(:scion_engine_overhaul_document_1)
+    @scion_engine_overhaul_document_1.attachment.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'scion-engine-overhaul-1.png'),'image/png'))
+    @scion_engine_overhaul_document_2 = documents(:scion_engine_overhaul_document_2)
+    @scion_engine_overhaul_document_2.attachment.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'scion-engine-overhaul-2.jpg'),'image/jpeg'))
+    @scion_5k_mile_maintenance_document_1 = documents(:scion_5k_mile_maintenance_document_1)
+    @scion_5k_mile_maintenance_document_1.attachment.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'scion-5k-mile-maintenance-1.jpg'),'image/jpeg'))
+    @scion_5k_mile_maintenance_document_2 = documents(:scion_5k_mile_maintenance_document_2)
+    @scion_5k_mile_maintenance_document_2.attachment.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'scion-5k-mile-maintenance-2.png'),'image/png'))
+    @camry_fuel_line_document_1 = documents(:camry_fuel_line_document_1)
+    @camry_fuel_line_document_1.attachment.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'camry-fuel-line-1.txt'),'text/plain'))
+    @camry_fuel_line_document_2 = documents(:camry_fuel_line_document_2)
+    @camry_fuel_line_document_2.attachment.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'camry-fuel-line-2.webp'),'image/webp'))
+    @camry_replaced_radiator_document_1 = documents(:camry_replaced_radiator_document_1)
+    @camry_replaced_radiator_document_1.attachment.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'camry-replaced-radiator-1.png'),'image/png'))
+    @camry_replaced_radiator_document_2 = documents(:camry_replaced_radiator_document_2)
+    @camry_replaced_radiator_document_2.attachment.attach(fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'camry-replaced-radiator-2.webp'),'image/webp'))
+  end
+
+  describe "GET /index" do
+    it "renders a successful response" do
+      get documents_url, headers: valid_headers
+      expect(response).to be_successful
+    end
+    it "gets 36 documents" do
+      get documents_url, headers: valid_headers
+      expect(JSON.parse(response.body).length).to eq 36
+    end
+    it "first document has correct properties" do
+      get documents_url, headers: valid_headers
+      documents = JSON.parse(response.body)
+      fiat_title = documents.select{|document| document['name'] == "Fiat title"}[0]
+      michael = User.find_by(name: "Michael Scott")
+      fiat = Car.find_by(name: "Michael's Fiat 500")
+      expect(fiat_title['date']).to be_nil
+      expect(fiat_title['name']).to eq "Fiat title"
+      expect(fiat_title['notes']).to be_nil
+      expect(fiat_title['attachment']).to match(/http.*title-fiat-500\.gif/)
+      expect(fiat_title['carId']).to eq fiat.id
+      expect(fiat_title['carName']).to eq fiat.name
+      expect(fiat_title['userId']).to eq michael.id
+      expect(fiat_title['userName']).to eq michael.name
+    end
+    it "second document has correct properties" do
+      get documents_url, headers: valid_headers
+      documents = JSON.parse(response.body)
+      elantra_tires = documents.select{|document| document['name'] == "elantra_new_tires_document_1"}[0]
+      jim = User.find_by(name: "Jim Halpert")
+      elantra = Car.find_by(name: "Jim's Hyundai Elantra")
+      expect(elantra_tires['date']).to be_nil
+      expect(elantra_tires['name']).to eq "elantra_new_tires_document_1"
+      expect(elantra_tires['notes']).to be_nil
+      expect(elantra_tires['attachment']).to match(/http.*elantra-new-tires-1\.pdf/)
+      expect(elantra_tires['carId']).to eq elantra.id
+      expect(elantra_tires['carName']).to eq elantra.name
+      expect(elantra_tires['userId']).to eq jim.id
+      expect(elantra_tires['userName']).to eq jim.name
+    end
+  end
+
+  describe "GET /show" do
+    it "renders a successful response" do
+      document = documents(:fiat_title)
+      get document_url(document), headers: valid_headers
+      expect(response).to be_successful
+    end
+    it "document has correct properties" do
+      document = documents(:fiat_title)
+      fiat = cars(:fiat)
+      michael = users(:michael)
+      get document_url(document), headers: valid_headers
+      fiat_title = JSON.parse(response.body)
+      expect(fiat_title['date']).to be_nil
+      expect(fiat_title['name']).to eq "Fiat title"
+      expect(fiat_title['notes']).to be_nil
+      expect(fiat_title['attachment']).to match(/http.*title-fiat-500\.gif/)
+      expect(fiat_title['carId']).to eq fiat.id
+      expect(fiat_title['carName']).to eq fiat.name
+      expect(fiat_title['userId']).to eq michael.id
+      expect(fiat_title['userName']).to eq michael.name
+    end
+  end
+
+  describe "POST /create" do
+    context "with valid parameters" do
+      it "creates a new document" do
+        expect { post documents_url, params: valid_attributes, headers: valid_headers, as: :json
+        }.to change(Document, :count).by(1)
+      end
+      it "renders a JSON response with the new document" do
+        post documents_url, params: valid_attributes, headers: valid_headers, as: :json
+        expect(response).to have_http_status(:created)
+        expect(response.content_type).to match(a_string_including("application/json"))
+      end
+    end
+
+    context "with invalid parameters" do
+      it "does not create new document" do
+        expect {
+          post documents_url, params: invalid_attributes, headers: valid_headers, as: :json
+        }.to change(Document, :count).by(0)
+      end
+      it "renders a JSON response with errors for the new document" do
+        post documents_url, params: invalid_attributes, headers: valid_headers, as: :json
+        expect(response).to have_http_status(:unprocessable_entity)
+        expect(response.content_type).to match(a_string_including("application/json"))
+      end
+    end
+  end
+
+  describe "PATCH /update" do
+    context "with valid parameters" do
+      let(:new_attributes) {{ name: "UpdatedName"}}
+
+      it "updates document's description" do
+        document = documents(:fiat_title)
+        patch document_url(document), params: new_attributes, headers: valid_headers, as: :json
+        document.reload
+        expect(document.name).to eq("UpdatedName")
+      end
+
+      it "renders a JSON response with the document" do
+        document = documents(:fiat_title)
+        patch document_url(document), params: new_attributes, headers: valid_headers, as: :json
+        expect(response).to have_http_status(:ok)
+        expect(response.content_type).to match(a_string_including("application/json"))
+      end
+
+      it "document's other properties are still correct" do
+        fiat = cars(:fiat)
+        michael = users(:michael)
+        document = documents(:fiat_title)
+        patch document_url(document), params: new_attributes, headers: valid_headers, as: :json
+        fiat_title = JSON.parse(response.body)
+        fiat_title = JSON.parse(response.body)
+        expect(fiat_title['date']).to be_nil
+        expect(fiat_title['notes']).to be_nil
+        expect(fiat_title['attachment']).to match(/http.*title-fiat-500\.gif/)
+        expect(fiat_title['carId']).to eq fiat.id
+        expect(fiat_title['carName']).to eq fiat.name
+        expect(fiat_title['userId']).to eq michael.id
+        expect(fiat_title['userName']).to eq michael.name
+      end
+
+      context "with invalid parameters" do
+        it "renders a JSON response with errors for the document" do
+          document = documents(:fiat_title)
+          patch document_url(document), params: invalid_attributes, headers: valid_headers, as: :json
+          expect(response).to have_http_status(:unprocessable_entity)
+          expect(response.content_type).to match(a_string_including("application/json"))
+        end
+      end
+
+    end
+
+    describe "DELETE /destroy" do
+      it "destroys the requested document" do
+        document = Document.create! valid_attributes
+        expect { delete document_url(document), headers: valid_headers, as: :json
+        }.to change(Document, :count).by(-1)
+      end
+    end
+
+  end
+
+
+end
+~
+EOF
+
+cat <<'EOF' | puravida spec/models/document_spec.rb ~
+require 'rails_helper'
+
+RSpec.describe Document, type: :model do
+  fixtures :users, :cars, :maintenances, :documents
+  let(:valid_attributes) {{ 
+    date: Date.parse("20200713"),
+    name: "name",
+    notes: "notes",
+    documentable_type: "Maintenance",
+    documentable_id: maintenances(:fiat_alignment).id
+  }}
+  let(:invalid_attributes) {{ 
+    date: Date.parse("20200713"),
+    name: "name",
+    notes: "notes",
+    documentable_type: "Maintenance",
+    documentable_id: -1
+  }}
+
+  it "is valid with valid attributes" do
+    expect(Document.new(valid_attributes)).to be_valid
+  end
+  it "is not valid width poorly formed email" do
+    expect(Document.new(invalid_attributes)).to_not be_valid
+  end
+end
+~
+EOF
+rspec
 
 # echo -e "\n\n🦄  Seeds\n\n"
 # cat <<'EOF' | puravida db/seeds.rb ~

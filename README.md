@@ -2856,6 +2856,9 @@ RSpec.describe "/maintenances", type: :request do
 end
 ~
 ```
+- `rubocop -A`
+
+## Routes
 - `puravida config/routes.rb ~`
 ```
 Rails.application.routes.draw do
@@ -2868,6 +2871,7 @@ Rails.application.routes.draw do
 end
 ~
 ```
+- `rubocop -A`
 - `rspec`
 
 ## Documents (Backend)
