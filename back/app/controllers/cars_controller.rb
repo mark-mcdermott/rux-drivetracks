@@ -15,7 +15,7 @@ class CarsController < ApplicationController
 
   # GET /cars/1
   def show
-    car = Car.find(params[:id])
+    car = Car.finds(params[:id])
     render json: prep_raw_car(car)
 
   rescue ActiveRecord::RecordNotFound => e
