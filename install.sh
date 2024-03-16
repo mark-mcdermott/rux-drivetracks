@@ -9,7 +9,19 @@ rails db:drop db:create
 bundle add rack-cors bcrypt jwt pry
 bundle add rspec-rails --group "development, test"
 bundle add database_cleaner-active_record --group "test"
+cat <<EOT >> Gemfile
+gem 'rubocop', require: false
+gem 'rubocop-rails', require: false
+gem 'rubocop-rspec', require: false
+EOT
 bundle
+cat <<'EOF' | puravida .rubocop.yml ~
+require:
+  - rubocop-rails
+  - rubocop-rspec
+~
+EOF
+rubocop -A
 rails active_storage:install
 rails generate rspec:install
 rails db:migrate
@@ -32,6 +44,8 @@ Rails.application.config.middleware.insert_before 0, Rack::Cors do
 end
 ~
 EOF
+rm -rf .git
+rubocop -A
 echo -e "\n\n🦄 Health Controller\n\n"
 rails g controller health index
 cat <<'EOF' | puravida app/controllers/health_controller.rb ~
@@ -67,6 +81,7 @@ Rails.application.routes.draw do
 end
 ~
 EOF
+rubocop -A
 rspec
 
 echo -e "\n\n🦄  Users\n\n"
@@ -110,7 +125,7 @@ def token_from_email_password(email,password)
 end
 ~
 EOF
-rails g rspec:scaffold users
+rails g rspec:scaffold user
 rails g rspec:model user
 cat <<'EOF' | puravida spec/models/user_spec.rb ~
 require 'rails_helper'
@@ -439,6 +454,7 @@ RSpec.describe "/users", type: :request do
 end
 ~
 EOF
+rubocop -A
 rspec
 
 
@@ -564,6 +580,7 @@ Rails.application.routes.draw do
 end
 ~
 EOF
+rubocop
 
 echo -e "\n\n🦄  /me Route (Application Controller)\n\n"
 cat <<'EOF' | puravida app/controllers/application_controller.rb ~
@@ -715,6 +732,7 @@ RSpec.describe "/me", type: :request do
 end
 ~
 EOF
+rubocop -A
 
 echo -e "\n\n🦄  Update users_spec.rb For Auth\n\n"
 cat <<'EOF' | puravida spec/requests/users_spec.rb ~
@@ -939,6 +957,7 @@ RSpec.describe "/users", type: :request do
 end
 ~
 EOF
+rubocop -A
 
 echo -e "\n\n🦄  Update Health Controller For Auth\n\n"
 cat <<'EOF' | puravida app/controllers/health_controller.rb ~
@@ -950,6 +969,7 @@ class HealthController < ApplicationController
 end
 ~
 EOF
+rubocop -A
 rspec
 
 echo -e "\n\n🦄  Cars (Backend)\n\n"
@@ -1914,6 +1934,7 @@ RSpec.describe "/users", type: :request do
 end
 ~
 EOF
+rubocop -A
 rspec
 
 
@@ -2449,6 +2470,8 @@ RSpec.describe "/maintenances", type: :request do
 end
 ~
 EOF
+rubocop -A
+
 echo -e "\n\n🦄  Routes\n\n"
 cat <<'EOF' | puravida config/routes.rb ~
 Rails.application.routes.draw do
@@ -2461,6 +2484,7 @@ Rails.application.routes.draw do
 end
 ~
 EOF
+rubocop -A
 rspec
 
 echo -e "\n\n🦄 Documents (Backend)\n\n"
@@ -3165,6 +3189,7 @@ RSpec.describe Document, type: :model do
 end
 ~
 EOF
+rubocop -A
 rspec
 
 echo -e "\n\n🦄  Seeds\n\n"
@@ -3321,6 +3346,11 @@ EOF
 rails db:seed
 rm -rf spec/factories
 rm -rf spec/routing
+rubocop -A
+rspec
+rm -rf .git
+rm .gitignore
+rm .gitattributes
 
 echo -e "\n\n🦄 FRONTEND\n\n"
 

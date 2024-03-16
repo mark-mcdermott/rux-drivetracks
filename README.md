@@ -17,7 +17,21 @@ This readme uses a small custom bash command called [puravida](#user-content-pur
 - `bundle add rack-cors bcrypt jwt pry`
 - `bundle add rspec-rails --group "development, test"`
 - `bundle add database_cleaner-active_record --group "test"`
+- to the end of `Gemfile` add:
+```
+gem 'rubocop', require: false
+gem 'rubocop-rails', require: false
+gem 'rubocop-rspec', require: false
+```
 - `bundle`
+- `puravida .rubocop.yml ~`
+```
+require:
+  - rubocop-rails
+  - rubocop-rspec
+~
+```
+- `rubocop -A`
 - `rails active_storage:install`
 - `rails generate rspec:install`
 - `rails db:migrate`
@@ -41,6 +55,8 @@ Rails.application.config.middleware.insert_before 0, Rack::Cors do
 end
 ~
 ```
+- `rm -rf .git`
+- `rubocop -A`
 
 ### Health Controller
 - `rails g controller health index`
@@ -53,7 +69,6 @@ class HealthController < ApplicationController
 end
 ~
 ```
-
 - `puravida spec/requests/health_spec.rb ~`
 ```
 # frozen_string_literal: true
@@ -81,6 +96,7 @@ Rails.application.routes.draw do
 end
 ~
 ```
+- `rubocop -A`
 - `rspec`
 
 ### Users
@@ -136,7 +152,7 @@ def token_from_email_password(email,password)
 end
 ~
 ```
-- `rails g rspec:scaffold users`
+- `rails g rspec:scaffold user`
 - `rails g rspec:model user`
 - `puravida spec/models/user_spec.rb ~`
 ```
@@ -466,6 +482,7 @@ RSpec.describe "/users", type: :request do
 end
 ~
 ```
+`rubocop -A`
 `rspec`
 
 #### /login Route (Authentications Controller)
@@ -602,6 +619,7 @@ Rails.application.routes.draw do
 end
 ~
 ```
+- `rubocop -A`
 
 #### /me Route (Application Controller Auth Helpers)
 
@@ -764,6 +782,7 @@ RSpec.describe "/me", type: :request do
 end
 ~
 ```
+- `rubocop -A`
 
 ### Update users_spec.rb For Auth
 
@@ -1288,6 +1307,7 @@ def blob_for(name)
 end
 ~
 ```
+- `rubocop -A`
 
 ### Update Health Controller For Auth
 - `puravida app/controllers/health_controller.rb ~`
@@ -1300,6 +1320,7 @@ class HealthController < ApplicationController
 end
 ~
 ```
+- `rubocop -A`
 - `rspec`
 
 
@@ -2287,6 +2308,7 @@ RSpec.describe "/users", type: :request do
 end
 ~
 ```
+- `rubocop -A`
 - `rspec`
 
 ### Maintenances (Backend)
@@ -2834,6 +2856,9 @@ RSpec.describe "/maintenances", type: :request do
 end
 ~
 ```
+- `rubocop -A`
+
+## Routes
 - `puravida config/routes.rb ~`
 ```
 Rails.application.routes.draw do
@@ -2846,6 +2871,7 @@ Rails.application.routes.draw do
 end
 ~
 ```
+- `rubocop -A`
 - `rspec`
 
 ## Documents (Backend)
@@ -3552,6 +3578,7 @@ RSpec.describe Document, type: :model do
 end
 ~
 ```
+- `rubocop -A`
 - `rspec`
 
 
@@ -3711,6 +3738,11 @@ document.attachment.attach(io: URI.open("#{Rails.root}/app/assets/images/documen
 - `rails db:drop db:create db:migrate db:seed RAILS_ENV=test`
 - `rm -rf spec/factories`
 - `rm -rf spec/routing`
+- `rubocop -A`
+- `rspec`
+- `rm -rf .git`
+- `rm .gitignore`
+- `rm .gitattributes`
 
 ## FRONTEND
 
@@ -4065,7 +4097,6 @@ export default {
 </template>
 ~
 ```
-`rspec`
 
 ### Users Page
 - `puravida components/user/Card.vue ~`
@@ -5512,7 +5543,6 @@ export const getters = {
 }
 ~
 ```
-~
 
 ### Admin page
 - `puravida pages/admin/index.vue ~`
