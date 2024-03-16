@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class CarsController < ApplicationController
-  before_action :set_car, only: %i[show update destroy]
+  before_action :set_car, only: %i[update destroy]
 
   # GET /cars
   def index
@@ -15,7 +15,11 @@ class CarsController < ApplicationController
 
   # GET /cars/1
   def show
-    render json: prep_raw_car(@car)
+    car = Car.find(params[:id])
+    render json: prep_raw_car(car)
+
+  rescue ActiveRecord::RecordNotFound => e
+    render status: :not_found, json: { errors: e.message }
   end
 
   # POST /cars
