@@ -127,6 +127,17 @@ RSpec.describe '/cars', type: :request do
       expect(response).to be_successful
     end
 
+    context 'exception handling' do
+      it 'renders a error message if car cannot be found' do
+        car = cars(:fiat)
+        bad_id = car.id + 1
+        get "/cars/#{bad_id}", headers: valid_headers
+
+        expect(response).to have_http_status(:not_found)
+        expect(JSON.parse(response.body)["errors"]).to match(/Couldn't find Car/)
+      end
+    end
+
     it 'gets correct car properties' do
       car = cars(:fiat)
       get car_url(car), headers: valid_headers
