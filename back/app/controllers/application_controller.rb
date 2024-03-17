@@ -3,6 +3,7 @@
 class ApplicationController < ActionController::API
   SECRET_KEY_BASE = Rails.application.secret_key_base
   before_action :require_login
+  rescue_from StandardError, with: :response_internal_server_error
 
   def require_login
     response_unauthorized if current_user_raw.blank?
