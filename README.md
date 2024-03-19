@@ -15,8 +15,9 @@ This readme uses a small custom bash command called [puravida](#user-content-pur
   - if first time doing this: `rails db:create`
   - if database already exists: `rails db:drop db:create`
 - `bundle add rack-cors bcrypt jwt pry`
-- `bundle add rspec-rails --group "development, test"`
-- `bundle add database_cleaner-active_record --group "test"`
+- `bundle add database_cleaner-active_record shoulda-matchers --group "test"`
+- `bundle add rspec-rails faker factory_bot_rails --group "development, test"`
+- add `, :require => false` to the end of the Gemfile `factory_bot_rails` line
 - to the end of `Gemfile` add:
 ```
 gem 'rubocop', require: false
@@ -69,6 +70,7 @@ class HealthController < ApplicationController
 end
 ~
 ```
+
 - `puravida spec/requests/health_spec.rb ~`
 ```
 # frozen_string_literal: true
@@ -89,6 +91,9 @@ RSpec.describe "API Testing" do
 end
 ~
 ```
+- `rubocop -A`
+
+## Routes
 - `puravida config/routes.rb ~`
 ```
 Rails.application.routes.draw do
@@ -144,16 +149,36 @@ RSpec.configure do |config|
   config.use_transactional_fixtures = true
   config.infer_spec_type_from_file_location!
   config.filter_rails_from_backtrace!
+  config.include FactoryBot::Syntax::Methods
 end
 
 def token_from_email_password(email,password)
   post "/login", params: { email: email, password: password }
   JSON.parse(response.body)['data']
 end
+
+Shoulda::Matchers.configure do |config|
+  config.integrate do |with|
+    with.test_framework :rspec
+    with.library :rails
+  end
+end
 ~
 ```
-- `rails g rspec:scaffold user`
-- `rails g rspec:model user`
+
+- `puravida spec/factories/user.rb ~`
+```
+# frozen_string_literal: true
+
+FactoryBot.define do
+  factory :user do
+    name { Faker::Name.name }
+    email { Faker::Internet.email }
+    password { 'password' }
+  end
+end
+~
+```
 - `puravida spec/models/user_spec.rb ~`
 ```
 require 'rails_helper'
@@ -170,7 +195,7 @@ RSpec.describe User, type: :model do
 end
 ~
 ```
-- `rspec`
+- `# rspec`
 - `puravida app/controllers/application_controller.rb ~`
 ```
 class ApplicationController < ActionController::API
@@ -483,7 +508,7 @@ end
 ~
 ```
 `rubocop -A`
-`rspec`
+`# rspec`
 
 #### /login Route (Authentications Controller)
 - `rails g controller Authentications`
@@ -1321,7 +1346,7 @@ end
 ~
 ```
 - `rubocop -A`
-- `rspec`
+- `# rspec`
 
 
 ### Cars (Backend)
@@ -1529,6 +1554,20 @@ class CarsController < ApplicationController
 end
 ~
 ```
+
+- `puravida spec/factories/car.rb ~`
+```
+# frozen_string_literal: true
+
+FactoryBot.define do
+  factory :car do
+    name { 'My Fly Ride' }
+    user
+  end
+end
+~
+```
+
 - `puravida spec/fixtures/cars.yml ~`
 ```
 fiat:
@@ -1680,6 +1719,35 @@ RSpec.describe "/cars", type: :request do
 end
 ~
 ```
+
+Note: Keegan's overwrite using fixtures for factories https://github.com/mark-mcdermott/rux-drivetracks/pull/13/files
+- `puravida spec/models/car_spec.rb ~`
+```
+# frozen_string_literal: true
+
+require 'rails_helper'
+
+RSpec.describe Car, type: :model do
+  let(:car) { build_stubbed(:car) }
+
+  describe 'relationships' do
+    it { is_expected.to belong_to(:user) }
+  end
+
+  describe 'validations' do
+    it 'is valid with valid attributes' do
+      expect(car).to be_valid
+    end
+
+    it do
+      expect(subject).to validate_length_of(:name)
+        .is_at_least(4).is_at_most(254)
+    end
+  end
+end
+~
+```
+
 - `puravida spec/requests/cars_spec.rb ~`
 ```
 require 'rails_helper'
@@ -2309,7 +2377,7 @@ end
 ~
 ```
 - `rubocop -A`
-- `rspec`
+- `# rspec`
 
 ### Maintenances (Backend)
 - `rails g scaffold maintenance date:date description vendor cost:decimal images:attachments car:references`
@@ -2856,9 +2924,6 @@ RSpec.describe "/maintenances", type: :request do
 end
 ~
 ```
-- `rubocop -A`
-
-## Routes
 - `puravida config/routes.rb ~`
 ```
 Rails.application.routes.draw do
@@ -2872,7 +2937,7 @@ end
 ~
 ```
 - `rubocop -A`
-- `rspec`
+- `# rspec`
 
 ## Documents (Backend)
 - `rails g scaffold document date:date name notes:text attachment:attachment documentable:references{polymorphic}`
@@ -3579,7 +3644,7 @@ end
 ~
 ```
 - `rubocop -A`
-- `rspec`
+- `# rspec`
 
 
 ### Seeds
@@ -3738,11 +3803,6 @@ document.attachment.attach(io: URI.open("#{Rails.root}/app/assets/images/documen
 - `rails db:drop db:create db:migrate db:seed RAILS_ENV=test`
 - `rm -rf spec/factories`
 - `rm -rf spec/routing`
-- `rubocop -A`
-- `rspec`
-- `rm -rf .git`
-- `rm .gitignore`
-- `rm .gitattributes`
 
 ## FRONTEND
 

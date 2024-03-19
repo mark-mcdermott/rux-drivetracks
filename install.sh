@@ -7,8 +7,10 @@ rails new back --api --database=postgresql --skip-test-unit
 cd back
 rails db:drop db:create
 bundle add rack-cors bcrypt jwt pry
+bundle add faker --group "development, test"
 bundle add rspec-rails --group "development, test"
-bundle add database_cleaner-active_record --group "test"
+bundle add database_cleaner-active_record shoulda-matchers --group "test"
+echo 'gem "factory_bot_rails", :require => false, :groups => [:development, :test]' >> Gemfile
 cat <<EOT >> Gemfile
 gem 'rubocop', require: false
 gem 'rubocop-rails', require: false
@@ -46,6 +48,7 @@ end
 EOF
 rm -rf .git
 rubocop -A
+
 echo -e "\n\n🦄 Health Controller\n\n"
 rails g controller health index
 cat <<'EOF' | puravida app/controllers/health_controller.rb ~
@@ -75,6 +78,9 @@ RSpec.describe "API Testing" do
 end
 ~
 EOF
+rubocop -A
+
+echo -e "\n\n🦄  Routes\n\n"
 cat <<'EOF' | puravida config/routes.rb ~
 Rails.application.routes.draw do
   get "health", to: "health#index"
@@ -82,7 +88,7 @@ end
 ~
 EOF
 rubocop -A
-rspec
+# rspec
 
 echo -e "\n\n🦄  Users\n\n"
 rails g scaffold user name email avatar:attachment admin:boolean password_digest
@@ -103,6 +109,7 @@ rm -rf test
 cat <<'EOF' | puravida spec/rails_helper.rb ~
 require 'spec_helper'
 require 'database_cleaner/active_record'
+require 'factory_bot'
 ENV['RAILS_ENV'] ||= 'test'
 require_relative '../config/environment'
 abort("The Rails environment is running in production mode!") if Rails.env.production?
@@ -117,16 +124,36 @@ RSpec.configure do |config|
   config.use_transactional_fixtures = true
   config.infer_spec_type_from_file_location!
   config.filter_rails_from_backtrace!
+  config.include FactoryBot::Syntax::Methods
 end
 
 def token_from_email_password(email,password)
   post "/login", params: { email: email, password: password }
   JSON.parse(response.body)['data']
 end
+
+Shoulda::Matchers.configure do |config|
+  config.integrate do |with|
+    with.test_framework :rspec
+    with.library :rails
+  end
+end
 ~
 EOF
-rails g rspec:scaffold user
-rails g rspec:model user
+
+cat <<'EOF' | puravida spec/factories/user.rb ~
+# frozen_string_literal: true
+
+FactoryBot.define do
+  factory :user do
+    name { Faker::Name.name }
+    email { Faker::Internet.email }
+    password { 'password' }
+  end
+end
+~
+EOF
+
 cat <<'EOF' | puravida spec/models/user_spec.rb ~
 require 'rails_helper'
 require 'database_cleaner/active_record'
@@ -142,8 +169,7 @@ RSpec.describe User, type: :model do
 end
 ~
 EOF
-rspec
-
+# rspec
 
 cat <<'EOF' | puravida app/controllers/application_controller.rb ~
 class ApplicationController < ActionController::API
@@ -455,9 +481,7 @@ end
 ~
 EOF
 rubocop -A
-rspec
-
-
+# rspec
 
 echo -e "\n\n🦄  /login Route (Authentications Controller)\n\n"
 rails g controller Authentications
@@ -580,7 +604,7 @@ Rails.application.routes.draw do
 end
 ~
 EOF
-rubocop
+rubocop -A
 
 echo -e "\n\n🦄  /me Route (Application Controller)\n\n"
 cat <<'EOF' | puravida app/controllers/application_controller.rb ~
@@ -970,7 +994,7 @@ end
 ~
 EOF
 rubocop -A
-rspec
+# rspec
 
 echo -e "\n\n🦄  Cars (Backend)\n\n"
 rails g scaffold Car name image:attachment year:integer make model trim body color plate vin cost:decimal initial_mileage:integer purchase_date:date purchase_vendor user:references
@@ -1158,6 +1182,19 @@ class CarsController < ApplicationController
 end
 ~
 EOF
+
+cat <<'EOF' | puravida spec/factories/car.rb ~
+# frozen_string_literal: true
+
+FactoryBot.define do
+  factory :car do
+    name { 'My Fly Ride' }
+    user
+  end
+end
+~
+EOF
+
 cat <<'EOF' | puravida spec/fixtures/cars.yml ~
 fiat:
   name: Michael's Fiat 500
@@ -1304,6 +1341,33 @@ RSpec.describe "/cars", type: :request do
     expect(Car.new(invalid_attributes)).to_not be_valid
   end
 
+end
+~
+EOF
+
+# Keegan's overwrite using fixtures for factories https://github.com/mark-mcdermott/rux-drivetracks/pull/13/files
+cat <<'EOF' | puravida spec/models/car_spec.rb ~
+# frozen_string_literal: true
+
+require 'rails_helper'
+
+RSpec.describe Car, type: :model do
+  let(:car) { build_stubbed(:car) }
+
+  describe 'relationships' do
+    it { is_expected.to belong_to(:user) }
+  end
+
+  describe 'validations' do
+    it 'is valid with valid attributes' do
+      expect(car).to be_valid
+    end
+
+    it do
+      expect(subject).to validate_length_of(:name)
+        .is_at_least(4).is_at_most(254)
+    end
+  end
 end
 ~
 EOF
@@ -1935,7 +1999,7 @@ end
 ~
 EOF
 rubocop -A
-rspec
+# rspec
 
 
 echo -e "\n\n🦄  Maintenances (Backend)\n\n"
@@ -2470,8 +2534,6 @@ RSpec.describe "/maintenances", type: :request do
 end
 ~
 EOF
-rubocop -A
-
 echo -e "\n\n🦄  Routes\n\n"
 cat <<'EOF' | puravida config/routes.rb ~
 Rails.application.routes.draw do
@@ -2485,7 +2547,7 @@ end
 ~
 EOF
 rubocop -A
-rspec
+# rspec
 
 echo -e "\n\n🦄 Documents (Backend)\n\n"
 rails g scaffold document date:date name notes:text attachment:attachment documentable:references{polymorphic}
@@ -3190,7 +3252,7 @@ end
 ~
 EOF
 rubocop -A
-rspec
+# rspec
 
 echo -e "\n\n🦄  Seeds\n\n"
 cat <<'EOF' | puravida db/seeds.rb ~
@@ -3344,10 +3406,8 @@ document.attachment.attach(io: URI.open("#{Rails.root}/app/assets/images/documen
 ~
 EOF
 rails db:seed
-rm -rf spec/factories
-rm -rf spec/routing
 rubocop -A
-rspec
+# rspec
 rm -rf .git
 rm .gitignore
 rm .gitattributes
