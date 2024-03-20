@@ -4014,6 +4014,8 @@ document.attachment.attach(io: URI.open("#{Rails.root}/app/assets/images/documen
 - `cd front`
 - `npm install @picocss/pico @nuxtjs/auth@4.5.1 @fortawesome/fontawesome-svg-core @fortawesome/free-solid-svg-icons @fortawesome/free-brands-svg-icons @fortawesome/vue-fontawesome@latest-2`
 - `npm install --save-dev sass sass-loader@10`
+- `puravida assets/images`
+- `cp ~/Desktop/rux-drivetracks/assets/challenger.png ~/Desktop/rux-drivetracks/front/assets/images`
 - `puravida assets/scss/main.scss ~`
 ```
 @import "node_modules/@picocss/pico/scss/pico.scss";
@@ -4022,7 +4024,16 @@ document.attachment.attach(io: URI.open("#{Rails.root}/app/assets/images/documen
 // $primary-500: #e91e63;
 
 h1 {
-  margin: 4rem 0
+  margin: 4rem 0 0
+}
+
+.subtitle {
+  margin: 0 0 3rem
+}
+
+.challenger {
+  margin: 0 0 3rem;
+  max-width: 50%
 }
 
 .no-margin {
@@ -5423,7 +5434,7 @@ export default { middleware: 'currentOrAdmin-showEdit' }
 ```
 <template>
   <span>
-    <font-awesome-icon icon="laptop-code" /> Ruxtmin
+    <font-awesome-icon icon="car" /> Drivetracks
   </span>
 </template>
 ~
@@ -5635,32 +5646,9 @@ html, body
 ```
 <template>
   <main class="container">
-    <h1>Rails 7 Nuxt 2 Admin Boilerplate</h1>
-    
-    <h2 class="small-bottom-margin">Features</h2>
-    <ul class="features">
-      <li>Admin dashboard</li>
-      <li>Placeholder users</li>
-      <li>Placeholder user item ("car")</li>
-    </ul>
-
-    <h3 class="small-bottom-margin stack">Stack</h3>
-    <div class="aligned-columns">
-      <p><span>frontend:</span> Nuxt 2</p>
-      <p><span>backend API:</span> Rails 7</p>
-      <p><span>database:</span> Postgres</p>
-      <p><span>styles:</span> Sass</p>
-      <p><span>css framework:</span> Pico.css</p>
-      <p><span>e2e tests:</span> Cypress</p>
-      <p><span>api tests:</span> RSpec</p>
-    </div>
-
-    <h3 class="small-bottom-margin tools">Tools</h3>
-    <div class="aligned-columns">
-      <p><span>user avatars:</span> local active storage</p>
-      <p><span>backend auth:</span> bcrypt & jwt</p>
-      <p><span>frontend auth:</span> nuxt auth module</p>
-    </div>
+    <h1>Drivetracks</h1>
+    <p class="subtitle">Cloud Car Document Storage</p>
+    <img class="challenger" :src="require(`@/assets/images/challenger.png`)" />
 
     <h3 class="small-bottom-margin">User Logins</h3>
     <table class="half-width">
