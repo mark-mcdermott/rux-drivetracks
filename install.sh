@@ -3012,8 +3012,8 @@ class ApplicationController < ActionController::API
     cars = Car.where(user_id: user.id).map { |car| prep_raw_car(car) }
     maintenances_ids = Maintenance.where(car_id: car_ids).map { |maintenance| maintenance.id }
     maintenances = Maintenance.where(car_id: car_ids).map { |maintenance| prep_raw_maintenance(maintenance) }
-    documents_ids = Document.where(documentable_id: car_ids, documentable_type: "Car").map { |document| document.id }
-    documents = Document.where(documentable_id: car_ids, documentable_type: "Car").map { |document| prep_raw_document(document) }
+    documents_ids = Document.where(documentable_id: car_ids, documentable_type: "Car").or(Document.where(documentable_id: maintenances_ids, documentable_type: "Maintenance")).map { |document| document.id }
+    documents = Document.where(documentable_id: car_ids, documentable_type: "Car").or(Document.where(documentable_id: maintenances_ids, documentable_type: "Maintenance")).map { |document| prep_raw_document(document) }
     user = user.admin ? user.slice(:id,:email,:name,:admin) : user.slice(:id,:email,:name)
     user['avatar'] = avatar
     user['car_ids'] = car_ids
@@ -3776,27 +3776,30 @@ function isEditPage(url) {
 }
 
 function isShowPage(url) {
-  const splitUrl = url.split('/')
+  const urlWithoutQuery = url.split('?')[0]
+  const splitUrl = urlWithoutQuery.split('/')
   return (!isNaN(splitUrl[splitUrl.length-1]) && !isEditPage(url)) ? true : false
 }
 ~
 EOF
 cat <<'EOF' | puravida middleware/currentOrAdmin-index.js ~
 export default function ({ route, store, redirect }) {
-  const { isAdmin, loggedInUser } = store.getters
+  const { isAdmin, loggedInUser, isAuthenticated } = store.getters
   const query = route.query
-  const isAdminRequest = query['admin'] ? true : false
-  const isUserIdRequest = query['user_id'] ? true : false
   const isQueryEmpty = Object.keys(query).length === 0 ? true : false
-  const userIdRequestButNotAdmin = isUserIdRequest && !isAdmin
   const requested_user_id = parseInt(query['user_id'])
   const actual_user_id = loggedInUser.id
-  const allowedAccess = requested_user_id === actual_user_id ? true : false
+  const isUserRequestingOwnData = requested_user_id === actual_user_id
+  const pathWithoutQuery = route.path.split('?')[0]
+  const pathWithAdminQuery = `${pathWithoutQuery}?admin=true`
 
-  if ((isAdminRequest || isQueryEmpty) && !isAdmin) {
+  if (!isAuthenticated) {
     return redirect('/')
-  } else if (userIdRequestButNotAdmin && !allowedAccess) {
-    return redirect('/cars?user_id=' + loggedInUser.id)
+  } else if (!isAdmin && !isQueryEmpty && !isUserRequestingOwnData) {
+    const pathWithUserId = `${pathWithoutQuery}?user_id=${loggedInUser.id}`
+    return redirect(pathWithUserId)
+  } else if (isQueryEmpty) {
+    return redirect(pathWithAdminQuery)
   }
 }
 ~
@@ -3935,7 +3938,7 @@ cat <<'EOF' | puravida components/user/Card.vue ~
 <template>
   <article>
     <h2>
-      <NuxtLink :to="`/users/${user.id}`">{{ user.name }}</NuxtLink> 
+      <NuxtLink :to="`/users/${user.id}?user_id=${loggedInUser.id}`">{{ user.name }}</NuxtLink> 
       <NuxtLink :to="`/users/${user.id}/edit`"><font-awesome-icon icon="pencil" /></NuxtLink>
       <a @click.prevent=deleteUser(user.id) href="#"><font-awesome-icon icon="trash" /></a>
     </h2>
@@ -3951,7 +3954,9 @@ cat <<'EOF' | puravida components/user/Card.vue ~
 import { mapGetters } from 'vuex'
 export default {
   name: 'UserCard',
-  computed: { ...mapGetters(['isAdmin']) },
+  computed: { 
+    ...mapGetters(['isAdmin', 'indexOrShowPage', 'loggedInUser'])
+  },
   props: {
     user: {
       type: Object,
@@ -3969,7 +3974,8 @@ export default {
     deleteUser: function(id) {
       this.$axios.$delete(`users/${id}`)
       const index = this.users.findIndex((i) => { return i.id === id })
-      this.users.splice(index, 1);
+      this.users.splice(index, 1)
+      this.indexOrShowPage === 'show' ? this.$router.push('/users') : null
     }
   }
 }
@@ -4060,7 +4066,7 @@ cat <<'EOF' | puravida components/car/Card.vue ~
 <template>
   <article>
     <h2>
-      <NuxtLink :to="`/cars/${car.id}`">{{ car.name }}</NuxtLink> 
+      <NuxtLink :to="`/cars/${car.id}?user_id=${loggedInUser.id}`">{{ car.name }}</NuxtLink> 
       <NuxtLink :to="`/cars/${car.id}/edit`"><font-awesome-icon icon="pencil" /></NuxtLink>
       <a @click.prevent=deleteCar(car.id) href="#"><font-awesome-icon icon="trash" /></a>
     </h2>
@@ -4098,7 +4104,9 @@ cat <<'EOF' | puravida components/car/Card.vue ~
 import { mapGetters } from 'vuex'
 export default {
   name: 'CarCard',
-  computed: { ...mapGetters(['isAdmin']) },
+  computed: { 
+    ...mapGetters(['isAdmin', 'indexOrShowPage', 'loggedInUser']),
+  },
   props: {
     car: {
       type: Object,
@@ -4116,7 +4124,8 @@ export default {
     deleteCar: function(id) {
       this.$axios.$delete(`cars/${id}`)
       const index = this.cars.findIndex((i) => { return i.id === id })
-      this.cars.splice(index, 1);
+      this.cars.splice(index, 1)
+      this.indexOrShowPage === 'show' ? this.$router.push(`/cars?user_id=${this.loggedInUser.id}`) : null
     }
   }
 }
@@ -4370,7 +4379,7 @@ cat <<'EOF' | puravida components/maintenance/Card.vue ~
 <template>
   <article>
     <h2>
-      <NuxtLink :to="`/maintenances/${maintenance.id}`">{{ maintenance.description }}</NuxtLink> 
+      <NuxtLink :to="`/maintenances/${maintenance.id}?user_id=${loggedInUser.id}`">{{ maintenance.description }}</NuxtLink> 
       <NuxtLink :to="`/maintenances/${maintenance.id}/edit`"><font-awesome-icon icon="pencil" /></NuxtLink>
       <a @click.prevent=deleteMaintenance(maintenance.id) href="#"><font-awesome-icon icon="trash" /></a>
     </h2>
@@ -4399,7 +4408,9 @@ cat <<'EOF' | puravida components/maintenance/Card.vue ~
 import { mapGetters } from 'vuex'
 export default {
   name: 'MaintenanceCard',
-  computed: { ...mapGetters(['isAdmin']) },
+  computed: { 
+    ...mapGetters(['isAdmin', 'indexOrShowPage', 'loggedInUser'])
+  },
   props: {
     maintenance: {
       type: Object,
@@ -4417,7 +4428,8 @@ export default {
     deleteMaintenance: function(id) {
       this.$axios.$delete(`maintenances/${id}`)
       const index = this.maintenances.findIndex((i) => { return i.id === id })
-      this.maintenances.splice(index, 1);
+      this.maintenances.splice(index, 1)
+      this.indexOrShowPage === 'show' ? this.$router.push('/maintenances') : null
     }
   }
 }
@@ -4647,7 +4659,7 @@ cat <<'EOF' | puravida components/document/Card.vue ~
 <template>
   <article>
     <h2>
-      <NuxtLink :to="`/documents/${document.id}`">{{ document.name }}</NuxtLink> 
+      <NuxtLink :to="`/documents/${document.id}?user_id=${loggedInUser.id}`">{{ document.name }}</NuxtLink> 
       <NuxtLink :to="`/documents/${document.id}/edit`"><font-awesome-icon icon="pencil" /></NuxtLink>
       <a @click.prevent=deleteDocument(document.id) href="#"><font-awesome-icon icon="trash" /></a>
     </h2>
@@ -4664,6 +4676,9 @@ cat <<'EOF' | puravida components/document/Card.vue ~
 import { mapGetters } from 'vuex'
 export default {
   name: 'DocumentCard',
+  computed: { 
+    ...mapGetters(['isAdmin', 'indexOrShowPage', 'loggedInUser'])
+  },
   props: {
     document: {
       type: Object,
@@ -4674,7 +4689,6 @@ export default {
       default: () => ([]),
     },
   },
-  computed: { ...mapGetters(['isAdmin']) },
   methods: {
     uploadImage: function() {
       this.image = this.$refs.inputFile.files[0];
@@ -4682,7 +4696,8 @@ export default {
     deleteDocument: function(id) {
       this.$axios.$delete(`documents/${id}`)
       const index = this.documents.findIndex((i) => { return i.id === id })
-      this.documents.splice(index, 1);
+      this.documents.splice(index, 1)
+      this.indexOrShowPage === 'show' ? this.$router.push('/documents') : null
     }
     
   }
@@ -5346,6 +5361,13 @@ export const getters = {
 
   loggedInUser(state) {
     return state.auth.user
+  },
+
+  indexOrShowPage() {
+    const splitUrl = $nuxt.$route.path.split('/')
+    const urlEnd = splitUrl[splitUrl.length-1]
+    const regex = /cars|maintenances|documents/
+    return regex.test(urlEnd) ? 'index' : 'show'
   }
 }
 ~
@@ -5788,18 +5810,21 @@ describe('Admin /users page', () => {
 describe('Admin visiting /cars', () => {
 
   context('No query string', () => {
-    it("Should show admin's two cars", () => {
+    it("Should show all users' cars", () => {
       cy.loginAdmin()
       cy.url().should('match', /http:\/\/localhost:3001\/users\/1/)
       cy.visit('http://localhost:3001/cars')
       cy.url().should('match', /http:\/\/localhost:3001\/cars/)
-      cy.get('section').children('div').should('have.length', 2)
+      cy.get('section').children('div').should('have.length', 6)
       cy.get('article').eq(0).find('h2').should('contain', "Michael's Fiat 500")
       cy.get('article').eq(1).find('h2').should('contain', "Michael's Honda Civic")
+      cy.get('article').eq(2).find('h2').should('contain', "Jim's Hyundai Elantra")
+      cy.get('article').eq(3).find('h2').should('contain', "Jim's Nissan Leaf")
+      cy.get('article').eq(4).find('h2').should('contain', "Pam's Scion Xb")
+      cy.get('article').eq(5).find('h2').should('contain', "Pam's Toyota Camry")
       cy.logoutAdmin()
     })
   })
-
 
   context('?admin=true query string', () => {
     it("Should show all cars", () => {

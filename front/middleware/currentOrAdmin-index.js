@@ -1,17 +1,19 @@
 export default function ({ route, store, redirect }) {
-  const { isAdmin, loggedInUser } = store.getters
+  const { isAdmin, loggedInUser, isAuthenticated } = store.getters
   const query = route.query
-  const isAdminRequest = query['admin'] ? true : false
-  const isUserIdRequest = query['user_id'] ? true : false
   const isQueryEmpty = Object.keys(query).length === 0 ? true : false
-  const userIdRequestButNotAdmin = isUserIdRequest && !isAdmin
   const requested_user_id = parseInt(query['user_id'])
   const actual_user_id = loggedInUser.id
-  const allowedAccess = requested_user_id === actual_user_id ? true : false
+  const isUserRequestingOwnData = requested_user_id === actual_user_id
+  const pathWithoutQuery = route.path.split('?')[0]
+  const pathWithAdminQuery = `${pathWithoutQuery}?admin=true`
 
-  if ((isAdminRequest || isQueryEmpty) && !isAdmin) {
+  if (!isAuthenticated) {
     return redirect('/')
-  } else if (userIdRequestButNotAdmin && !allowedAccess) {
-    return redirect('/cars?user_id=' + loggedInUser.id)
+  } else if (!isAdmin && !isQueryEmpty && !isUserRequestingOwnData) {
+    const pathWithUserId = `${pathWithoutQuery}?user_id=${loggedInUser.id}`
+    return redirect(pathWithUserId)
+  } else if (isQueryEmpty) {
+    return redirect(pathWithAdminQuery)
   }
 }
