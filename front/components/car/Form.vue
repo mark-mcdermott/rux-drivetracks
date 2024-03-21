@@ -19,7 +19,7 @@
         <p>vin: </p><input v-model="vin">
         <p>cost: </p><input v-model="cost">
         <p>initial_mileage: </p><input v-model="initial_mileage">
-        <p>purchase_date: </p><input v-model="purchase_date">
+        <p>purchase_date: </p><date-picker v-model="purchase_date" valueType="format"></date-picker>
         <p>purchase_vendor: </p><input v-model="purchase_vendor">
         <button v-if="editOrNew !== 'edit'" @click.prevent=createCar>Create Car</button>
         <button v-else-if="editOrNew == 'edit'" @click.prevent=editCar>Edit Car</button>
@@ -30,7 +30,10 @@
 
 <script>
 import { mapGetters } from 'vuex'
+import DatePicker from 'vue2-datepicker';
+import 'vue2-datepicker/index.css';
 export default {
+  components: { DatePicker },
   data () {
     return {
       name: "",
