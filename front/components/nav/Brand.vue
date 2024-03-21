@@ -1,5 +1,5 @@
 <template>
   <span>
-    <font-awesome-icon icon="laptop-code" /> Ruxtmin
+    <font-awesome-icon icon="car" /> Drivetracks
   </span>
 </template>

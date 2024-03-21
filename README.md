@@ -4014,6 +4014,8 @@ document.attachment.attach(io: URI.open("#{Rails.root}/app/assets/images/documen
 - `cd front`
 - `npm install @picocss/pico @nuxtjs/auth@4.5.1 @fortawesome/fontawesome-svg-core @fortawesome/free-solid-svg-icons @fortawesome/free-brands-svg-icons @fortawesome/vue-fontawesome@latest-2`
 - `npm install --save-dev sass sass-loader@10`
+- `puravida assets/images`
+- `cp ~/Desktop/rux-drivetracks/assets/images/homepage/challenger.png ~/Desktop/front/assets/images`
 - `puravida assets/scss/main.scss ~`
 ```
 @import "node_modules/@picocss/pico/scss/pico.scss";
@@ -4022,11 +4024,25 @@ document.attachment.attach(io: URI.open("#{Rails.root}/app/assets/images/documen
 // $primary-500: #e91e63;
 
 h1 {
-  margin: 4rem 0
+  margin: 4rem 0 0
+}
+
+.subtitle {
+  margin: 0 0 3rem
+}
+
+.challenger {
+  margin: 0 0 3rem;
+  max-width: 50%
 }
 
 .no-margin {
   margin: 0
+}
+
+.half-width {
+  margin: 0 0 4rem;
+  width: 50%;
 }
 
 .small-bottom-margin {
@@ -5423,7 +5439,7 @@ export default { middleware: 'currentOrAdmin-showEdit' }
 ```
 <template>
   <span>
-    <font-awesome-icon icon="laptop-code" /> Ruxtmin
+    <font-awesome-icon icon="car" /> Drivetracks
   </span>
 </template>
 ~
@@ -5635,32 +5651,9 @@ html, body
 ```
 <template>
   <main class="container">
-    <h1>Rails 7 Nuxt 2 Admin Boilerplate</h1>
-    
-    <h2 class="small-bottom-margin">Features</h2>
-    <ul class="features">
-      <li>Admin dashboard</li>
-      <li>Placeholder users</li>
-      <li>Placeholder user item ("car")</li>
-    </ul>
-
-    <h3 class="small-bottom-margin stack">Stack</h3>
-    <div class="aligned-columns">
-      <p><span>frontend:</span> Nuxt 2</p>
-      <p><span>backend API:</span> Rails 7</p>
-      <p><span>database:</span> Postgres</p>
-      <p><span>styles:</span> Sass</p>
-      <p><span>css framework:</span> Pico.css</p>
-      <p><span>e2e tests:</span> Cypress</p>
-      <p><span>api tests:</span> RSpec</p>
-    </div>
-
-    <h3 class="small-bottom-margin tools">Tools</h3>
-    <div class="aligned-columns">
-      <p><span>user avatars:</span> local active storage</p>
-      <p><span>backend auth:</span> bcrypt & jwt</p>
-      <p><span>frontend auth:</span> nuxt auth module</p>
-    </div>
+    <h1>Drivetracks</h1>
+    <p class="subtitle">Cloud Car Document Storage</p>
+    <img class="challenger" :src="require(`@/assets/images/challenger.png`)" />
 
     <h3 class="small-bottom-margin">User Logins</h3>
     <table class="half-width">
@@ -5674,7 +5667,6 @@ html, body
       <NuxtLink to="/log-in" role="button" class="secondary">Log In</NuxtLink> 
       <NuxtLink to="/sign-up" role="button" class="contrast outline">Sign Up</NuxtLink>
     </p>    
-
   </main>
 </template>
 
@@ -6010,41 +6002,15 @@ context('Logged Out', () => {
     it('should find page copy', () => {
       cy.visit('http://localhost:3001/')
       cy.get('main.container')
-        .should('contain', 'Rails 7 Nuxt 2 Admin Boilerplate')
-        .should('contain', 'Features')
-      cy.get('ul.features')
-        .within(() => {
-          cy.get('li').eq(0).contains('Admin dashboard')
-          cy.get('li').eq(1).contains('Placeholder users')
-          cy.get('li').eq(2).contains('Placeholder user item ("car")')
-        })
-      cy.get('h3.stack')
-        .next('div.aligned-columns')
+        .should('contain', 'Drivetracks')
+        .should('contain', 'Cloud Car Document Storage')
+      cy.get('img').should('have.attr', 'src', '/_nuxt/assets/images/challenger.png')
+      cy.get('h3')
+        .next('table')
           .within(() => {
-            cy.get('p').eq(0).contains('frontend:')
-            cy.get('p').eq(0).contains('Nuxt 2')
-            cy.get('p').eq(1).contains('backend API:')
-            cy.get('p').eq(1).contains('Rails 7')
-            cy.get('p').eq(2).contains('database:')
-            cy.get('p').eq(2).contains('Postgres')
-            cy.get('p').eq(3).contains('styles:')
-            cy.get('p').eq(3).contains('Sass')
-            cy.get('p').eq(4).contains('css framework:')
-            cy.get('p').eq(4).contains('Pico.css')
-            cy.get('p').eq(5).contains('e2e tests:')
-            cy.get('p').eq(5).contains('Cypress')
-            cy.get('p').eq(6).contains('api tests:')
-            cy.get('p').eq(6).contains('RSpec')      
-          })
-      cy.get('h3.tools')
-        .next('div.aligned-columns')
-          .within(() => {
-            cy.get('p').eq(0).contains('user avatars:')
-            cy.get('p').eq(0).contains('local active storage')
-            cy.get('p').eq(1).contains('backend auth:')
-            cy.get('p').eq(1).contains('bcrypt & jwt')
-            cy.get('p').eq(2).contains('frontend auth:')
-            cy.get('p').eq(2).contains('nuxt auth module')
+            cy.get('th').eq(0).contains('Email')
+            cy.get('th').eq(1).contains('Password')
+            cy.get('th').eq(2).contains('Notes')
           }) 
     })
   })
