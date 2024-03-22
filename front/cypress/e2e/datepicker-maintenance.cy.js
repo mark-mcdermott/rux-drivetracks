@@ -11,6 +11,5 @@ describe('Checking maintenance form', () => {
     cy.get('input[name=date]').click()
     cy.get('td[title="2024-03-10"]').click()
     cy.get('input[name=date]').should('have.value', '2024-03-10')
-    
   })
 })

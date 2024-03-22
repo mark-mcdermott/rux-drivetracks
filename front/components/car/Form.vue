@@ -39,7 +39,7 @@ export default {
       name: "",
       description: "",
       image: "",
-      year: "",
+      year: null,
       make: "",
       model: "",
       trim: "",
