@@ -88,6 +88,10 @@ export default {
       this.image = this.$refs.inputFile.files[0]
       this.hideImage = true
     },
+    getUserId() {
+      const userIdQuery = $nuxt.$route.query.user_id
+      this.userId = userIdQuery ? userIdQuery : null
+    },
     createCar: function() {
       const userId = this.$auth.$state.user.id
       const params = {
@@ -108,6 +112,7 @@ export default {
         'user_id': userId
       }
       let payload = new FormData()
+      
       Object.entries(params).forEach(
         ([key, value]) => payload.append(key, value)
       )
@@ -121,11 +126,48 @@ export default {
       let params = {}
       const filePickerFile = this.$refs.inputFile.files[0]
       if (!filePickerFile) {
-        params = { 'name': this.name, 'description': this.description }
+        const userId = this.$auth.$state.user.id
+        console.log('user id', userId)
+        params = {
+          'name': this.name,
+          // 'image': this.image,
+          'year': this.year,
+          'make': this.make,
+          'model': this.model,
+          'trim': this.trim,
+          'body': this.body,
+          'color': this.color,
+          'plate': this.plate,
+          'vin': this.vin,
+          'cost': this.cost,
+          'initial_mileage': this.initial_mileage,
+          'purchase_date': this.purchase_date,
+          'purchase_vendor': this.purchase_vendor
+          // 'description': this.description, 
+          // 'user_id': userId
+        }
+        console.log('params', params)
       } else {
-        params = { 'name': this.name, 'description': this.description, 'image': this.image }
+        params = { 
+          'name': this.name,
+          'image': this.image, 
+          'year': this.year,
+          'make': this.make,
+          'model': this.model,
+          'trim': this.trim,
+          'body': this.body,
+          'color': this.color,
+          'plate': this.plate,
+          'vin': this.vin,
+          'cost': this.cost,
+          'initial_mileage': this.initial_mileage,
+          'purchase_date': this.purchase_date,
+          'purchase_vendor': this.purchase_vendor
+          // 'description': this.description, 
+          // 'user_id': userId
+        }
       }
-    
+      // console.log("this route params", this.$route.params.id)
       let payload = new FormData()
       Object.entries(params).forEach(
         ([key, value]) => payload.append(key, value)
