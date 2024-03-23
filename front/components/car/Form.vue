@@ -60,7 +60,7 @@ export default {
     this.editOrNew = splitPath[splitPath.length-1]
   },
   computed: {
-    ...mapGetters(['isAuthenticated', 'isAdmin', 'loggedInUser`']),
+    ...mapGetters(['isAuthenticated', 'isAdmin', 'loggedInUser']),
   },
   async fetch() {
     const splitPath = $nuxt.$route.path.split('/')
@@ -130,7 +130,6 @@ export default {
         console.log('user id', userId)
         params = {
           'name': this.name,
-          // 'image': this.image,
           'year': this.year,
           'make': this.make,
           'model': this.model,
@@ -142,9 +141,8 @@ export default {
           'cost': this.cost,
           'initial_mileage': this.initial_mileage,
           'purchase_date': this.purchase_date,
-          'purchase_vendor': this.purchase_vendor
-          // 'description': this.description, 
-          // 'user_id': userId
+          'purchase_vendor': this.purchase_vendor,
+          'user_id': userId
         }
         console.log('params', params)
       } else {
@@ -162,12 +160,10 @@ export default {
           'cost': this.cost,
           'initial_mileage': this.initial_mileage,
           'purchase_date': this.purchase_date,
-          'purchase_vendor': this.purchase_vendor
-          // 'description': this.description, 
-          // 'user_id': userId
+          'purchase_vendor': this.purchase_vendor,
+          'user_id': userId
         }
       }
-      // console.log("this route params", this.$route.params.id)
       let payload = new FormData()
       Object.entries(params).forEach(
         ([key, value]) => payload.append(key, value)
@@ -180,3 +176,4 @@ export default {
   }
 }
 </script>
+
