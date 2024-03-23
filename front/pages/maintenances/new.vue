@@ -2,5 +2,4 @@
   <main class="container">
     <MaintenanceForm />
   </main>
-</template> 
-
+</template>
