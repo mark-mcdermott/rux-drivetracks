@@ -17,7 +17,7 @@
         <p>color: </p><input v-model="color">
         <p>plate: </p><input v-model="plate">
         <p>vin: </p><input v-model="vin">
-        <p>cost: </p><input v-model="cost">
+        <p>cost: </p><CurrencyInput />
         <p>initial_mileage: </p><input v-model="initial_mileage">
         <p>purchase_date: </p><date-picker v-model="purchase_date" valueType="format"></date-picker>
         <p>purchase_vendor: </p><input v-model="purchase_vendor">
