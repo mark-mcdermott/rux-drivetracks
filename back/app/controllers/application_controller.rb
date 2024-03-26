@@ -141,7 +141,7 @@ class ApplicationController < ActionController::API
 
   def currency_to_number currency
     currency.to_s.gsub(/[$,]/,'').to_f
-   end
+  end
 
   private
 
