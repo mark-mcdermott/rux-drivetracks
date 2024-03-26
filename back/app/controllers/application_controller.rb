@@ -97,6 +97,7 @@ class ApplicationController < ActionController::API
       prep_raw_document(document)
     end
     maintenance = maintenance.slice(:id, :date, :description, :vendor, :cost, :car_id)
+    maintenance['cost'] = number_to_currency(maintenance['cost'])
     maintenance['carId'] = car.id
     maintenance['carName'] = car.name
     maintenance['userId'] = user.id

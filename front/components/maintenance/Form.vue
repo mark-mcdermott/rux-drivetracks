@@ -8,7 +8,7 @@
         <p>Date: </p><date-picker v-model="date" valueType="format"></date-picker>
         <p>Description: </p><input v-model="description">
         <p>Vendor: </p><input v-model="vendor">
-        <p>Cost: </p><input v-model="cost">
+        <p>Cost: </p><CurrencyInput v-model="cost" />
         <!-- <p class="no-margin">Image: </p>
         <img v-if="!hideImage && editOrNew === 'edit'" :src="image" />    
         <input type="file" ref="inputFile" @change=uploadImage()> -->
