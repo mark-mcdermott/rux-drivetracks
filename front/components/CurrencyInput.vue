@@ -1,20 +1,13 @@
 <template>
-  <input v-model="val" @keydown="discardIllegalKeys" @keyup="processKeyUp" />
+  <input 
+    v-bind:value="value"
+    v-on:input="$emit('input', updateCurrencyStr($event.target.value))"
+  />
 </template>
 <script>
   export default {
-    data() {
-      return {
-        val: ''
-      }
-    },
-
+    props: ['value'],
     methods: {
-
-      processKeyUp() {
-        this.val = this.correctChangedCurrencyStr(this.val)
-      },
-
       discardIllegalKeys(evt) {
         if (!this.isNumKey(evt) && !this.isArrowBackspaceOrDeleteKey(evt)) {
           evt.preventDefault()
@@ -67,7 +60,7 @@
 
       // @param changedCurrencyStr: '$63,273.397'
       // @return fixedCurrencyStr: '$632,733.97'
-      correctChangedCurrencyStr(changedCurrencyStr) {
+      updateCurrencyStr(changedCurrencyStr) {
         const rawCurrencyInt = this.rawCurrencyIntFromCurrencyStr(changedCurrencyStr)
         let correctedCurrencyStr = ''
         switch (rawCurrencyInt.toString().length) {
@@ -88,7 +81,6 @@
         }
         return correctedCurrencyStr
       }
-
     }
   }
 </script>

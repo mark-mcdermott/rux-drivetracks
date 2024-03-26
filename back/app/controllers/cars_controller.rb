@@ -22,6 +22,7 @@ class CarsController < ApplicationController
   def create
     create_params = car_params
     create_params['image'] = params['image'].presence # if no image is chosen on new car page, params['image'] comes in as a blank string, which throws a 500 error at User.new(user_params). This changes any params['avatar'] blank string to nil, which is fine in User.new(user_params).
+    create_params['cost'] = currency_to_number(create_params['cost'])
     @car = Car.new(create_params)
     if @car.save
       render json: prep_raw_car(@car), status: :created, location: @car
@@ -32,7 +33,9 @@ class CarsController < ApplicationController
 
   # PATCH/PUT /cars/1
   def update
-    if @car.update(car_params)
+    edit_params = car_params
+    edit_params['cost'] = currency_to_number(edit_params['cost'])
+    if @car.update(edit_params)
       render json: prep_raw_car(@car)
     else
       render json: @car.errors, status: :unprocessable_entity
