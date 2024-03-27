@@ -1105,7 +1105,7 @@ class ApplicationController < ActionController::API
     ActionController::Base.helpers.number_to_currency(amount)
   end
 
-  def currency_to_number currency
+  def currency_to_number(currency)
     currency.to_s.gsub(/[$,]/,'').to_f
   end
 
@@ -2413,7 +2413,7 @@ class ApplicationController < ActionController::API
     ActionController::Base.helpers.number_to_currency(amount)
   end
 
-  def currency_to_number currency
+  def currency_to_number(currency)
     currency.to_s.gsub(/[$,]/,'').to_f
   end
   
@@ -3086,7 +3086,7 @@ class ApplicationController < ActionController::API
     ActionController::Base.helpers.number_to_currency(amount)
   end
 
-  def currency_to_number currency
+  def currency_to_number(currency)
     currency.to_s.gsub(/[$,]/,'').to_f
   end
   
