@@ -4012,7 +4012,7 @@ document.attachment.attach(io: URI.open("#{Rails.root}/app/assets/images/documen
   - Version control system: None
   - (takes 30 seconds to setup starter files)
 - `cd front`
-- `npm install @picocss/pico @nuxtjs/auth@4.5.1 @fortawesome/fontawesome-svg-core @fortawesome/free-solid-svg-icons @fortawesome/free-brands-svg-icons @fortawesome/vue-fontawesome@latest-2`
+- `npm install @picocss/pico @nuxtjs/auth@4.5.1 @fortawesome/fontawesome-svg-core @fortawesome/free-solid-svg-icons @fortawesome/free-brands-svg-icons @fortawesome/vue-fontawesome@latest-2 vue2-datepicker`
 - `npm install --save-dev sass sass-loader@10`
 - `puravida assets/images`
 - `cp ~/Desktop/rux-drivetracks/assets/images/homepage/challenger.png ~/Desktop/front/assets/images`
@@ -4092,15 +4092,16 @@ ul.features {
 }
 
 main {
-
   > a {
     margin: 0 0 3rem;
   }
-
   > section > div {
     margin: 0 0 4rem;
   }
-  
+}
+
+.mx-table-date td {
+  text-align: center;
 }
 ~
 ```
@@ -4629,7 +4630,7 @@ export default {
         <p>vin: </p><input v-model="vin">
         <p>cost: </p><input v-model="cost">
         <p>initial_mileage: </p><input v-model="initial_mileage">
-        <p>purchase_date: </p><input v-model="purchase_date">
+        <p>purchase_date: </p><date-picker v-model="purchase_date" valueType="format"></date-picker>
         <p>purchase_vendor: </p><input v-model="purchase_vendor">
         <button v-if="editOrNew !== 'edit'" @click.prevent=createCar>Create Car</button>
         <button v-else-if="editOrNew == 'edit'" @click.prevent=editCar>Edit Car</button>
@@ -4640,13 +4641,16 @@ export default {
 
 <script>
 import { mapGetters } from 'vuex'
+import DatePicker from 'vue2-datepicker'
+import 'vue2-datepicker/index.css'
 export default {
+  components: { DatePicker },
   data () {
     return {
       name: "",
       description: "",
       image: "",
-      year: "",
+      year: null,
       make: "",
       model: "",
       trim: "",
@@ -4667,7 +4671,7 @@ export default {
     this.editOrNew = splitPath[splitPath.length-1]
   },
   computed: {
-    ...mapGetters(['isAuthenticated', 'isAdmin', 'loggedInUser`']),
+    ...mapGetters(['isAuthenticated', 'isAdmin', 'loggedInUser']),
   },
   async fetch() {
     const splitPath = $nuxt.$route.path.split('/')
@@ -4695,6 +4699,10 @@ export default {
       this.image = this.$refs.inputFile.files[0]
       this.hideImage = true
     },
+    getUserId() {
+      const userIdQuery = $nuxt.$route.query.user_id
+      this.userId = userIdQuery ? userIdQuery : null
+    },
     createCar: function() {
       const userId = this.$auth.$state.user.id
       const params = {
@@ -4715,6 +4723,7 @@ export default {
         'user_id': userId
       }
       let payload = new FormData()
+
       Object.entries(params).forEach(
         ([key, value]) => payload.append(key, value)
       )
@@ -4727,10 +4736,44 @@ export default {
     editCar: function() {
       let params = {}
       const filePickerFile = this.$refs.inputFile.files[0]
-      if (!filePickerFile) {
-        params = { 'name': this.name, 'description': this.description }
+if (!filePickerFile) {
+        const userId = this.$auth.$state.user.id
+        console.log('user id', userId)
+        params = {
+          'name': this.name,
+          'year': this.year,
+          'make': this.make,
+          'model': this.model,
+          'trim': this.trim,
+          'body': this.body,
+          'color': this.color,
+          'plate': this.plate,
+          'vin': this.vin,
+          'cost': this.cost,
+          'initial_mileage': this.initial_mileage,
+          'purchase_date': this.purchase_date,
+          'purchase_vendor': this.purchase_vendor,
+          'user_id': userId
+        }
+        console.log('params', params)
       } else {
-        params = { 'name': this.name, 'description': this.description, 'image': this.image }
+        params = { 
+          'name': this.name,
+          'image': this.image, 
+          'year': this.year,
+          'make': this.make,
+          'model': this.model,
+          'trim': this.trim,
+          'body': this.body,
+          'color': this.color,
+          'plate': this.plate,
+          'vin': this.vin,
+          'cost': this.cost,
+          'initial_mileage': this.initial_mileage,
+          'purchase_date': this.purchase_date,
+          'purchase_vendor': this.purchase_vendor,
+          'user_id': userId
+        }
       }
     
       let payload = new FormData()
@@ -4920,7 +4963,7 @@ async fetch() {
     <article>
       <form enctype="multipart/form-data">
         <p v-if="editOrNew === 'edit'">id: {{ $route.params.id }}</p>
-        <p>Date: </p><input v-model="date">
+        <p>Date: </p><date-picker v-model="date" valueType="format"></date-picker>
         <p>Description: </p><input v-model="description">
         <p>Vendor: </p><input v-model="vendor">
         <p>Cost: </p><input v-model="cost">
@@ -4941,10 +4984,13 @@ async fetch() {
 
 <script>
 import { mapGetters } from 'vuex'
+import DatePicker from 'vue2-datepicker';
+import 'vue2-datepicker/index.css';
 export default {
+  components: { DatePicker },
   data () {
     return {
-      date: "",
+      date: null,
       description: "",
       vendor: "",
       cost: "",
@@ -5197,7 +5243,7 @@ export default {
     <article>
       <form enctype="multipart/form-data">
         <p v-if="editOrNew === 'edit'">id: {{ $route.params.id }}</p>
-        <p>Date: </p><input v-model="date">
+        <p>Date: </p><date-picker v-model="date" valueType="format"></date-picker>
         <p>Name: </p><input v-model="name">
         <p>Notes: </p><textarea v-model="notes"></textarea>
         <p class="no-margin">Image: </p>
@@ -5231,10 +5277,13 @@ export default {
 
 <script>
 import { mapGetters } from 'vuex'
+import DatePicker from 'vue2-datepicker';
+import 'vue2-datepicker/index.css';
 export default {
+  components: { DatePicker },
   data () {
     return {
-      date: "",
+      date: null,
       name: "",
       notes: "",
       attachment: "",
@@ -6474,6 +6523,27 @@ describe('Non-admin visiting /cars', () => {
 })
 ~
 ```
+
+- `puravida cypress/e2e/datepicker-maintenance.cy.js ~`
+```
+/// <reference types="cypress" />
+
+// reset the db: rails db:drop db:create db:migrate db:seed RAILS_ENV=test
+// run dev server with test db: CYPRESS=1 bin/rails server -p 3000
+
+describe('Checking maintenance form', () => {
+  it('opens and clicks the date picker,and correct date shows successfully', () => {
+    cy.loginNonAdmin()
+    cy.url().should('match', /http:\/\/localhost:3001\/users\/2/)
+    cy.visit('http://localhost:3001/maintenances/new')
+    cy.get('input[name=date]').click()
+    cy.get('td[title="2024-03-10"]').click()
+    cy.get('input[name=date]').should('have.value', '2024-03-10')
+  })
+})
+~
+```
+
 - run backend for cypress: `CYPRESS=1 bin/rails server -p 3000`
 - run frontend: `npm run dev`
 - open cypress: `npx cypress run`
