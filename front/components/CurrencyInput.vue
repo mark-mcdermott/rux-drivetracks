@@ -14,6 +14,7 @@
         }
       },
 
+      // TODO - add a check for command + a
       isArrowBackspaceOrDeleteKey(evt) {
         const keyCode = evt.keyCode
         const isDelete = keyCode === 8

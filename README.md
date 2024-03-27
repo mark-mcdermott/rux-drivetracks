@@ -4029,8 +4029,15 @@ document.attachment.attach(io: URI.open("#{Rails.root}/app/assets/images/documen
 // Pico overrides 
 // $primary-500: #e91e63;
 
-h1 {
-  margin: 4rem 0 0
+.container {
+  h1 {
+    margin: 4rem 0
+  }
+  &.home {
+    h1 {
+      margin: 4rem 0 0
+    }
+  }
 }
 
 .subtitle {
@@ -5112,7 +5119,6 @@ export default {
     this.editOrNew = $nuxt.$route.path.split('/')[$nuxt.$route.path.split('/').length-1]
     if ($nuxt.$route.path.split('/')[$nuxt.$route.path.split('/').length-1]=='edit') {
       const maintenance = await this.$axios.$get(`maintenances/${this.$route.params.id}`)
-      console.log(maintenance)
       this.date = maintenance.date
       this.description = maintenance.description,
       this.vendor = maintenance.vendor
@@ -5442,7 +5448,6 @@ export default {
       this.cars = user.cars
       this.maintenances = user.maintenances
       this.documents = user.documents
-      console.log(this.maintenances)
     },
     createDocument: function() {
       const params = {
@@ -5453,8 +5458,6 @@ export default {
         'documentable_type': this.carOrMaintenance,
         'documentable_id': parseInt(this.documentableId)
       }
-      console.log("params")
-      console.log(params)
       let payload = new FormData()
       Object.entries(params).forEach(
         ([key, value]) => payload.append(key, value)
@@ -5798,7 +5801,7 @@ html, body
 - `puravida pages/index.vue ~`
 ```
 <template>
-  <main class="container">
+  <main class="home container">
     <h1>Drivetracks</h1>
     <p class="subtitle">Cloud Car Document Storage</p>
     <img class="challenger" :src="require(`@/assets/images/challenger.png`)" />

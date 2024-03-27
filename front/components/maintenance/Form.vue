@@ -56,7 +56,6 @@ export default {
     this.editOrNew = $nuxt.$route.path.split('/')[$nuxt.$route.path.split('/').length-1]
     if ($nuxt.$route.path.split('/')[$nuxt.$route.path.split('/').length-1]=='edit') {
       const maintenance = await this.$axios.$get(`maintenances/${this.$route.params.id}`)
-      console.log(maintenance)
       this.date = maintenance.date
       this.description = maintenance.description,
       this.vendor = maintenance.vendor

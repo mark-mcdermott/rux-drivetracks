@@ -105,19 +105,15 @@ export default {
       this.cars = user.cars
       this.maintenances = user.maintenances
       this.documents = user.documents
-      console.log(this.maintenances)
     },
     createDocument: function() {
       const params = {
         'date': this.date,
         'name': this.name,
         'notes': this.notes,
-        // 'attachment': this.attachment,
         'documentable_type': this.carOrMaintenance,
         'documentable_id': parseInt(this.documentableId)
       }
-      console.log("params")
-      console.log(params)
       let payload = new FormData()
       Object.entries(params).forEach(
         ([key, value]) => payload.append(key, value)

@@ -3,8 +3,15 @@
 // Pico overrides 
 // $primary-500: #e91e63;
 
-h1 {
-  margin: 4rem 0 0
+.container {
+  h1 {
+    margin: 4rem 0
+  }
+  &.home {
+    h1 {
+      margin: 4rem 0 0
+    }
+  }
 }
 
 .subtitle {
