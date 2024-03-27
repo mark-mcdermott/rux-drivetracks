@@ -3,8 +3,24 @@
 // Pico overrides 
 // $primary-500: #e91e63;
 
-h1 {
-  margin: 4rem 0
+.container {
+  h1 {
+    margin: 4rem 0
+  }
+  &.home {
+    h1 {
+      margin: 4rem 0 0
+    }
+  }
+}
+
+.subtitle {
+  margin: 0 0 3rem
+}
+
+.challenger {
+  margin: 0 0 3rem;
+  max-width: 50%
 }
 
 .no-margin {
@@ -58,13 +74,14 @@ ul.features {
 }
 
 main {
-
   > a {
     margin: 0 0 3rem;
   }
-
   > section > div {
     margin: 0 0 4rem;
   }
-  
+}
+
+.mx-table-date td {
+  text-align: center;
 }

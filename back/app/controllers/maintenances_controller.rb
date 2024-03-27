@@ -25,6 +25,7 @@ class MaintenancesController < ApplicationController
     create_params = maintenance_params
     # create_params['images'] = params['images'].blank? ? nil : params['images'] # if no image is chosen on new maintenance page, params['image'] comes in as a blank string, which throws a 500 error at Maintenance.new(create_params). This changes any params['image'] blank string to nil, which is fine in Maintenance.new(create_params).
     create_params['car_id'] = create_params['car_id'].to_i
+    create_params['cost'] = currency_to_number(create_params['cost'])
     @maintenance = Maintenance.new(create_params)
     if @maintenance.save
       prepped_maintenance = prep_raw_maintenance(@maintenance)
@@ -36,7 +37,9 @@ class MaintenancesController < ApplicationController
 
   # PATCH/PUT /maintenances/1
   def update
-    if @maintenance.update(maintenance_params)
+    edit_params = maintenance_params
+    edit_params['cost'] = currency_to_number(edit_params['cost'])
+    if @maintenance.update(edit_params)
       render json: prep_raw_maintenance(@maintenance)
     else
       render json: @maintenance.errors, status: :unprocessable_entity

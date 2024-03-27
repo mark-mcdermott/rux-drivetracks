@@ -1,7 +1,7 @@
 <template>
   <article>
     <h2>
-      <NuxtLink :to="`/documents/${document.id}`">{{ document.name }}</NuxtLink> 
+      <NuxtLink :to="`/documents/${document.id}?user_id=${loggedInUser.id}`">{{ document.name }}</NuxtLink> 
       <NuxtLink :to="`/documents/${document.id}/edit`"><font-awesome-icon icon="pencil" /></NuxtLink>
       <a @click.prevent=deleteDocument(document.id) href="#"><font-awesome-icon icon="trash" /></a>
     </h2>
@@ -18,6 +18,9 @@
 import { mapGetters } from 'vuex'
 export default {
   name: 'DocumentCard',
+  computed: { 
+    ...mapGetters(['isAdmin', 'indexOrShowPage', 'loggedInUser'])
+  },
   props: {
     document: {
       type: Object,
@@ -28,7 +31,6 @@ export default {
       default: () => ([]),
     },
   },
-  computed: { ...mapGetters(['isAdmin']) },
   methods: {
     uploadImage: function() {
       this.image = this.$refs.inputFile.files[0];
@@ -36,7 +38,8 @@ export default {
     deleteDocument: function(id) {
       this.$axios.$delete(`documents/${id}`)
       const index = this.documents.findIndex((i) => { return i.id === id })
-      this.documents.splice(index, 1);
+      this.documents.splice(index, 1)
+      this.indexOrShowPage === 'show' ? this.$router.push('/documents') : null
     }
     
   }

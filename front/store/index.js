@@ -13,5 +13,12 @@ export const getters = {
 
   loggedInUser(state) {
     return state.auth.user
+  },
+
+  indexOrShowPage() {
+    const splitUrl = $nuxt.$route.path.split('/')
+    const urlEnd = splitUrl[splitUrl.length-1]
+    const regex = /cars|maintenances|documents/
+    return regex.test(urlEnd) ? 'index' : 'show'
   }
 }

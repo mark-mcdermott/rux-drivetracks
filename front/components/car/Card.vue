@@ -1,7 +1,7 @@
 <template>
   <article>
     <h2>
-      <NuxtLink :to="`/cars/${car.id}`">{{ car.name }}</NuxtLink> 
+      <NuxtLink :to="`/cars/${car.id}?user_id=${loggedInUser.id}`">{{ car.name }}</NuxtLink> 
       <NuxtLink :to="`/cars/${car.id}/edit`"><font-awesome-icon icon="pencil" /></NuxtLink>
       <a @click.prevent=deleteCar(car.id) href="#"><font-awesome-icon icon="trash" /></a>
     </h2>
@@ -39,7 +39,9 @@
 import { mapGetters } from 'vuex'
 export default {
   name: 'CarCard',
-  computed: { ...mapGetters(['isAdmin']) },
+  computed: { 
+    ...mapGetters(['isAdmin', 'indexOrShowPage', 'loggedInUser']),
+  },
   props: {
     car: {
       type: Object,
@@ -57,7 +59,8 @@ export default {
     deleteCar: function(id) {
       this.$axios.$delete(`cars/${id}`)
       const index = this.cars.findIndex((i) => { return i.id === id })
-      this.cars.splice(index, 1);
+      this.cars.splice(index, 1)
+      this.indexOrShowPage === 'show' ? this.$router.push(`/cars?user_id=${this.loggedInUser.id}`) : null
     }
   }
 }
