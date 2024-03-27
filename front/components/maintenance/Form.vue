@@ -5,7 +5,7 @@
     <article>
       <form enctype="multipart/form-data">
         <p v-if="editOrNew === 'edit'">id: {{ $route.params.id }}</p>
-        <p>Date: </p><input v-model="date">
+        <p>Date: </p><date-picker v-model="date" valueType="format"></date-picker>
         <p>Description: </p><input v-model="description">
         <p>Vendor: </p><input v-model="vendor">
         <p>Cost: </p><input v-model="cost">
@@ -26,10 +26,14 @@
 
 <script>
 import { mapGetters } from 'vuex'
+import DatePicker from 'vue2-datepicker';
+import 'vue2-datepicker/index.css';
+
 export default {
+  components: { DatePicker },
   data () {
     return {
-      date: "",
+      date: null,
       description: "",
       vendor: "",
       cost: "",

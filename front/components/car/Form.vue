@@ -19,7 +19,7 @@
         <p>vin: </p><input v-model="vin">
         <p>cost: </p><input v-model="cost">
         <p>initial_mileage: </p><input v-model="initial_mileage">
-        <p>purchase_date: </p><input v-model="purchase_date">
+        <p>purchase_date: </p><date-picker v-model="purchase_date" valueType="format"></date-picker>
         <p>purchase_vendor: </p><input v-model="purchase_vendor">
         <button v-if="editOrNew !== 'edit'" @click.prevent=createCar>Create Car</button>
         <button v-else-if="editOrNew == 'edit'" @click.prevent=editCar>Edit Car</button>
@@ -30,13 +30,16 @@
 
 <script>
 import { mapGetters } from 'vuex'
+import DatePicker from 'vue2-datepicker';
+import 'vue2-datepicker/index.css';
 export default {
+  components: { DatePicker },
   data () {
     return {
       name: "",
       description: "",
       image: "",
-      year: "",
+      year: null,
       make: "",
       model: "",
       trim: "",
@@ -57,7 +60,7 @@ export default {
     this.editOrNew = splitPath[splitPath.length-1]
   },
   computed: {
-    ...mapGetters(['isAuthenticated', 'isAdmin', 'loggedInUser`']),
+    ...mapGetters(['isAuthenticated', 'isAdmin', 'loggedInUser']),
   },
   async fetch() {
     const splitPath = $nuxt.$route.path.split('/')
@@ -85,6 +88,10 @@ export default {
       this.image = this.$refs.inputFile.files[0]
       this.hideImage = true
     },
+    getUserId() {
+      const userIdQuery = $nuxt.$route.query.user_id
+      this.userId = userIdQuery ? userIdQuery : null
+    },
     createCar: function() {
       const userId = this.$auth.$state.user.id
       const params = {
@@ -105,6 +112,7 @@ export default {
         'user_id': userId
       }
       let payload = new FormData()
+      
       Object.entries(params).forEach(
         ([key, value]) => payload.append(key, value)
       )
@@ -118,11 +126,44 @@ export default {
       let params = {}
       const filePickerFile = this.$refs.inputFile.files[0]
       if (!filePickerFile) {
-        params = { 'name': this.name, 'description': this.description }
+        const userId = this.$auth.$state.user.id
+        console.log('user id', userId)
+        params = {
+          'name': this.name,
+          'year': this.year,
+          'make': this.make,
+          'model': this.model,
+          'trim': this.trim,
+          'body': this.body,
+          'color': this.color,
+          'plate': this.plate,
+          'vin': this.vin,
+          'cost': this.cost,
+          'initial_mileage': this.initial_mileage,
+          'purchase_date': this.purchase_date,
+          'purchase_vendor': this.purchase_vendor,
+          'user_id': userId
+        }
+        console.log('params', params)
       } else {
-        params = { 'name': this.name, 'description': this.description, 'image': this.image }
+        params = { 
+          'name': this.name,
+          'image': this.image, 
+          'year': this.year,
+          'make': this.make,
+          'model': this.model,
+          'trim': this.trim,
+          'body': this.body,
+          'color': this.color,
+          'plate': this.plate,
+          'vin': this.vin,
+          'cost': this.cost,
+          'initial_mileage': this.initial_mileage,
+          'purchase_date': this.purchase_date,
+          'purchase_vendor': this.purchase_vendor,
+          'user_id': userId
+        }
       }
-    
       let payload = new FormData()
       Object.entries(params).forEach(
         ([key, value]) => payload.append(key, value)
@@ -135,3 +176,4 @@ export default {
   }
 }
 </script>
+
