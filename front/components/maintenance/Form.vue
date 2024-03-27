@@ -8,7 +8,7 @@
         <p>Date: </p><date-picker v-model="date" valueType="format"></date-picker>
         <p>Description: </p><input v-model="description">
         <p>Vendor: </p><input v-model="vendor">
-        <p>Cost: </p><input v-model="cost">
+        <p>Cost: </p><CurrencyInput v-model="cost" />
         <!-- <p class="no-margin">Image: </p>
         <img v-if="!hideImage && editOrNew === 'edit'" :src="image" />    
         <input type="file" ref="inputFile" @change=uploadImage()> -->
@@ -56,7 +56,6 @@ export default {
     this.editOrNew = $nuxt.$route.path.split('/')[$nuxt.$route.path.split('/').length-1]
     if ($nuxt.$route.path.split('/')[$nuxt.$route.path.split('/').length-1]=='edit') {
       const maintenance = await this.$axios.$get(`maintenances/${this.$route.params.id}`)
-      console.log(maintenance)
       this.date = maintenance.date
       this.description = maintenance.description,
       this.vendor = maintenance.vendor

@@ -1392,6 +1392,7 @@ class User < ApplicationRecord
 end
 ~
 ```
+
 - `puravida app/controllers/application_controller.rb ~`
 ```
 class ApplicationController < ActionController::API
@@ -1465,6 +1466,7 @@ class ApplicationController < ActionController::API
     # maintenances = maintenances.map { |maintenance| maintenance.slice(:id,:name,:description,:car_id) }
     image = car.image.present? ? url_for(car.image) : nil
     car = car.slice(:id,:name,:year,:make,:model,:trim,:body,:color,:plate,:vin,:cost,:initial_mileage,:purchase_date,:purchase_vendor)
+    car['cost'] = number_to_currency(car['cost'])
     car['userId'] = user_id
     car['userName'] = user_name
     car['image'] = image
@@ -1472,19 +1474,12 @@ class ApplicationController < ActionController::API
     car
   end
 
-  def prep_raw_maintenance(maintenance)
-    car = Car.find(maintenance.car_id)
-    user = User.find(car.user_id)
-    # images = maintenance.images.present? ? maintenance.images.map { |image| url_for(image) } : nil
-    # documents = Document.where(documentable_id: maintenance.id, documentable_type: "Maintenance").map { |document| prep_raw_document(document) }
-    maintenance = maintenance.slice(:id,:date,:description,:vendor,:cost,:car_id)
-    maintenance['carId'] = car.id
-    maintenance['carName'] = car.name
-    maintenance['userId'] = user.id
-    maintenance['userName'] = user.name
-    # maintenance['documents'] = documents
-    # maintenance['images'] = images
-    maintenance
+  def number_to_currency(amount)
+    ActionController::Base.helpers.number_to_currency(amount)
+  end
+
+  def currency_to_number(currency)
+    currency.to_s.gsub(/[$,]/,'').to_f
   end
   
   private 
@@ -1520,6 +1515,7 @@ class CarsController < ApplicationController
   def create
     create_params = car_params
     create_params['image'] = params['image'].blank? ? nil : params['image'] # if no image is chosen on new car page, params['image'] comes in as a blank string, which throws a 500 error at User.new(user_params). This changes any params['avatar'] blank string to nil, which is fine in User.new(user_params).
+    create_params['cost'] = currency_to_number(create_params['cost'])
     @car = Car.new(create_params)
     if @car.save
       render json: prep_raw_car(@car), status: :created, location: @car
@@ -1530,7 +1526,9 @@ class CarsController < ApplicationController
 
   # PATCH/PUT /cars/1
   def update
-    if @car.update(car_params)
+    edit_params = car_params
+    edit_params['cost'] = currency_to_number(edit_params['cost'])
+    if @car.update(edit_params)
       render json: prep_raw_car(@car)
     else
       render json: @car.errors, status: :unprocessable_entity
@@ -2658,6 +2656,7 @@ class MaintenancesController < ApplicationController
     create_params = maintenance_params
     # create_params['images'] = params['images'].blank? ? nil : params['images'] # if no image is chosen on new maintenance page, params['image'] comes in as a blank string, which throws a 500 error at Maintenance.new(create_params). This changes any params['image'] blank string to nil, which is fine in Maintenance.new(create_params).
     create_params['car_id'] = create_params['car_id'].to_i
+    create_params['cost'] = currency_to_number(create_params['cost'])
     @maintenance = Maintenance.new(create_params)
     if @maintenance.save
       prepped_maintenance = prep_raw_maintenance(@maintenance)
@@ -2669,7 +2668,9 @@ class MaintenancesController < ApplicationController
 
   # PATCH/PUT /maintenances/1
   def update
-    if @maintenance.update(maintenance_params)
+    edit_params = maintenance_params
+    edit_params['cost'] = currency_to_number(edit_params['cost'])
+    if @maintenance.update(edit_params)
       render json: prep_raw_maintenance(@maintenance)
     else
       render json: @maintenance.errors, status: :unprocessable_entity
@@ -2773,6 +2774,7 @@ class ApplicationController < ActionController::API
     # documents = documents.map { |document| document.slice(:id,:name,:description,:car_id) }
     image = car.image.present? ? url_for(car.image) : nil
     car = car.slice(:id,:name,:year,:make,:model,:trim,:body,:color,:plate,:vin,:cost,:initial_mileage,:purchase_date,:purchase_vendor)
+    car['cost'] = number_to_currency(car['cost'])
     car['userId'] = user_id
     car['userName'] = user_name
     car['image'] = image
@@ -2787,6 +2789,7 @@ class ApplicationController < ActionController::API
     # images = maintenance.images.present? ? maintenance.images.map { |image| url_for(image) } : nil
     # documents = Document.where(documentable_id: maintenance.id, documentable_type: "Maintenance").map { |document| prep_raw_document(document) }
     maintenance = maintenance.slice(:id,:date,:description,:vendor,:cost,:car_id)
+    maintenance['cost'] = number_to_currency(maintenance['cost'])
     maintenance['carId'] = car.id
     maintenance['carName'] = car.name
     maintenance['userId'] = user.id
@@ -2796,19 +2799,12 @@ class ApplicationController < ActionController::API
     maintenance
   end
 
-  def prep_raw_document(document)
-    car_id = document.car_id
-    car = Car.find(car_id)
-    user = User.find(car.user_id)
-    image = document.image.present? ? url_for(document.image) : nil
-    document = document.slice(:id,:name,:description)
-    document['carId'] = car_id
-    document['carName'] = car.name
-    document['carDescription'] = car.description
-    document['userId'] = user.id
-    document['userName'] = user.name
-    document['image'] = image
-    document
+  def number_to_currency(amount)
+    ActionController::Base.helpers.number_to_currency(amount)
+  end
+
+  def currency_to_number(currency)
+    currency.to_s.gsub(/[$,]/,'').to_f
   end
   
   private 
@@ -3424,6 +3420,7 @@ class ApplicationController < ActionController::API
     documents = Document.where(documentable_id: car.id, documentable_type: "Car").map { |document| prep_raw_document(document) }
     image = car.image.present? ? url_for(car.image) : nil
     car = car.slice(:id,:name,:year,:make,:model,:trim,:body,:color,:plate,:vin,:cost,:initial_mileage,:purchase_date,:purchase_vendor)
+    car['cost'] = number_to_currency(car['cost'])
     car['userId'] = user_id
     car['userName'] = user_name
     car['image'] = image
@@ -3438,6 +3435,7 @@ class ApplicationController < ActionController::API
     # images = maintenance.images.present? ? maintenance.images.map { |image| url_for(image) } : nil
     documents = Document.where(documentable_id: maintenance.id, documentable_type: "Maintenance").map { |document| prep_raw_document(document) }
     maintenance = maintenance.slice(:id,:date,:description,:vendor,:cost,:car_id)
+    maintenance['cost'] = number_to_currency(maintenance['cost'])
     maintenance['carId'] = car.id
     maintenance['carName'] = car.name
     maintenance['userId'] = user.id
@@ -3473,6 +3471,14 @@ class ApplicationController < ActionController::API
     document['userId'] = user.id
     document['userName'] = user.name
     document
+  end
+
+  def number_to_currency(amount)
+    ActionController::Base.helpers.number_to_currency(amount)
+  end
+
+  def currency_to_number(currency)
+    currency.to_s.gsub(/[$,]/,'').to_f
   end
   
   private 
@@ -4023,8 +4029,15 @@ document.attachment.attach(io: URI.open("#{Rails.root}/app/assets/images/documen
 // Pico overrides 
 // $primary-500: #e91e63;
 
-h1 {
-  margin: 4rem 0 0
+.container {
+  h1 {
+    margin: 4rem 0
+  }
+  &.home {
+    h1 {
+      margin: 4rem 0 0
+    }
+  }
 }
 
 .subtitle {
@@ -4497,6 +4510,126 @@ export default { middleware: 'currentOrAdmin-showEdit' }
 ```
 
 ### Cars (Frontend)
+- `puravida components/CurrencyInput.vue ~`
+```
+<template>
+  <input 
+    v-bind:value="value"
+    v-on:keydown="discardIllegalEntries($event)"
+    v-on:input="$emit('input', updateCurrencyStr($event))"
+    ref="input"
+  />
+</template>
+<script>
+  import { ref } from 'vue'
+  export default {
+    props: ['value'],
+    setup() {
+      const input = ref(null)
+      return {
+        input
+      }
+    },
+    methods: {
+      discardIllegalEntries(evt) {
+        if (this.isIllegalEntry(evt)) {
+          evt.preventDefault()
+        }
+      },
+
+      isIllegalEntry(evt) {
+        if (evt.altKey || evt.ctrlKey || evt.metaKey) return false  // we don't care what's pressed if alt, ctrl or command are also held down
+        const keyCode = evt.keyCode
+        const is58To90 = keyCode > 57 && keyCode < 91               // 58-90 are punctuation, math symbols and letters
+        const is106To111 = keyCode > 105 && keyCode < 112           // 106-111 are math operation symbols
+        const is160 = keyCode === 160                               // 160 is ^ symbol
+        const is163To165 = keyCode > 162 && keyCode < 166           // 163-165 are currency symbols
+        const is169To173 = keyCode > 168 && keyCode < 174           // 169-173 are copyright, trademark, registered, section, dash
+        const is186To223 = keyCode > 185 && keyCode < 224           // 186-223 are punctuation, symbols, math symbols
+        const is226 = keyCode === 226                               // 226 is < symbol
+        const isShiftPlusNumber = evt.shiftKey && this.isNumber(keyCode)
+        const illegalEntries = [is58To90, is106To111, is160, is163To165, is169To173, is186To223, is226, isShiftPlusNumber]
+        const isEntryIllegal = illegalEntries.some(Boolean)         // are any vals in array truthy, https://www.30secondsofcode.org/js/s/check-array-values-are-truthy/#check-if-all-values-in-an-array-are-truthy
+        return isEntryIllegal
+      },
+
+      isNumber(keyCode) {
+        return keyCode > 47 && keyCode < 58 || keyCode > 95 && keyCode < 106
+      },
+
+      // @param rawCurrencyInt: 6327397 would represent $63,273.97
+      // @return allButLastTwoWithCommas: '63,273'
+      dollarsStrFromRawCurrencyInt(rawCurrencyInt) {
+        const allButLastTwo = rawCurrencyInt.toString().slice(0, -2)
+        const addCommasRegex = /\B(?=(\d{3})+(?!\d))/g
+        const allButLastTwoWithCommas = allButLastTwo.replace(addCommasRegex, ',')
+        return allButLastTwoWithCommas
+      },
+
+      // @param rawCurrencyInt: 6327397 would represent $63,273.97
+      // @return lastTwo: '97'
+      centsStrFromRawCurrencyInt(rawCurrencyInt) {
+        const lastTwo = rawCurrencyInt.toString().slice(-2)
+        return lastTwo
+      },
+
+      currencyStrFromDollarsAndCents(dollars, cents) {
+        return `$${dollars}.${cents}`
+      },
+
+      currencyStrFromRawCurrencyInt(rawCurrencyInt) {
+        const dollars = this.dollarsStrFromRawCurrencyInt(rawCurrencyInt)
+        const cents = this.centsStrFromRawCurrencyInt(rawCurrencyInt)
+        return this.currencyStrFromDollarsAndCents(dollars, cents)
+      },
+
+      // @param currencyStr: '$63,273.97'
+      // @return rawCurrencyInt: 6327397
+      rawCurrencyIntFromCurrencyStr(currencyStr) {
+        if (currencyStr === '') 
+          return ''
+        else
+          return parseInt(currencyStr.replace(/[^\d]/g, ''))
+      },
+
+      // @param changedCurrencyStr: '$63,273.397'
+      // @return fixedCurrencyStr: '$632,733.97'
+      updateCurrencyStr(evt) {
+        const changedCurrencyStr = evt.target.value
+        const strLenAtStart = changedCurrencyStr.length
+        const cursorPosition = evt.target.selectionStart
+        const rawCurrencyInt = this.rawCurrencyIntFromCurrencyStr(changedCurrencyStr)
+        let correctedCurrencyStr = ''
+        switch (rawCurrencyInt.toString().length) {
+          case 0:
+            break
+          case 1:
+            correctedCurrencyStr = `$0.0${rawCurrencyInt}`;
+            break
+          case 2:
+            correctedCurrencyStr = `$0.${rawCurrencyInt}`;
+            break
+          case 3:
+          case 4:
+            correctedCurrencyStr = this.currencyStrFromRawCurrencyInt(rawCurrencyInt)
+            break
+          default:
+            correctedCurrencyStr = this.currencyStrFromRawCurrencyInt(rawCurrencyInt)
+        }
+        setTimeout(() => {
+          const strLenAtEnd = correctedCurrencyStr.length
+          const cursorPositionOffset = strLenAtEnd - strLenAtStart
+          const newCursorPosition = cursorPosition + cursorPositionOffset
+          this.$refs.input.setSelectionRange(newCursorPosition, newCursorPosition);
+        });
+        return correctedCurrencyStr
+      }
+    }
+  }
+</script>
+~
+```
+
 - `puravida components/car/Card.vue ~`
 ```
 <template>
@@ -4628,7 +4761,7 @@ export default {
         <p>color: </p><input v-model="color">
         <p>plate: </p><input v-model="plate">
         <p>vin: </p><input v-model="vin">
-        <p>cost: </p><input v-model="cost">
+        <p>cost: </p><CurrencyInput v-model="cost" />
         <p>initial_mileage: </p><input v-model="initial_mileage">
         <p>purchase_date: </p><date-picker v-model="purchase_date" valueType="format"></date-picker>
         <p>purchase_vendor: </p><input v-model="purchase_vendor">
@@ -4775,7 +4908,7 @@ if (!filePickerFile) {
           'user_id': userId
         }
       }
-    
+
       let payload = new FormData()
       Object.entries(params).forEach(
         ([key, value]) => payload.append(key, value)
@@ -4784,6 +4917,7 @@ if (!filePickerFile) {
         .then(() => {
           this.$router.push(`/cars/${this.$route.params.id}`)
         })
+
     },
   }
 }
@@ -4966,7 +5100,7 @@ async fetch() {
         <p>Date: </p><date-picker v-model="date" valueType="format"></date-picker>
         <p>Description: </p><input v-model="description">
         <p>Vendor: </p><input v-model="vendor">
-        <p>Cost: </p><input v-model="cost">
+        <p>Cost: </p><CurrencyInput v-model="cost" />
         <!-- <p class="no-margin">Image: </p>
         <img v-if="!hideImage && editOrNew === 'edit'" :src="image" />    
         <input type="file" ref="inputFile" @change=uploadImage()> -->
@@ -5013,7 +5147,6 @@ export default {
     this.editOrNew = $nuxt.$route.path.split('/')[$nuxt.$route.path.split('/').length-1]
     if ($nuxt.$route.path.split('/')[$nuxt.$route.path.split('/').length-1]=='edit') {
       const maintenance = await this.$axios.$get(`maintenances/${this.$route.params.id}`)
-      console.log(maintenance)
       this.date = maintenance.date
       this.description = maintenance.description,
       this.vendor = maintenance.vendor
@@ -5343,7 +5476,6 @@ export default {
       this.cars = user.cars
       this.maintenances = user.maintenances
       this.documents = user.documents
-      console.log(this.maintenances)
     },
     createDocument: function() {
       const params = {
@@ -5354,8 +5486,6 @@ export default {
         'documentable_type': this.carOrMaintenance,
         'documentable_id': parseInt(this.documentableId)
       }
-      console.log("params")
-      console.log(params)
       let payload = new FormData()
       Object.entries(params).forEach(
         ([key, value]) => payload.append(key, value)
@@ -5699,7 +5829,7 @@ html, body
 - `puravida pages/index.vue ~`
 ```
 <template>
-  <main class="container">
+  <main class="home container">
     <h1>Drivetracks</h1>
     <p class="subtitle">Cloud Car Document Storage</p>
     <img class="challenger" :src="require(`@/assets/images/challenger.png`)" />

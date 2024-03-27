@@ -80,6 +80,7 @@ class ApplicationController < ActionController::API
     image = car.image.present? ? url_for(car.image) : nil
     car = car.slice(:id, :name, :year, :make, :model, :trim, :body, :color, :plate, :vin, :cost, :initial_mileage, :purchase_date,
                     :purchase_vendor)
+    car['cost'] = number_to_currency(car['cost'])
     car['userId'] = user_id
     car['userName'] = user_name
     car['image'] = image
@@ -96,6 +97,7 @@ class ApplicationController < ActionController::API
       prep_raw_document(document)
     end
     maintenance = maintenance.slice(:id, :date, :description, :vendor, :cost, :car_id)
+    maintenance['cost'] = number_to_currency(maintenance['cost'])
     maintenance['carId'] = car.id
     maintenance['carName'] = car.name
     maintenance['userId'] = user.id
@@ -131,6 +133,14 @@ class ApplicationController < ActionController::API
     document['userId'] = user.id
     document['userName'] = user.name
     document
+  end
+
+  def number_to_currency(amount)
+    ActionController::Base.helpers.number_to_currency(amount)
+  end
+
+  def currency_to_number(currency)
+    currency.to_s.gsub(/[$,]/,'').to_f
   end
 
   private

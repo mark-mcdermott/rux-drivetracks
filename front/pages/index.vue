@@ -1,5 +1,5 @@
 <template>
-  <main class="container">
+  <main class="home container">
     <h1>Drivetracks</h1>
     <p class="subtitle">Cloud Car Document Storage</p>
     <img class="challenger" :src="require(`@/assets/images/challenger.png`)" />
