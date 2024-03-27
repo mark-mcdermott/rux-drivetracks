@@ -14,4 +14,8 @@ class CarSerializer
   attribute :cost do |object|
     object.cost.to_f
   end
+
+  attribute :image do |object|
+    Rails.application.routes.url_helpers.url_for(object.image) if object.image.attachment
+  end
 end

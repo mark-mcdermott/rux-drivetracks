@@ -27,9 +27,8 @@ RSpec.describe CarSerializer, type: :serializer do
 
     expect(attributes[:name]).to eq "Jim's Fiat 500"
     expect(attributes[:userName]).to eq user.name
-    # expect(attributes[:image]).to be_kind_of(String)
-    # "http://www.example.com/rails/active_storage/blobs/redirect/eyJfcmFpbHMiOnsibWVzc2FnZSI6IkJBaHBBaEZ2IiwiZXhwIjpudWxsLCJwdXIiOiJibG9iX2lkIn19--b6abbbfe9315b41629b483cec65fb670f0d505f2/fiat-500.jpg"
-    # expect(attributes[:image]).to match(/http.*fiat-500\.jpg/)
+    expect(attributes[:image]).to be_kind_of(String)
+    expect(attributes[:image]).to match(/http.*fiat-500\.jpg/)
     expect(attributes[:make]).to eq 'Fiat'
     expect(attributes[:model]).to eq '500'
     expect(attributes[:trim]).to eq 'Sport'
