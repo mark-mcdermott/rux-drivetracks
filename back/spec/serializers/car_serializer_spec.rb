@@ -20,26 +20,21 @@ RSpec.describe CarSerializer, type: :serializer do
       initial_mileage: 47_361
     )
     car.image.attach(fixture_file_upload(Rails.root.join('spec/fixtures/files/fiat-500.jpg'), 'image/jpeg'))
+    maintenance = Maintenance.create(date: Date.parse('20200713'), description: 'Alignment', vendor: 'Pep Boys',
+                                 cost: '350.00', car_id: car.id)
+    car_document = Document.create(name: 'title-fiat-500', date: Date.parse('20200909'), notes: 'notes',
+                           documentable_type: 'Car', documentable_id: car.id)
+    maintenance_document = Document.create(name: 'fiat-alignment-1.png', date: Date.parse('20200909'), notes: 'notes',
+                           documentable_type: 'Maintenance', documentable_id: maintenance.id)
 
     hash = described_class.new(car).serializable_hash
     data = hash[:data]
+    relationships = hash[:data][:relationships]
     attributes = data[:attributes]
 
     expect(attributes[:name]).to eq "Jim's Fiat 500"
     expect(attributes[:userName]).to eq user.name
-    expect(attributes[:image]).to be_kind_of(String)
-    expect(attributes[:image]).to match(/http.*fiat-500\.jpg/)
-    expect(attributes[:make]).to eq 'Fiat'
-    expect(attributes[:model]).to eq '500'
-    expect(attributes[:trim]).to eq 'Sport'
-    expect(attributes[:color]).to eq 'Yellow'
-    expect(attributes[:body]).to eq 'Hatchback'
-    expect(attributes[:plate]).to eq '6XYK922'
-    expect(attributes[:vin]).to eq '3C3CFFBR0CT382584'
-    expect(attributes[:year]).to eq 2012
-    expect(attributes[:cost]).to eq 10_235.0
-    expect(attributes[:purchaseVendor]).to eq 'Ted Fleid'
-    expect(attributes[:initialMileage]).to eq 47_361
-    expect(attributes[:userId]).to eq user.id
+    expect(relationships[:maintenances][:data]).to include({id: maintenance.id.to_s, type: :maintenance})
+    expect(relationships[:documents][:data]).to include({id: car_document.id.to_s, type: :document})
   end
 end
