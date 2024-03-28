@@ -6,7 +6,7 @@ class UsersController < ApplicationController
 
   # GET /users
   def index
-    @users = User.all.map { |user| prep_raw_user(user) }
+    @users = User.all.map { |user| UserSerializer.new(user).serializable_hash }
     render json: @users
   end
 
